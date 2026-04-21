@@ -195,7 +195,9 @@ tr:hover td{background:#fafafa}
       <div class="add-form" style="margin-bottom:14px">
         <h3>📅 اختر الأسبوع الدراسي</h3>
         <p style="font-size:0.85rem;color:#666;margin-bottom:10px">اختر الأسبوع الذي تريد إرسال رابط رفع الخطة له</p>
-        <select id="sendWeekSelect" onchange="renderWaList()" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px"></select>
+        <select id="sendWeekSelect" onchange="renderWaList()" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+          <option value="">— اختر الأسبوع —</option>
+        </select>
         <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
           <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendAllLinks()">📱 إرسال للجميع دفعة واحدة</button>
           <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="selectAllTeachers()">تحديد الكل</button>
@@ -431,7 +433,13 @@ function showTab(name,btn){
   document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   if(name==='teachers') renderTeachers();
-  if(name==='send'){initSendWeekSelect();renderWaList();}
+  if(name==='send'){
+    const sel=document.getElementById('sendWeekSelect');
+    sel.innerHTML=weeks.map(function(w,i){
+      return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+    }).join('');
+    renderWaList();
+  }
 }
 
 // ====== WEEK ======
@@ -548,14 +556,13 @@ function openTeacherLink(id){
 // ====== WHATSAPP ======
 function initSendWeekSelect(){
   const sel=document.getElementById('sendWeekSelect');
-  if(!sel) return;
+  if(!sel||sel.options.length>0) return;
   sel.innerHTML=weeks.map(function(w,i){
     return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
   }).join('');
 }
 
 function renderWaList(){
-  initSendWeekSelect();
   const sel=document.getElementById('sendWeekSelect');
   const selectedWeek=sel?sel.value:weeks[1];
   const wKey=selectedWeek.split('—')[0].trim();
