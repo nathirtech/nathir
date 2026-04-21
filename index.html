@@ -192,11 +192,24 @@ tr:hover td{background:#fafafa}
 
     <!-- SEND -->
     <div id="tabSend" class="hidden">
+      <div class="add-form" style="margin-bottom:14px">
+        <h3>📅 اختر الأسبوع الدراسي</h3>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:10px">اختر الأسبوع الذي تريد إرسال رابط رفع الخطة له</p>
+        <select id="sendWeekSelect" onchange="renderWaList()" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px"></select>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendAllLinks()">📱 إرسال للجميع دفعة واحدة</button>
+          <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="selectAllTeachers()">تحديد الكل</button>
+          <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="deselectAllTeachers()">إلغاء التحديد</button>
+        </div>
+      </div>
       <div class="add-form">
-        <h3>📱 إرسال روابط رفع الخطط للمعلمين عبر واتساب</h3>
-        <p style="font-size:0.88rem;color:#666;margin-bottom:1rem">سيتم إرسال رابط خاص لكل معلم يتيح له رفع خطة درسه الأسبوعية.</p>
+        <h3>👨‍🏫 اختر المعلمين</h3>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:10px">حدد المعلمين الذين تريد إرسال الرابط لهم</p>
         <div id="waList"></div>
-        <button class="btn btn-main" style="margin-top:1rem;width:auto;padding:0.7rem 2rem" onclick="sendAllLinks()">إرسال للجميع دفعة واحدة</button>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span id="selectedCount" style="font-size:13px;color:#666">0 معلم محدد</span>
+          <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendSelectedLinks()">📱 إرسال للمحددين</button>
+        </div>
       </div>
     </div>
 
@@ -418,7 +431,7 @@ function showTab(name,btn){
   document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   if(name==='teachers') renderTeachers();
-  if(name==='send') renderWaList();
+  if(name==='send'){initSendWeekSelect();renderWaList();}
 }
 
 // ====== WEEK ======
@@ -533,27 +546,77 @@ function openTeacherLink(id){
 }
 
 // ====== WHATSAPP ======
-function renderWaList(){
-  document.getElementById('waList').innerHTML=teachers.map(function(t){
-    return '<div class="wa-item">'+
-      '<div>'+
-        '<div class="wa-name">'+t.name+'</div>'+
-        '<div class="wa-phone">'+(t.phone||'لا يوجد رقم')+'</div>'+
-      '</div>'+
-      (t.phone?'<button class="wa-btn" onclick="sendWa('+t.id+')">📱 إرسال</button>':'<span style="font-size:12px;color:#999">لا يوجد رقم</span>')+
-    '</div>';
+function initSendWeekSelect(){
+  const sel=document.getElementById('sendWeekSelect');
+  if(!sel) return;
+  sel.innerHTML=weeks.map(function(w,i){
+    return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
   }).join('');
 }
 
+function renderWaList(){
+  initSendWeekSelect();
+  const sel=document.getElementById('sendWeekSelect');
+  const selectedWeek=sel?sel.value:weeks[1];
+  const wKey=selectedWeek.split('—')[0].trim();
+  const sentNames=submissions.filter(function(s){return s.week===wKey;}).map(function(s){return s.teacherName;});
+
+  document.getElementById('waList').innerHTML=teachers.map(function(t){
+    const alreadySent=sentNames.includes(t.name);
+    return '<div class="wa-item">'+
+      '<div style="display:flex;align-items:center;gap:10px;flex:1">'+
+        '<input type="checkbox" id="chk_'+t.id+'" value="'+t.id+'" onchange="updateSelectedCount()" style="width:16px;height:16px;cursor:pointer"'+(alreadySent?' disabled':'')+'>'+
+        '<div>'+
+          '<div class="wa-name">'+t.name+'</div>'+
+          '<div class="wa-phone">'+(t.phone||'لا يوجد رقم')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        (alreadySent?'<span class="badge badge-green">✓ أرسل</span>':'')+
+        (t.phone?'<button class="wa-btn" onclick="sendWa('+t.id+')">📱 إرسال</button>':'<span style="font-size:12px;color:#999">لا يوجد رقم</span>')+
+      '</div>'+
+    '</div>';
+  }).join('');
+  updateSelectedCount();
+}
+
+function updateSelectedCount(){
+  const checked=document.querySelectorAll('#waList input[type=checkbox]:checked');
+  document.getElementById('selectedCount').textContent=checked.length+' معلم محدد';
+}
+
+function selectAllTeachers(){
+  document.querySelectorAll('#waList input[type=checkbox]:not(:disabled)').forEach(function(cb){cb.checked=true;});
+  updateSelectedCount();
+}
+
+function deselectAllTeachers(){
+  document.querySelectorAll('#waList input[type=checkbox]').forEach(function(cb){cb.checked=false;});
+  updateSelectedCount();
+}
+
 function sendWa(id){
-  var t=teachers.find(function(x){return x.id===id;});
-  var link=window.location.href.split('#')[0]+'#upload='+id;
-  var msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس الأسبوعية عبر الرابط التالي:\n'+link+'\nشكراً — إدارة مدرسة الإمام الدوري');
+  const t=teachers.find(function(x){return x.id===id;});
+  const sel=document.getElementById('sendWeekSelect');
+  const selectedWeek=sel?sel.value:weeks[1];
+  const wKey=selectedWeek.split('—')[0].trim();
+  const link=window.location.href.split('#')[0]+'#upload='+id;
+  const msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس الأسبوعية لـ'+wKey+' عبر الرابط التالي:\n'+link+'\nشكراً — إدارة مدرسة الإمام الدوري');
   window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
 }
 
 function sendAllLinks(){
   teachers.filter(function(t){return t.phone;}).forEach(function(t){sendWa(t.id);});
+}
+
+function sendSelectedLinks(){
+  const checked=document.querySelectorAll('#waList input[type=checkbox]:checked');
+  if(checked.length===0){alert('يرجى تحديد معلم واحد على الأقل');return;}
+  checked.forEach(function(cb){
+    const id=parseInt(cb.value);
+    const t=teachers.find(function(x){return x.id===id;});
+    if(t&&t.phone) sendWa(id);
+  });
 }
 
 function sendReminder(phone,name,week){
