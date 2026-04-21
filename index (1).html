@@ -195,9 +195,7 @@ tr:hover td{background:#fafafa}
       <div class="add-form" style="margin-bottom:14px">
         <h3>📅 اختر الأسبوع الدراسي</h3>
         <p style="font-size:0.85rem;color:#666;margin-bottom:10px">اختر الأسبوع الذي تريد إرسال رابط رفع الخطة له</p>
-        <select id="sendWeekSelect" onchange="renderWaList()" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
-          <option value="">— اختر الأسبوع —</option>
-        </select>
+        <select id="sendWeekSelect" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px"></select>
         <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
           <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendAllLinks()">📱 إرسال للجميع دفعة واحدة</button>
           <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="selectAllTeachers()">تحديد الكل</button>
@@ -340,11 +338,10 @@ function loadData(){
   try{
     const t=localStorage.getItem('imam_teachers');
     const s=localStorage.getItem('imam_submissions');
-    const w=localStorage.getItem('imam_weeks');
     return{
       teachers:t?JSON.parse(t):null,
       submissions:s?JSON.parse(s):[],
-      weeks:w?JSON.parse(w):null
+      weeks:null
     };
   }catch(e){return{teachers:null,submissions:[],weeks:null};}
 }
@@ -434,10 +431,12 @@ function showTab(name,btn){
   btn.classList.add('active');
   if(name==='teachers') renderTeachers();
   if(name==='send'){
-    const sel=document.getElementById('sendWeekSelect');
+    var sel=document.getElementById('sendWeekSelect');
     sel.innerHTML=weeks.map(function(w,i){
-      return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+      return '<option value="'+w+'"'+(i===0?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
     }).join('');
+    sel.removeEventListener('change', renderWaList);
+    sel.addEventListener('change', renderWaList);
     renderWaList();
   }
 }
@@ -446,7 +445,7 @@ function showTab(name,btn){
 function renderWeekSelect(){
   const sel=document.getElementById('weekSelect');
   sel.innerHTML=weeks.map(function(w,i){
-    return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+    return '<option value="'+w+'"'+(i===0?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
   }).join('');
   updateWeekBadge();
 }
