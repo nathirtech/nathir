@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+body{background:#f0f4f8;direction:rtl;min-height:100vh}
+.hidden{display:none!important}
+.page{min-height:100vh}
+.header{background:#1c2833;border-bottom:2px solid #c9a227;color:#fff;padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem}
+.header-title{font-size:1.3rem;font-weight:700;line-height:1.4}
+.header-subtitle{font-size:0.85rem;opacity:0.85}
+.header-min{font-size:0.7rem;color:#c9a227;font-weight:600;margin-bottom:2px}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 90px);padding:2rem}
+.login-card{background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.1)}
+.login-icon{font-size:3rem;text-align:center;margin-bottom:1rem}
+.login-card h2{text-align:center;color:#1c2833;margin-bottom:0.3rem;font-size:1.4rem}
+.login-card p{text-align:center;color:#666;font-size:0.9rem;margin-bottom:1.5rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:0.85rem;color:#444;margin-bottom:0.4rem;font-weight:500}
+.form-group input{width:100%;padding:0.7rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:0.95rem;outline:none;transition:border 0.2s;font-family:inherit}
+.form-group input:focus{border-color:#c9a227}
+.btn{width:100%;padding:0.8rem;border:none;border-radius:8px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s}
+.btn-main{background:#1c2833;color:#c9a227;border:1.5px solid #c9a227}
+.btn-main:hover{background:#c9a227;color:#1c2833}
+.btn-sm{width:auto;padding:0.45rem 1rem;font-size:0.85rem;font-weight:500;border-radius:6px}
+.btn-outline{background:#fff;border:1.5px solid #1c2833;color:#1c2833}
+.btn-outline:hover{background:#f0f4f8}
+.btn-red{background:#c0392b;color:#fff;border:none}
+.error-msg{color:#c0392b;font-size:0.85rem;margin-top:0.5rem;display:none}
+.dashboard{min-height:100vh}
+.dash-nav{background:#fff;padding:0.8rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;gap:8px}
+.nav-tabs{display:flex;gap:0.5rem;flex-wrap:wrap}
+.nav-tab{padding:0.5rem 1.1rem;border-radius:8px;border:none;background:none;font-size:0.9rem;cursor:pointer;color:#555;font-family:inherit;font-weight:500;transition:all 0.2s}
+.nav-tab.active{background:#1c2833;color:#c9a227}
+.nav-tab:hover:not(.active){background:#f0f4f8}
+.dash-content{padding:1.5rem 2rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:#fff;border-radius:12px;padding:1.2rem;text-align:center;border:1px solid #e8e8e8}
+.stat-num{font-size:2rem;font-weight:700;color:#1c2833}
+.stat-label{font-size:0.82rem;color:#666;margin-top:0.2rem}
+.week-bar{background:#fff;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;border:1px solid #e8e8e8;flex-wrap:wrap}
+.week-bar label{font-size:0.9rem;color:#444;font-weight:500}
+.week-bar select{padding:0.4rem 0.8rem;border:1.5px solid #ddd;border-radius:6px;font-size:0.9rem;font-family:inherit;outline:none;max-width:100%}
+.week-badge{background:#fef9e7;color:#9a7d0a;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.82rem;font-weight:600}
+.table-wrap{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden}
+.table-header{padding:1rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;flex-wrap:wrap;gap:0.5rem}
+.table-header h3{font-size:1rem;color:#333;font-weight:600}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.9rem}
+th{background:#1c2833;padding:0.7rem 1rem;text-align:right;font-weight:600;color:#c9a227;border-bottom:1px solid #eee;white-space:nowrap}
+td{padding:0.7rem 1rem;border-bottom:1px solid #f0f0f0;color:#333}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.badge{display:inline-block;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.78rem;font-weight:600}
+.badge-green{background:#e8f5ee;color:#1a5c3a}
+.badge-red{background:#fdecea;color:#c0392b}
+.badge-gray{background:#f0f0f0;color:#666}
+.file-link{color:#1c2833;text-decoration:none;font-size:0.85rem;font-weight:600;background:#fef9e7;padding:3px 10px;border-radius:4px;border:1px solid #c9a227}
+.file-link:hover{background:#c9a227;color:#1c2833}
+.teacher-grid{display:grid;gap:1rem}
+.teacher-card{background:#fff;border-radius:12px;padding:1rem 1.2rem;border:1px solid #e8e8e8;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.teacher-avatar{width:44px;height:44px;border-radius:50%;background:#1c2833;color:#c9a227;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
+.teacher-info{flex:1;min-width:150px}
+.teacher-name{font-weight:600;color:#222;font-size:0.95rem}
+.teacher-phone{font-size:0.82rem;color:#666;margin-top:0.2rem}
+.teacher-actions{display:flex;gap:0.5rem;flex-wrap:wrap}
+.add-form{background:#fff;border-radius:12px;padding:1.5rem;border:1px solid #e8e8e8;margin-bottom:1.2rem}
+.add-form h3{color:#1c2833;margin-bottom:1rem;font-size:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:0.8rem;align-items:end}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+.upload-page{min-height:100vh;background:#f0f4f8;display:flex;flex-direction:column}
+.upload-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem}
+.upload-card{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:480px;box-shadow:0 4px 24px rgba(0,0,0,0.1)}
+.upload-card h2{color:#1c2833;margin-bottom:0.3rem;font-size:1.2rem}
+.teacher-info-box{background:#f0f8f4;border-radius:8px;padding:0.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.7rem}
+.drive-box{background:#f0f8f4;border-radius:10px;padding:16px;margin-bottom:16px;text-align:center}
+.instructions{background:#fff3cd;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#856404;line-height:1.8}
+.success-box{background:#e8f5ee;border-radius:10px;padding:1.5rem;text-align:center;display:none}
+.success-icon{font-size:2.5rem}
+.success-box h3{color:#1a5c3a;margin-top:0.5rem}
+.success-box p{color:#555;font-size:0.88rem;margin-top:0.3rem}
+.wa-item{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:6px}
+.wa-item:last-child{border-bottom:none}
+.wa-name{font-size:0.9rem;font-weight:500}
+.wa-phone{font-size:0.8rem;color:#888}
+.wa-btn{background:#25d366;color:#fff;border:none;border-radius:6px;padding:0.4rem 0.8rem;cursor:pointer;font-size:0.8rem;font-family:inherit}
+</style>
+</head>
+<body>
+
+<div class="header" id="mainHeader">
+  <svg width="52" height="37" viewBox="0 0 54 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="4" r="2.8" fill="white"/>
+    <circle cx="38" cy="4" r="2.8" fill="white"/>
+    <circle cx="46" cy="4" r="2.8" fill="white"/>
+    <circle cx="26" cy="11" r="2.8" fill="white"/>
+    <circle cx="34" cy="11" r="2.8" fill="white"/>
+    <circle cx="42" cy="11" r="2.8" fill="white"/>
+    <circle cx="50" cy="11" r="2.8" fill="white"/>
+    <circle cx="22" cy="18" r="2.8" fill="white"/>
+    <circle cx="30" cy="18" r="2.8" fill="white"/>
+    <circle cx="38" cy="18" r="2.8" fill="white"/>
+    <circle cx="46" cy="18" r="2.8" fill="white"/>
+    <circle cx="34" cy="25" r="2.2" fill="white" opacity="0.7"/>
+    <circle cx="38" cy="31" r="1.5" fill="white" opacity="0.5"/>
+  </svg>
+  <div style="width:1px;height:44px;background:rgba(255,255,255,0.2);margin:0 4px"></div>
+  <div>
+    <div class="header-min">وزارة التعليم — Ministry of Education</div>
+    <div class="header-title">مدرسة الإمام الدوري لتحفيظ القرآن الكريم</div>
+    <div class="header-subtitle">نظام خطة الدروس الأسبوعية</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage" class="page">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h2>تسجيل دخول المدير</h2>
+      <p>أدخل بيانات الدخول للوصول إلى لوحة التحكم</p>
+      <div class="form-group">
+        <label>اسم المستخدم</label>
+        <input type="text" id="loginUser" placeholder="admin" />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPass" placeholder="••••••" />
+        <div class="error-msg" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+      </div>
+      <button class="btn btn-main" onclick="doLogin()">دخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page dashboard hidden">
+  <div class="dash-nav">
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('report',this)">📊 التقرير الأسبوعي</button>
+      <button class="nav-tab" onclick="showTab('teachers',this)">👨‍🏫 المعلمون</button>
+      <button class="nav-tab" onclick="showTab('send',this)">📱 إرسال الروابط</button>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="doLogout()">خروج</button>
+  </div>
+  <div class="dash-content">
+
+    <!-- REPORT -->
+    <div id="tabReport">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="week-bar">
+        <label>الأسبوع الدراسي:</label>
+        <select id="weekSelect" onchange="renderReport()"></select>
+        <span class="week-badge" id="weekBadge"></span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>سجل خطط الدروس المرسلة</h3>
+          <button class="btn btn-outline btn-sm" onclick="exportReport()">⬇ تصدير PDF</button>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead>
+              <tr><th>اسم المعلم</th><th>التخصص</th><th>تاريخ الإرسال</th><th>الأسبوع</th><th>الحالة</th><th>ملف Drive</th></tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div id="tabTeachers" class="hidden">
+      <div class="add-form">
+        <h3>➕ إضافة معلم جديد</h3>
+        <div class="form-row">
+          <div class="form-group" style="margin:0">
+            <label>اسم المعلم</label>
+            <input type="text" id="newName" placeholder="الاسم الكامل" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>رقم الواتساب</label>
+            <input type="text" id="newPhone" placeholder="05xxxxxxxx" />
+          </div>
+          <button class="btn btn-main btn-sm" style="height:38px" onclick="addTeacher()">إضافة</button>
+        </div>
+      </div>
+      <div class="teacher-grid" id="teacherGrid"></div>
+    </div>
+
+    <!-- SEND -->
+    <div id="tabSend" class="hidden">
+      <div class="add-form" style="margin-bottom:14px">
+        <h3>📅 اختر الأسبوع الدراسي</h3>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:10px">اختر الأسبوع الذي تريد إرسال رابط رفع الخطة له</p>
+        <select id="sendWeekSelect" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px"></select>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendAllLinks()">📱 إرسال للجميع دفعة واحدة</button>
+          <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="selectAllTeachers()">تحديد الكل</button>
+          <button class="btn btn-outline" style="width:auto;padding:0.6rem 1.5rem" onclick="deselectAllTeachers()">إلغاء التحديد</button>
+        </div>
+      </div>
+      <div class="add-form">
+        <h3>👨‍🏫 اختر المعلمين</h3>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:10px">حدد المعلمين الذين تريد إرسال الرابط لهم</p>
+        <div id="waList"></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span id="selectedCount" style="font-size:13px;color:#666">0 معلم محدد</span>
+          <button class="btn btn-main" style="width:auto;padding:0.6rem 1.5rem" onclick="sendSelectedLinks()">📱 إرسال للمحددين</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- UPLOAD PAGE -->
+<div id="uploadPage" class="page upload-page hidden">
+  <div class="header" style="background:#1c2833;border-bottom:2px solid #c9a227;padding:1rem 1.5rem">
+    <svg width="40" height="29" viewBox="0 0 54 38" fill="none">
+      <circle cx="30" cy="4" r="2.8" fill="white"/>
+      <circle cx="38" cy="4" r="2.8" fill="white"/>
+      <circle cx="46" cy="4" r="2.8" fill="white"/>
+      <circle cx="26" cy="11" r="2.8" fill="white"/>
+      <circle cx="34" cy="11" r="2.8" fill="white"/>
+      <circle cx="42" cy="11" r="2.8" fill="white"/>
+      <circle cx="50" cy="11" r="2.8" fill="white"/>
+      <circle cx="22" cy="18" r="2.8" fill="white"/>
+      <circle cx="30" cy="18" r="2.8" fill="white"/>
+      <circle cx="38" cy="18" r="2.8" fill="white"/>
+      <circle cx="46" cy="18" r="2.8" fill="white"/>
+      <circle cx="34" cy="25" r="2.2" fill="white" opacity="0.7"/>
+      <circle cx="38" cy="31" r="1.5" fill="white" opacity="0.5"/>
+    </svg>
+    <div style="width:1px;height:38px;background:rgba(255,255,255,0.2);margin:0 4px"></div>
+    <div>
+      <div style="font-size:0.65rem;color:#c9a227;font-weight:600;margin-bottom:1px">وزارة التعليم — Ministry of Education</div>
+      <div style="font-weight:700;font-size:0.95rem">مدرسة الإمام الدوري لتحفيظ القرآن الكريم</div>
+      <div style="font-size:0.78rem;opacity:0.85">نظام خطة الدروس الأسبوعية</div>
+    </div>
+  </div>
+  <div class="upload-wrap">
+    <div class="upload-card">
+      <div id="uploadForm">
+        <h2>رفع خطة الدروس الأسبوعية</h2>
+        <p style="color:#666;font-size:0.85rem;margin-bottom:1rem">الأسبوع الدراسي: <strong id="uploadWeekLabel"></strong></p>
+        <div class="teacher-info-box">
+          <span style="font-size:1.2rem">👨‍🏫</span>
+          <div>
+            <div style="font-weight:600;font-size:0.95rem" id="uploadTeacherName"></div>
+            <div style="font-size:0.8rem;color:#666">رابط خاص بك — لا تشاركه</div>
+          </div>
+        </div>
+        <div class="drive-box">
+          <div style="font-size:2rem;margin-bottom:8px">📁</div>
+          <p style="font-size:14px;color:#333;font-weight:600;margin-bottom:6px">ارفع خطة درسك في مجلد Google Drive</p>
+          <p style="font-size:12px;color:#666;margin-bottom:12px">اضغط الزر أدناه لفتح المجلد المخصص ثم ارفع ملفك</p>
+          <button onclick="openDriveFolder()" style="background:#1c2833;color:#c9a227;border:1.5px solid #c9a227;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+            📂 فتح مجلد الرفع في Google Drive
+          </button>
+        </div>
+        <div class="instructions">
+          <b>تعليمات الرفع:</b><br>
+          1️⃣ اضغط "فتح مجلد الرفع" أعلاه<br>
+          2️⃣ ارفع ملف خطة الدرس في المجلد<br>
+          3️⃣ عد لهذه الصفحة واضغط "تم الرفع ✓"
+        </div>
+        <button class="btn btn-main" onclick="confirmUpload()">تم الرفع في Drive ✓</button>
+      </div>
+      <div class="success-box" id="successBox">
+        <div class="success-icon">✅</div>
+        <h3>تم التسجيل بنجاح!</h3>
+        <p>تم تسجيل إرسالك في النظام.</p>
+        <p style="margin-top:0.5rem;font-size:0.82rem;color:#999">جزاك الله خيراً</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/18Dz8_kcHeaIz6SInK9deflTdUpHrw0f2?usp=drive_link';
+const ADMIN_PASS = 'AAss1122@';
+
+const DEFAULT_TEACHERS = [
+  {id:1,name:'خالد أحمد مجرشي',phone:'0509067660',subject:'دراسات إسلامية',initials:'خم'},
+  {id:2,name:'خالد محسن العويني',phone:'0505241787',subject:'دراسات إسلامية',initials:'خع'},
+  {id:3,name:'محمد اليعيش',phone:'0562769990',subject:'دراسات إسلامية',initials:'مي'},
+  {id:4,name:'عمر احمد بانبيلة',phone:'0506515499',subject:'دراسات إسلامية',initials:'عب'},
+  {id:5,name:'عبدالغني القصير',phone:'0590167111',subject:'دراسات إسلامية',initials:'عق'},
+  {id:6,name:'سلطان علي العويني',phone:'0566066751',subject:'دراسات إسلامية',initials:'سع'},
+  {id:7,name:'جميل الغامدي',phone:'',subject:'دراسات إسلامية',initials:'جغ'},
+  {id:8,name:'أحمد الشهري',phone:'0506119920',subject:'دراسات إسلامية',initials:'أش'},
+  {id:9,name:'إبراهيم الدوسري',phone:'0566221070',subject:'لغة عربية',initials:'إد'},
+  {id:10,name:'محمد عبدالله البديوي',phone:'0505187891',subject:'لغة عربية',initials:'مب'},
+  {id:11,name:'محمد سالم اليميني',phone:'0558319463',subject:'لغة عربية',initials:'مي'},
+  {id:12,name:'أحمد حيدر',phone:'0583644866',subject:'اجتماعيات',initials:'أح'},
+  {id:13,name:'نواف الربيع',phone:'0568856675',subject:'اجتماعيات',initials:'نر'},
+  {id:14,name:'محمد المالكي',phone:'0598479605',subject:'رياضيات',initials:'مم'},
+  {id:15,name:'تركي المسلم',phone:'0567584853',subject:'رياضيات',initials:'تم'},
+  {id:16,name:'عبدالرحمن اللهيمي',phone:'0546388467',subject:'رياضيات',initials:'عل'},
+  {id:17,name:'خالد المطيري',phone:'0508078464',subject:'رياضيات',initials:'خط'},
+  {id:18,name:'حسين الحسين',phone:'0554228882',subject:'علوم',initials:'حح'},
+  {id:19,name:'إبراهيم ضياء الحق',phone:'0549988014',subject:'علوم',initials:'إض'},
+  {id:20,name:'وديع الحجاجي',phone:'0560719471',subject:'علوم',initials:'وح'},
+  {id:21,name:'عدنان الشهري',phone:'0569337752',subject:'إنجليزي',initials:'عش'},
+  {id:22,name:'عبدالإله الشهري',phone:'',subject:'إنجليزي',initials:'عش'},
+  {id:23,name:'محمد عيظة الزهراني',phone:'0547889932',subject:'مهارات رقمية',initials:'مز'},
+  {id:24,name:'عبدالرحمن العبلان',phone:'0540070388',subject:'فنية',initials:'عع'},
+  {id:25,name:'فيصل الجوير',phone:'0559918343',subject:'رياضية',initials:'فج'},
+];
+
+const DEFAULT_WEEKS = [
+  'الأسبوع الأول — 29/7/1447 إلى 3/8/1447 | 18/1/2026 إلى 22/1/2026',
+  'الأسبوع الثاني — 6/8/1447 إلى 10/8/1447 | 25/1/2026 إلى 29/1/2026',
+  'الأسبوع الثالث — 13/8/1447 إلى 17/8/1447 | 1/2/2026 إلى 5/2/2026',
+  'الأسبوع الرابع — 20/8/1447 إلى 24/8/1447 | 8/2/2026 إلى 12/2/2026',
+  'الأسبوع الخامس — 27/8/1447 إلى 2/9/1447 | 15/2/2026 إلى 19/2/2026',
+  'الأسبوع السادس — 9/9/1447 إلى 9/9/1447 | 22/2/2026 إلى 26/2/2026 (إجازة يوم التأسيس)',
+  'الأسبوع السابع — 13/9/1447 إلى 16/9/1447 | 1/3/2026 إلى 5/3/2026 (بنهايته تبدأ إجازة عيد الفطر)',
+  'الأسبوع الثامن — 10/10/1447 إلى 14/10/1447 | 29/3/2026 إلى 2/4/2026',
+  'الأسبوع التاسع — 17/10/1447 إلى 21/10/1447 | 5/4/2026 إلى 9/4/2026',
+  'الأسبوع العاشر — 24/10/1447 إلى 28/10/1447 | 12/4/2026 إلى 16/4/2026',
+  'الأسبوع الحادي عشر — 2/11/1447 إلى 6/11/1447 | 19/4/2026 إلى 23/4/2026',
+  'الأسبوع الثاني عشر — 9/11/1447 إلى 13/11/1447 | 26/4/2026 إلى 30/4/2026',
+  'الأسبوع الثالث عشر — 16/11/1447 إلى 20/11/1447 | 3/5/2026 إلى 7/5/2026',
+  'الأسبوع الرابع عشر — 23/11/1447 إلى 27/11/1447 | 10/5/2026 إلى 14/5/2026',
+  'الأسبوع الخامس عشر — 30/11/1447 إلى 4/12/1447 | 17/5/2026 إلى 21/5/2026',
+  'الأسبوع السادس عشر — 16/12/1447 إلى 18/12/1447 | 2/6/2026 إلى 4/6/2026',
+  'الأسبوع السابع عشر — 21/12/1447 إلى 25/12/1447 | 7/6/2026 إلى 11/6/2026',
+  'الأسبوع الثامن عشر — 28/12/1447 إلى 3/1/1448 | 14/6/2026 إلى 18/6/2026',
+  'الأسبوع التاسع عشر — 6/1/1448 إلى 10/1/1448 | 21/6/2026 إلى 25/6/2026',
+];
+
+function loadData(){
+  try{
+    const t=localStorage.getItem('imam_teachers');
+    const s=localStorage.getItem('imam_submissions');
+    return{
+      teachers:t?JSON.parse(t):null,
+      submissions:s?JSON.parse(s):[],
+      weeks:null
+    };
+  }catch(e){return{teachers:null,submissions:[],weeks:null};}
+}
+
+function saveData(){
+  try{
+    localStorage.setItem('imam_teachers',JSON.stringify(teachers));
+    localStorage.setItem('imam_submissions',JSON.stringify(submissions));
+    localStorage.setItem('imam_weeks',JSON.stringify(weeks));
+  }catch(e){}
+}
+
+const _d=loadData();
+let teachers=_d.teachers||DEFAULT_TEACHERS;
+let submissions=_d.submissions;
+let weeks=_d.weeks||DEFAULT_WEEKS;
+let currentTeacherId=null;
+
+if(!_d.teachers){saveData();}
+
+// ====== ROUTING ======
+function init(){
+  const hash=window.location.hash;
+  if(hash.startsWith('#upload=')){
+    const tid=parseInt(hash.replace('#upload=',''));
+    showUploadPage(tid);
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin(){
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('uploadPage').classList.add('hidden');
+}
+
+function showDashboard(){
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('uploadPage').classList.add('hidden');
+  renderWeekSelect();
+  renderStats();
+  renderReport();
+  renderTeachers();
+  renderWaList();
+}
+
+function showUploadPage(tid){
+  currentTeacherId=tid;
+  const t=teachers.find(x=>x.id===tid);
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('uploadPage').classList.remove('hidden');
+  if(t) document.getElementById('uploadTeacherName').textContent=t.name;
+  document.getElementById('uploadWeekLabel').textContent=weeks[1].split('—')[0].trim();
+}
+
+// ====== AUTH ======
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  const err=document.getElementById('loginError');
+  if(u==='admin' && p===ADMIN_PASS){
+    err.style.display='none';
+    showDashboard();
+  } else {
+    err.style.display='block';
+  }
+}
+
+document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+
+function doLogout(){
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  showLogin();
+}
+
+// ====== TABS ======
+function showTab(name,btn){
+  ['Report','Teachers','Send'].forEach(function(t){
+    document.getElementById('tab'+t).classList.add('hidden');
+  });
+  document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
+  document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(name==='teachers') renderTeachers();
+  if(name==='send'){
+    var sel=document.getElementById('sendWeekSelect');
+    sel.innerHTML=weeks.map(function(w,i){
+      return '<option value="'+w+'"'+(i===0?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+    }).join('');
+    sel.removeEventListener('change', renderWaList);
+    sel.addEventListener('change', renderWaList);
+    renderWaList();
+  }
+}
+
+// ====== WEEK ======
+function renderWeekSelect(){
+  const sel=document.getElementById('weekSelect');
+  sel.innerHTML=weeks.map(function(w,i){
+    return '<option value="'+w+'"'+(i===0?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+  }).join('');
+  updateWeekBadge();
+}
+
+function updateWeekBadge(){
+  const w=document.getElementById('weekSelect').value;
+  const wKey=w.split('—')[0].trim();
+  const cnt=submissions.filter(function(s){return s.week===wKey;}).length;
+  document.getElementById('weekBadge').textContent=cnt+' خطة مستلمة';
+}
+
+// ====== STATS ======
+function renderStats(){
+  const total=teachers.length;
+  const w=document.getElementById('weekSelect')?document.getElementById('weekSelect').value:weeks[1];
+  const wKey=w.split('—')[0].trim();
+  const sent=submissions.filter(function(s){return s.week===wKey;}).length;
+  const notSent=Math.max(0,total-sent);
+  document.getElementById('statsGrid').innerHTML=
+    '<div class="stat-card"><div class="stat-num">'+total+'</div><div class="stat-label">إجمالي المعلمين</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#1a5c3a">'+sent+'</div><div class="stat-label">أرسلوا هذا الأسبوع</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#c0392b">'+notSent+'</div><div class="stat-label">لم يرسلوا بعد</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#2980b9">'+submissions.length+'</div><div class="stat-label">إجمالي الخطط</div></div>';
+}
+
+// ====== REPORT ======
+function renderReport(){
+  updateWeekBadge();
+  const w=document.getElementById('weekSelect').value;
+  const wKey=w.split('—')[0].trim();
+  const rows=submissions.filter(function(s){return s.week===wKey;});
+  const sentNames=rows.map(function(r){return r.teacherName;});
+  const notSent=teachers.filter(function(t){return !sentNames.includes(t.name);});
+  renderStats();
+
+  var html=rows.map(function(r){
+    return '<tr>'+
+      '<td><strong>'+r.teacherName+'</strong></td>'+
+      '<td>'+(teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject+'</td>'+
+      '<td>'+r.date+'</td>'+
+      '<td>'+r.week+'</td>'+
+      '<td><span class="badge badge-green">✓ مرسل</span></td>'+
+      '<td><a class="file-link" href="'+DRIVE_FOLDER_URL+'" target="_blank">فتح Drive</a></td>'+
+      '</tr>';
+  }).join('');
+
+  html+=notSent.map(function(t){
+    return '<tr>'+
+      '<td><strong>'+t.name+'</strong></td>'+
+      '<td>'+(t.subject||'—')+'</td>'+
+      '<td>—</td><td>'+wKey+'</td>'+
+      '<td><span class="badge badge-red">✗ لم يرسل</span></td>'+
+      '<td>'+(t.phone?'<button onclick="sendReminder(\''+t.phone+'\',\''+t.name+'\',\''+wKey+'\')" style="background:#fef9e7;color:#9a7d0a;border:1px solid #c9a227;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:12px">تذكير</button>':'—')+'</td>'+
+      '</tr>';
+  }).join('');
+
+  document.getElementById('reportBody').innerHTML=html||'<tr><td colspan="6" style="text-align:center;padding:2rem;color:#999">لا توجد بيانات لهذا الأسبوع</td></tr>';
+}
+
+// ====== TEACHERS ======
+function renderTeachers(){
+  document.getElementById('teacherGrid').innerHTML=teachers.map(function(t){
+    return '<div class="teacher-card">'+
+      '<div class="teacher-avatar">'+t.initials+'</div>'+
+      '<div class="teacher-info">'+
+        '<div class="teacher-name">'+t.name+'</div>'+
+        '<div class="teacher-phone">📱 '+(t.phone||'غير محدد')+'</div>'+
+        '<div style="font-size:11px;color:#888;margin-top:2px">'+t.subject+'</div>'+
+      '</div>'+
+      '<div class="teacher-actions">'+
+        '<button class="btn btn-outline btn-sm" onclick="openTeacherLink('+t.id+')">🔗 رابطه</button>'+
+        '<button class="btn btn-red btn-sm" onclick="removeTeacher('+t.id+')">حذف</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function addTeacher(){
+  var name=document.getElementById('newName').value.trim();
+  var phone=document.getElementById('newPhone').value.trim();
+  if(!name||!phone){alert('يرجى إدخال الاسم ورقم الواتساب');return;}
+  var words=name.replace(/^أ\.\s*/,'').split(' ');
+  var initials=(words[0]?words[0][0]:'')+(words[words.length-1]?words[words.length-1][0]:'');
+  var id=Date.now();
+  teachers.push({id:id,name:name,phone:phone,subject:'',initials:initials});
+  document.getElementById('newName').value='';
+  document.getElementById('newPhone').value='';
+  saveData();
+  renderTeachers();
+  renderWaList();
+  renderStats();
+}
+
+function removeTeacher(id){
+  if(!confirm('هل تريد حذف هذا المعلم؟')) return;
+  teachers=teachers.filter(function(t){return t.id!==id;});
+  saveData();
+  renderTeachers();
+  renderStats();
+}
+
+function openTeacherLink(id){
+  var link=window.location.href.split('#')[0]+'#upload='+id;
+  prompt('رابط المعلم (انسخه وأرسله):', link);
+}
+
+// ====== WHATSAPP ======
+function initSendWeekSelect(){
+  const sel=document.getElementById('sendWeekSelect');
+  if(!sel||sel.options.length>0) return;
+  sel.innerHTML=weeks.map(function(w,i){
+    return '<option value="'+w+'"'+(i===1?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+  }).join('');
+}
+
+function renderWaList(){
+  const sel=document.getElementById('sendWeekSelect');
+  const selectedWeek=sel?sel.value:weeks[1];
+  const wKey=selectedWeek.split('—')[0].trim();
+  const sentNames=submissions.filter(function(s){return s.week===wKey;}).map(function(s){return s.teacherName;});
+
+  document.getElementById('waList').innerHTML=teachers.map(function(t){
+    const alreadySent=sentNames.includes(t.name);
+    return '<div class="wa-item">'+
+      '<div style="display:flex;align-items:center;gap:10px;flex:1">'+
+        '<input type="checkbox" id="chk_'+t.id+'" value="'+t.id+'" onchange="updateSelectedCount()" style="width:16px;height:16px;cursor:pointer"'+(alreadySent?' disabled':'')+'>'+
+        '<div>'+
+          '<div class="wa-name">'+t.name+'</div>'+
+          '<div class="wa-phone">'+(t.phone||'لا يوجد رقم')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        (alreadySent?'<span class="badge badge-green">✓ أرسل</span>':'')+
+        (t.phone?'<button class="wa-btn" onclick="sendWa('+t.id+')">📱 إرسال</button>':'<span style="font-size:12px;color:#999">لا يوجد رقم</span>')+
+      '</div>'+
+    '</div>';
+  }).join('');
+  updateSelectedCount();
+}
+
+function updateSelectedCount(){
+  const checked=document.querySelectorAll('#waList input[type=checkbox]:checked');
+  document.getElementById('selectedCount').textContent=checked.length+' معلم محدد';
+}
+
+function selectAllTeachers(){
+  document.querySelectorAll('#waList input[type=checkbox]:not(:disabled)').forEach(function(cb){cb.checked=true;});
+  updateSelectedCount();
+}
+
+function deselectAllTeachers(){
+  document.querySelectorAll('#waList input[type=checkbox]').forEach(function(cb){cb.checked=false;});
+  updateSelectedCount();
+}
+
+function sendWa(id){
+  const t=teachers.find(function(x){return x.id===id;});
+  const sel=document.getElementById('sendWeekSelect');
+  const selectedWeek=sel?sel.value:weeks[1];
+  const wKey=selectedWeek.split('—')[0].trim();
+  const link=window.location.href.split('#')[0]+'#upload='+id;
+  const msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس الأسبوعية لـ'+wKey+' عبر الرابط التالي:\n'+link+'\nشكراً — إدارة مدرسة الإمام الدوري');
+  window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+}
+
+function sendAllLinks(){
+  teachers.filter(function(t){return t.phone;}).forEach(function(t){sendWa(t.id);});
+}
+
+function sendSelectedLinks(){
+  const checked=document.querySelectorAll('#waList input[type=checkbox]:checked');
+  if(checked.length===0){alert('يرجى تحديد معلم واحد على الأقل');return;}
+  checked.forEach(function(cb){
+    const id=parseInt(cb.value);
+    const t=teachers.find(function(x){return x.id===id;});
+    if(t&&t.phone) sendWa(id);
+  });
+}
+
+function sendReminder(phone,name,week){
+  var link=window.location.href.split('#')[0];
+  var msg=encodeURIComponent('تذكير: '+name+'، لم يتم استلام خطة الدروس الخاصة بك لـ'+week+'. يرجى الرفع في أقرب وقت.\nشكراً — إدارة مدرسة الإمام الدوري');
+  window.open('https://wa.me/'+phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+}
+
+// ====== UPLOAD (Drive) ======
+function openDriveFolder(){
+  window.open(DRIVE_FOLDER_URL,'_blank');
+}
+
+function confirmUpload(){
+  const t=teachers.find(function(x){return x.id===currentTeacherId;});
+  const hash=window.location.hash;
+  const weekParam=hash.includes('week=')? decodeURIComponent(hash.split('week=')[1]) : weeks[1];
+  const weekLabel=weekParam.split('—')[0].trim();
+  const today=new Date().toISOString().split('T')[0];
+  submissions.push({
+    teacherId:currentTeacherId,
+    teacherName:t?t.name:'معلم',
+    date:today,
+    type:'PDF',
+    week:weekLabel,
+    status:'مرسل',
+    file:'تم الرفع في Drive',
+    fileUrl:DRIVE_FOLDER_URL
+  });
+  saveData();
+  document.getElementById('uploadForm').style.display='none';
+  document.getElementById('successBox').style.display='block';
+}
+
+// ====== EXPORT PDF ======
+function exportReport(){
+  var w=document.getElementById('weekSelect').value;
+  var wKey=w.split('—')[0].trim();
+  var rows=submissions.filter(function(s){return s.week===wKey;});
+  var notSent=teachers.filter(function(t){return !rows.find(function(r){return r.teacherName===t.name;});});
+  var today=new Date().toLocaleDateString('ar-SA');
+
+  var html='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'+
+  '<style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;color:#222}'+
+  'h2{text-align:center;color:#1c2833;border-bottom:3px solid #c9a227;padding-bottom:8px}'+
+  '.meta{text-align:center;color:#555;font-size:13px;margin-bottom:20px}'+
+  'table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}'+
+  'th{background:#1c2833;color:#c9a227;padding:8px;text-align:right;border:1px solid #ddd}'+
+  'td{padding:7px 8px;border:1px solid #ddd;text-align:right}'+
+  'tr:nth-child(even) td{background:#f9f9f9}'+
+  '.sent{color:#1a5c3a;font-weight:bold}.notsent{color:#c0392b;font-weight:bold}'+
+  '.section-title{background:#f0f0f0;padding:6px 10px;font-weight:bold;margin:10px 0 4px;font-size:13px;border-right:4px solid #c9a227}'+
+  '</style></head><body>'+
+  '<h2>مدرسة الإمام الدوري لتحفيظ القرآن الكريم</h2>'+
+  '<div class="meta">تقرير خطة الدروس الأسبوعية — '+wKey+' — تاريخ الطباعة: '+today+'</div>'+
+  '<div class="section-title">أولاً: المعلمون الذين أرسلوا ('+rows.length+')</div>'+
+  '<table><thead><tr><th>#</th><th>اسم المعلم</th><th>التخصص</th><th>تاريخ الإرسال</th><th>الحالة</th></tr></thead><tbody>'+
+  rows.map(function(r,i){
+    var subj=(teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;
+    return '<tr><td>'+(i+1)+'</td><td>'+r.teacherName+'</td><td>'+subj+'</td><td>'+r.date+'</td><td class="sent">✓ مرسل</td></tr>';
+  }).join('')+
+  (rows.length===0?'<tr><td colspan="5" style="text-align:center;padding:12px;color:#999">لا يوجد</td></tr>':'')+
+  '</tbody></table>'+
+  '<div class="section-title">ثانياً: المعلمون الذين لم يرسلوا ('+notSent.length+')</div>'+
+  '<table><thead><tr><th>#</th><th>اسم المعلم</th><th>التخصص</th><th>الحالة</th></tr></thead><tbody>'+
+  notSent.map(function(t,i){
+    return '<tr><td>'+(i+1)+'</td><td>'+t.name+'</td><td>'+(t.subject||'—')+'</td><td class="notsent">✗ لم يرسل</td></tr>';
+  }).join('')+
+  (notSent.length===0?'<tr><td colspan="4" style="text-align:center;padding:12px;color:#1a5c3a">جميع المعلمين أرسلوا ✓</td></tr>':'')+
+  '</tbody></table>'+
+  '<div style="text-align:center;margin-top:30px;font-size:11px;color:#999">إجمالي المعلمين: '+teachers.length+' | أرسلوا: '+rows.length+' | لم يرسلوا: '+notSent.length+'</div>'+
+  '<script>window.onload=function(){window.print()}<\/script></body></html>';
+
+  var w2=window.open('','_blank');
+  w2.document.write(html);
+  w2.document.close();
+}
+
+window.addEventListener('hashchange',init);
+init();
+</script>
+</body>
+</html>
