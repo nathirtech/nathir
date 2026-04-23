@@ -518,8 +518,21 @@ tr:hover td{background:var(--green-bg)}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
           <h3 style="font-size:14px;font-weight:600">إضافة معلم جديد</h3>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end">
           <div class="form-group" style="margin:0"><label style="font-size:12px;color:#555;display:block;margin-bottom:3px">الاسم</label><input type="text" id="newName" placeholder="اسم المعلم" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:12px;color:#555;display:block;margin-bottom:3px">المهمة</label>
+            <select id="newRole" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none">
+              <option value="">اختر المهمة</option>
+              <option>معلم</option>
+              <option>وكيل</option>
+              <option>وكيل الشؤون التعليمية</option>
+              <option>وكيل شؤون الطلاب</option>
+              <option>الموجه الطلابي</option>
+              <option>رائد النشاط</option>
+              <option>مسؤول الأمن والسلامة</option>
+            </select>
+          </div>
           <div class="form-group" style="margin:0"><label style="font-size:12px;color:#555;display:block;margin-bottom:3px">الواتساب</label><input type="text" id="newPhone" placeholder="05xxxxxxxx" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>
           <div class="form-group" style="margin:0"><label style="font-size:12px;color:#555;display:block;margin-bottom:3px">التخصص</label><input type="text" id="newSubject" placeholder="المادة" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>
           <button class="btn-sm btn-sm-gold" style="height:34px" onclick="addTeacher()">إضافة</button>
@@ -996,7 +1009,8 @@ function renderTeachers(){
       return '<div class="teacher-card">'+
         '<div class="teacher-avatar">'+t.initials+'</div>'+
         '<div class="teacher-info"><div class="teacher-name">'+t.name+'</div>'+
-        '<div class="teacher-sub">'+(t.subject||'—')+' | '+(t.phone||'لا يوجد رقم')+'</div></div>'+
+        '<div class="teacher-sub">'+(t.role?'<span style="background:var(--green-pale);color:var(--green-dark);padding:1px 7px;border-radius:10px;font-size:10px;margin-left:5px">'+t.role+'</span>':'')+
+        (t.subject||'—')+' | '+(t.phone||'لا يوجد رقم')+'</div></div>'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
           '<button class="btn-sm btn-sm-outline" onclick="copyTeacherLink('+t.id+')">🔗 رابط</button>'+
           '<button class="btn-sm btn-sm-red" onclick="removeTeacher('+t.id+')">حذف</button>'+
@@ -1008,15 +1022,17 @@ function addTeacher(){
   var name=document.getElementById('newName').value.trim();
   var phone=document.getElementById('newPhone').value.trim();
   var subject=document.getElementById('newSubject').value.trim();
+  var role=document.getElementById('newRole').value;
   if(!name){alert('يرجى إدخال اسم المعلم');return;}
   var words=name.replace(/^أ\.\s*/,'').split(' ');
   var initials=(words[0]?words[0][0]:'')+(words[words.length-1]?words[words.length-1][0]:'');
   var data=loadSchoolData(currentSchool.code)||{teachers:[],submissions:[],driveUrl:''};
-  data.teachers.push({id:Date.now(),name:name,phone:phone,subject:subject,initials:initials});
+  data.teachers.push({id:Date.now(),name:name,phone:phone,subject:subject,role:role,initials:initials});
   saveSchoolData(currentSchool.code,data);
   document.getElementById('newName').value='';
   document.getElementById('newPhone').value='';
   document.getElementById('newSubject').value='';
+  document.getElementById('newRole').value='';
   renderTeachers();renderStats();
 }
 
