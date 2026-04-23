@@ -436,7 +436,7 @@ tr:hover td{background:var(--green-bg)}
 
   <div class="dash-nav">
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showTab('report',this)">📊 التقرير الأسبوعي</button>
+      <button class="nav-tab active" onclick="showTab('report',this)">📊 تقرير الخطة الأسبوعي</button>
       <button class="nav-tab" onclick="showTab('circulars',this)">📢 التعاميم</button>
       <button class="nav-tab" onclick="showTab('teachers',this)">👨‍🏫 المعلمون</button>
       <button class="nav-tab" onclick="showTab('send',this)">📱 إرسال الروابط</button>
@@ -457,11 +457,37 @@ tr:hover td{background:var(--green-bg)}
 
     <!-- CIRCULARS -->
     <div id="tabCirculars" class="hidden">
-      <div class="card" style="padding:2rem;text-align:center">
-        <div style="font-size:3rem;margin-bottom:1rem">📢</div>
-        <h3 style="color:var(--green-dark);margin-bottom:0.5rem">التعاميم</h3>
-        <p style="color:var(--text-light);font-size:14px">هذا القسم قيد التطوير — سيتم إضافة محتواه قريباً</p>
+
+      <!-- إضافة تعميم جديد -->
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <h3 style="font-size:14px;font-weight:600;color:var(--green-dark);margin-bottom:12px">➕ إضافة تعميم جديد</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:12px;color:#555;display:block;margin-bottom:3px">عنوان التعميم</label>
+            <input type="text" id="circTitle" placeholder="مثال: تعميم رقم 1234" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:12px;color:#555;display:block;margin-bottom:3px">رقم التعميم</label>
+            <input type="text" id="circNumber" placeholder="مثال: 1234/1447" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-size:12px;color:#555;display:block;margin-bottom:3px">رابط التعميم (Google Drive)</label>
+          <input type="text" id="circUrl" placeholder="https://drive.google.com/..." style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none">
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-size:12px;color:#555;display:block;margin-bottom:4px">الموجه إلى</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_teachers" checked> المعلمون</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_deputies"> الوكلاء</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_admin"> الإداريون</label>
+          </div>
+        </div>
+        <button class="btn-sm btn-sm-gold" onclick="addCircular()">إضافة التعميم وإرساله</button>
       </div>
+
+      <!-- قائمة التعاميم -->
+      <div id="circularsList"></div>
     </div>
 
     <!-- REPORT -->
@@ -581,7 +607,57 @@ tr:hover td{background:var(--green-bg)}
   </div>
 </div>
 
-<!-- ===== UPLOAD PAGE ===== -->
+<!-- ===== CIRCULAR VIEW PAGE ===== -->
+<div id="circularPage" class="upload-page hidden">
+  <div class="dash-header" style="background:var(--green-dark);border-bottom:2px solid var(--green-light);padding:0.9rem 1.5rem">
+    <div class="dash-header-logo">
+      <svg width="36" height="30" viewBox="0 0 130 90" fill="none">
+        <circle cx="70" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="6" r="4.5" fill="#3a9e6e"/>
+        <circle cx="58" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="18" r="4.5" fill="#3a9e6e"/>
+        <circle cx="46" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="118" cy="30" r="4.5" fill="#3a9e6e"/>
+      </svg>
+      <div>
+        <div style="font-size:10px;color:#a8e6c3">وزارة التعليم</div>
+        <div style="font-size:13px;font-weight:700;color:#fff" id="circSchoolName">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="upload-wrap">
+    <div class="upload-card">
+      <div id="circViewForm">
+        <div style="background:var(--green-pale);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid #c8e6d8">
+          <div style="font-size:11px;color:var(--green-light);margin-bottom:2px">تعميم رسمي</div>
+          <div style="font-weight:700;font-size:15px;color:var(--green-dark)" id="circViewTitle">—</div>
+          <div style="font-size:12px;color:#666;margin-top:2px">رقم التعميم: <span id="circViewNumber">—</span></div>
+        </div>
+        <div class="teacher-info-box">
+          <span style="font-size:1.2rem">👤</span>
+          <div>
+            <div style="font-weight:600;font-size:14px" id="circViewName">—</div>
+            <div style="font-size:11px;color:#666">يرجى الاطلاع على التعميم أدناه</div>
+          </div>
+        </div>
+        <div class="drive-box">
+          <div style="font-size:2rem;margin-bottom:8px">📄</div>
+          <p style="font-size:14px;color:#333;font-weight:600;margin-bottom:6px">اضغط لفتح التعميم</p>
+          <button onclick="openCircularFile()" style="background:var(--green-dark);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">📂 فتح التعميم</button>
+        </div>
+        <div class="instructions">
+          <b>تعليمات:</b><br>
+          1️⃣ اضغط "فتح التعميم" للاطلاع عليه<br>
+          2️⃣ بعد الاطلاع اضغط "تم الاطلاع ✓"
+        </div>
+        <button onclick="confirmCircularView()" style="width:100%;padding:12px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">تم الاطلاع ✓</button>
+      </div>
+      <div class="success-box-upload" id="circSuccessBox">
+        <div style="font-size:2.5rem">✅</div>
+        <h3 style="color:var(--green-dark);margin-top:8px">تم تسجيل اطلاعك!</h3>
+        <p style="color:#555;font-size:13px;margin-top:4px">تم تسجيل اطلاعك على التعميم بنجاح</p>
+        <p style="color:#999;font-size:12px;margin-top:8px">شكراً لتعاونك</p>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="uploadPage" class="upload-page hidden">
   <div class="dash-header" style="padding:0.9rem 1.5rem">
     <div class="dash-header-logo">
@@ -791,6 +867,12 @@ function doLogin(){
     currentSchool=school;
     hideModal('loginModal');
     showDashboard();
+  } else if(hash.startsWith('#circular=')){
+    var cparts=hash.split('#circular=')[1].split('&')[0].split('-');
+    var cSchoolCode=cparts[0];
+    var cCircId=parseInt(cparts[1]);
+    var cTeacherId=parseInt(cparts[2]);
+    showCircularPage(cSchoolCode,cCircId,cTeacherId);
   } else {
     err.style.display='block';
   }
@@ -835,7 +917,7 @@ function showTab(name,btn){
   document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
   document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  if(name==='teachers') renderTeachers();
+  if(name==='circulars') renderCirculars();
   if(name==='send'){
     var sel=document.getElementById('sendWeekSelect');
     sel.innerHTML=DEFAULT_WEEKS.map(function(w,i){
