@@ -470,12 +470,12 @@ tr:hover td{background:var(--green-bg)}
           <input type="file" id="circFile" accept=".pdf,image/*" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer">
         </div>
         <div class="form-group" style="margin-bottom:10px">
-          <label style="font-size:12px;color:#555;display:block;margin-bottom:4px">الموجه إلى</label>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_teachers" checked> المعلمون</label>
-            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_deputies"> الوكلاء</label>
-            <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" id="circ_admin"> الإداريون</label>
+          <label style="font-size:12px;color:#555;display:block;margin-bottom:6px">الموجه إلى</label>
+          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <button class="btn-sm btn-sm-gold" onclick="selectAllCircTargets()">تحديد الكل</button>
+            <button class="btn-sm btn-sm-outline" onclick="deselectAllCircTargets()">إلغاء التحديد</button>
           </div>
+          <div id="circTargetsList" style="max-height:200px;overflow-y:auto;border:1.5px solid #ddd;border-radius:8px;padding:8px;background:#fafafa"></div>
         </div>
         <button class="btn-sm btn-sm-gold" onclick="addCircular()">إضافة التعميم وإرساله</button>
       </div>
@@ -924,7 +924,7 @@ function showTab(name,btn){
   document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
   document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  if(name==='circulars') renderCirculars();
+  if(name==='circulars'){renderCirculars();renderCircTargets();}
   if(name==='send'){
     var sel=document.getElementById('sendWeekSelect');
     sel.innerHTML=DEFAULT_WEEKS.map(function(w,i){
