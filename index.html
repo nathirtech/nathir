@@ -192,7 +192,11 @@ tr:hover td{background:var(--gb)}
     <div><div class="stat-n" id="landPlans">0</div><div class="stat-l">خطة مرفوعة</div></div>
     <div><div class="stat-n">مجاني</div><div class="stat-l">للمرحلة الحالية</div></div>
   </div>
-  <div class="land-footer">منصة خطة الدروس الأسبوعية © 2026 — جميع الحقوق محفوظة</div>
+  <div class="land-footer">
+    منصة خطة الدروس الأسبوعية © 2026 — جميع الحقوق محفوظة
+    <br>
+    <button onclick="doAdminLogin()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:inherit;margin-top:6px">لوحة التحكم</button>
+  </div>
 </div>
 
 <!-- MODAL REGISTER -->
@@ -426,7 +430,90 @@ tr:hover td{background:var(--gb)}
   </div>
 </div>
 
-<!-- UPLOAD PAGE -->
+<!-- ADMIN DASHBOARD -->
+<div id="pgAdmin" class="hidden">
+  <div style="background:#0f4a28;border-bottom:3px solid #3a9e6e;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <svg style="width:48px;height:34px" viewBox="0 0 130 90" fill="none"><circle cx="70" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="46" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="118" cy="30" r="4.5" fill="#3a9e6e"/></svg>
+      <div>
+        <div style="font-size:11px;color:#a8e6c3;margin-bottom:2px">لوحة تحكم المشرف العام</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">منصة خطة الدروس الأسبوعية</div>
+      </div>
+    </div>
+    <button class="btn btn-o btn-sm" onclick="adminLogout()">خروج</button>
+  </div>
+
+  <!-- Admin Nav -->
+  <div style="background:#fff;padding:0.7rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;gap:4px;flex-wrap:wrap">
+    <button class="nav-tab active" onclick="adminTab('stats',this)">📊 الإحصائيات</button>
+    <button class="nav-tab" onclick="adminTab('schools',this)">🏫 المدارس</button>
+    <button class="nav-tab" onclick="adminTab('reports',this)">📈 التقارير</button>
+    <button class="nav-tab" onclick="adminTab('settings',this)">⚙️ الإعدادات</button>
+  </div>
+
+  <div class="dash-content">
+
+    <!-- STATS -->
+    <div id="adminStats">
+      <div class="stats-grid" id="adminStatsGrid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;flex-wrap:wrap">
+        <div class="card">
+          <div class="card-header"><h3>المدارس حسب المنطقة</h3></div>
+          <div style="padding:14px" id="adminByRegion"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>المدارس حسب المرحلة</h3></div>
+          <div style="padding:14px" id="adminByStage"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHOOLS -->
+    <div id="adminSchools" class="hidden">
+      <div class="card" style="padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="text" id="adminSearch" placeholder="بحث باسم المدرسة أو الكود..." oninput="renderAdminSchools()" style="flex:1;padding:8px 12px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+        <select id="adminFilterRegion" onchange="renderAdminSchools()" style="padding:8px 12px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+          <option value="">كل المناطق</option>
+          <option>الرياض</option><option>مكة المكرمة</option><option>المدينة المنورة</option>
+          <option>القصيم</option><option>الشرقية</option><option>عسير</option>
+          <option>تبوك</option><option>حائل</option><option>جازان</option><option>نجران</option><option>الباحة</option><option>الجوف</option>
+        </select>
+      </div>
+      <div id="adminSchoolsList"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="adminReports" class="hidden">
+      <div class="card">
+        <div class="card-header"><h3>تقرير شامل لجميع المدارس</h3><button class="btn btn-g btn-sm" onclick="exportAdminReport()">⬇ تصدير PDF</button></div>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>المدرسة</th><th>الكود</th><th>المنطقة</th><th>المرحلة</th><th>المدير</th><th>المعلمون</th><th>الخطط</th><th>تاريخ التسجيل</th></tr></thead>
+            <tbody id="adminReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN SETTINGS -->
+    <div id="adminSettings" class="hidden">
+      <div class="set-card">
+        <h3>تغيير كلمة مرور المشرف العام</h3>
+        <div class="form-g"><label>كلمة المرور الحالية</label><input type="password" id="adCur" placeholder="••••••" style="max-width:300px"></div>
+        <div class="form-g"><label>كلمة المرور الجديدة</label><input type="password" id="adNew" placeholder="••••••" style="max-width:300px"></div>
+        <div class="form-g"><label>تأكيد كلمة المرور</label><input type="password" id="adCon" placeholder="••••••" style="max-width:300px"></div>
+        <div class="err" id="adErr" style="display:none"></div>
+        <button class="btn btn-g btn-sm" onclick="changeAdminPass()">تغيير كلمة المرور</button>
+      </div>
+      <div class="set-card">
+        <h3 style="color:var(--red)">منطقة الخطر</h3>
+        <p style="font-size:13px;color:var(--tl);margin-bottom:10px">مسح جميع بيانات المنصة (لا يمكن التراجع)</p>
+        <button class="btn btn-r btn-sm" onclick="if(confirm('هل أنت متأكد تماماً؟'))resetPlatform()">مسح جميع البيانات</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 <div id="pgUpload" class="upload-page hidden">
   <div class="header" style="padding:0.85rem 1.5rem">
     <div class="header-logo">
@@ -577,7 +664,7 @@ var circTargets=[]; // selected circular targets
 
 // ====== PAGES ======
 function showPage(id){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular'].forEach(function(p){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgAdmin'].forEach(function(p){
     document.getElementById(p).classList.add('hidden');
   });
   document.getElementById(id).classList.remove('hidden');
@@ -640,10 +727,190 @@ function doLogin(){
 }
 document.getElementById('lPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
+var ADMIN_PASS_KEY='pt_admin_pass';
+function getAdminPass(){return localStorage.getItem(ADMIN_PASS_KEY)||'Admin@2026';}
+function setAdminPass(p){localStorage.setItem(ADMIN_PASS_KEY,p);}
+
 function doAdminLogin(){
   var p=prompt('كلمة مرور المشرف العام:');
-  if(p==='Admin@2026'){alert('عدد المدارس: '+schools.length+'\n'+schools.map(function(s){return s.code+' — '+s.name;}).join('\n'));}
-  else if(p!==null){alert('كلمة المرور غير صحيحة');}
+  if(p===null) return;
+  if(p===getAdminPass()){showAdminDashboard();}
+  else{alert('كلمة المرور غير صحيحة');}
+}
+
+function showAdminDashboard(){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular'].forEach(function(pg){
+    document.getElementById(pg).classList.add('hidden');
+  });
+  document.getElementById('pgAdmin').classList.remove('hidden');
+  renderAdminStats();
+  renderAdminSchools();
+  renderAdminReport();
+}
+
+function adminLogout(){
+  showPage('pgLanding');
+  updateLandingStats();
+}
+
+function adminTab(name,btn){
+  ['Stats','Schools','Reports','Settings'].forEach(function(t){
+    document.getElementById('admin'+t).classList.add('hidden');
+  });
+  document.getElementById('admin'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
+  document.querySelectorAll('#pgAdmin .nav-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(name==='stats') renderAdminStats();
+  if(name==='schools') renderAdminSchools();
+  if(name==='reports') renderAdminReport();
+}
+
+function renderAdminStats(){
+  var total=schools.length;
+  var totalT=0,totalP=0,totalC=0;
+  schools.forEach(function(s){
+    var d=getSD(s.code);
+    if(d){totalT+=d.teachers.length;totalP+=d.submissions.length;totalC+=(d.circulars||[]).length;}
+  });
+  document.getElementById('adminStatsGrid').innerHTML=
+    '<div class="stat-card"><div class="stat-num">'+total+'</div><div class="stat-lbl">مدرسة مسجلة</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:var(--gm)">'+totalT+'</div><div class="stat-lbl">إجمالي المنتسبين</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#2980b9">'+totalP+'</div><div class="stat-lbl">خطة مرفوعة</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#8e44ad">'+totalC+'</div><div class="stat-lbl">تعميم صادر</div></div>';
+
+  // By region
+  var regions={};
+  schools.forEach(function(s){regions[s.region]=(regions[s.region]||0)+1;});
+  document.getElementById('adminByRegion').innerHTML=Object.keys(regions).map(function(r){
+    var pct=Math.round(regions[r]/total*100);
+    return '<div style="margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>'+r+'</span><span>'+regions[r]+' مدرسة</span></div>'+
+      '<div style="background:#f0f0f0;border-radius:10px;height:6px"><div style="background:var(--gd);width:'+pct+'%;height:100%;border-radius:10px"></div></div>'+
+    '</div>';
+  }).join('')||'<p style="color:#999;font-size:13px">لا توجد بيانات</p>';
+
+  // By stage
+  var stages={};
+  schools.forEach(function(s){stages[s.stage]=(stages[s.stage]||0)+1;});
+  document.getElementById('adminByStage').innerHTML=Object.keys(stages).map(function(st){
+    var pct=Math.round(stages[st]/total*100);
+    return '<div style="margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>'+st+'</span><span>'+stages[st]+' مدرسة</span></div>'+
+      '<div style="background:#f0f0f0;border-radius:10px;height:6px"><div style="background:var(--gl);width:'+pct+'%;height:100%;border-radius:10px"></div></div>'+
+    '</div>';
+  }).join('')||'<p style="color:#999;font-size:13px">لا توجد بيانات</p>';
+}
+
+function renderAdminSchools(){
+  var search=(document.getElementById('adminSearch')||{value:''}).value.toLowerCase();
+  var region=(document.getElementById('adminFilterRegion')||{value:''}).value;
+  var filtered=schools.filter(function(s){
+    var matchS=!search||(s.name.toLowerCase().includes(search)||s.code.toLowerCase().includes(search));
+    var matchR=!region||s.region===region;
+    return matchS&&matchR;
+  });
+  document.getElementById('adminSchoolsList').innerHTML=filtered.length===0?
+    '<div class="card" style="padding:2rem;text-align:center"><p style="color:#999">لا توجد مدارس</p></div>':
+    filtered.map(function(s){
+      var d=getSD(s.code)||{teachers:[],submissions:[]};
+      var active=s.active!==false;
+      return '<div class="card" style="margin-bottom:10px">'+
+        '<div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+          '<div>'+
+            '<div style="font-weight:600;color:var(--gd);font-size:14px">'+s.name+'</div>'+
+            '<div style="font-size:12px;color:#888;margin-top:3px">'+
+              s.code+' | '+s.region+' | '+(s.stage||'—')+' | '+(s.gender||'—')+
+            '</div>'+
+            '<div style="font-size:12px;color:#888;margin-top:2px">المدير: '+s.director+' | '+s.phone+'</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
+            '<span style="background:'+(active?'var(--gp)':'#fdecea')+';color:'+(active?'var(--gd)':'var(--red)')+';padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">'+(active?'✓ نشطة':'✗ معطلة')+'</span>'+
+            '<span class="badge" style="background:#f0f0f0;color:#555">'+d.teachers.length+' منتسب</span>'+
+            '<span class="badge" style="background:#f0f0f0;color:#555">'+d.submissions.length+' خطة</span>'+
+            '<button class="btn btn-o btn-sm" onclick="toggleSchool(\''+s.code+'\')">'+(active?'تعطيل':'تفعيل')+'</button>'+
+            '<button class="btn btn-o btn-sm" onclick="resetSchoolPass(\''+s.code+'\')">🔐 كلمة المرور</button>'+
+            '<button class="btn btn-r btn-sm" onclick="deleteSchool(\''+s.code+'\')">حذف</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+}
+
+function toggleSchool(code){
+  var idx=schools.findIndex(function(s){return s.code===code;});
+  if(idx>-1){schools[idx].active=schools[idx].active===false?true:false;setSchools(schools);renderAdminSchools();}
+}
+
+function resetSchoolPass(code){
+  var s=schools.find(function(x){return x.code===code;});
+  var np=prompt('أدخل كلمة المرور الجديدة لـ '+s.name+':');
+  if(!np||np.length<4){alert('كلمة المرور قصيرة جداً');return;}
+  var idx=schools.findIndex(function(x){return x.code===code;});
+  schools[idx].pass=np;setSchools(schools);
+  alert('تم تغيير كلمة مرور '+s.name+' إلى: '+np);
+}
+
+function deleteSchool(code){
+  var s=schools.find(function(x){return x.code===code;});
+  if(!confirm('حذف مدرسة '+s.name+' بجميع بياناتها؟\nلا يمكن التراجع!')) return;
+  schools=schools.filter(function(x){return x.code!==code;});
+  setSchools(schools);
+  localStorage.removeItem('pt_'+code);
+  renderAdminSchools();renderAdminStats();
+}
+
+function renderAdminReport(){
+  document.getElementById('adminReportBody').innerHTML=schools.map(function(s){
+    var d=getSD(s.code)||{teachers:[],submissions:[]};
+    var date=s.createdAt?s.createdAt.split('T')[0]:'—';
+    return '<tr>'+
+      '<td><b>'+s.name+'</b></td>'+
+      '<td>'+s.code+'</td>'+
+      '<td>'+s.region+'</td>'+
+      '<td>'+(s.stage||'—')+'</td>'+
+      '<td>'+s.director+'</td>'+
+      '<td style="text-align:center">'+d.teachers.length+'</td>'+
+      '<td style="text-align:center">'+d.submissions.length+'</td>'+
+      '<td>'+date+'</td>'+
+    '</tr>';
+  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:2rem;color:#999">لا توجد مدارس</td></tr>';
+}
+
+function exportAdminReport(){
+  var today=new Date().toLocaleDateString('ar-SA');
+  var html='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><style>body{font-family:Arial;direction:rtl;padding:20px}h2{text-align:center;color:#1a6e3c;border-bottom:3px solid #3a9e6e;padding-bottom:8px}.meta{text-align:center;color:#555;font-size:13px;margin-bottom:20px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#1a6e3c;color:#fff;padding:8px;text-align:right}td{padding:6px 8px;border:1px solid #ddd}tr:nth-child(even) td{background:#f9f9f9}</style></head><body>'+
+  '<h2>منصة خطة الدروس الأسبوعية</h2><div class="meta">تقرير المدارس المسجلة — '+today+'</div>'+
+  '<table><thead><tr><th>#</th><th>المدرسة</th><th>الكود</th><th>المنطقة</th><th>المرحلة</th><th>المدير</th><th>المنتسبون</th><th>الخطط</th><th>تاريخ التسجيل</th></tr></thead><tbody>'+
+  schools.map(function(s,i){
+    var d=getSD(s.code)||{teachers:[],submissions:[]};
+    return '<tr><td>'+(i+1)+'</td><td>'+s.name+'</td><td>'+s.code+'</td><td>'+s.region+'</td><td>'+(s.stage||'—')+'</td><td>'+s.director+'</td><td style="text-align:center">'+d.teachers.length+'</td><td style="text-align:center">'+d.submissions.length+'</td><td>'+(s.createdAt?s.createdAt.split('T')[0]:'—')+'</td></tr>';
+  }).join('')+
+  '</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>';
+  var w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
+function changeAdminPass(){
+  var cc=document.getElementById('adCur').value.trim();
+  var np=document.getElementById('adNew').value.trim();
+  var co=document.getElementById('adCon').value.trim();
+  var err=document.getElementById('adErr');
+  if(cc!==getAdminPass()){err.style.display='block';err.textContent='كلمة المرور الحالية غير صحيحة';return;}
+  if(np.length<6){err.style.display='block';err.textContent='كلمة المرور قصيرة جداً (6 أحرف على الأقل)';return;}
+  if(np!==co){err.style.display='block';err.textContent='كلمتا المرور غير متطابقتين';return;}
+  err.style.display='none';
+  setAdminPass(np);
+  document.getElementById('adCur').value='';
+  document.getElementById('adNew').value='';
+  document.getElementById('adCon').value='';
+  alert('تم تغيير كلمة مرور المشرف العام ✅');
+}
+
+function resetPlatform(){
+  schools.forEach(function(s){localStorage.removeItem('pt_'+s.code);});
+  localStorage.removeItem('pt_schools');
+  schools=[];
+  alert('تم مسح جميع البيانات');
+  adminLogout();
 }
 
 function doLogout(){cur=null;showPage('pgLanding');updateLandingStats();}
