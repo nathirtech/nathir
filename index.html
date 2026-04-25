@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
-body{background:#f0f7f3;direction:rtl;min-height:100vh}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',sans-serif}
+body{background:#f5f4f0;direction:rtl;min-height:100vh}
 .hidden{display:none!important}
 
 /* Colors */
 :root{
-  --gd:#1a6e3c;--gm:#1e8449;--gl:#3a9e6e;
-  --gp:#e8f5ee;--gb:#f0f7f3;
-  --bd:#e0e0e0;--tx:#1a1a1a;--tm:#444;--tl:#888;
-  --red:#c0392b;--white:#fff;
+  --gd:#1a3a6b;--gm:#1e4d8c;--gl:#0099b8;
+  --gp:#e8f0f8;--gb:#f5f4f0;
+  --bd:#d0d8e8;--tx:#1a1a2e;--tm:#3a4a6b;--tl:#7a8aab;
+  --gold:#b8952e;--red:#c0392b;--white:#fff;
 }
 
 /* Header */
-.header{background:var(--gd);border-bottom:3px solid var(--gl);padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.header-logo{display:flex;align-items:center;gap:12px}
-.header-info h1{font-size:14px;font-weight:700;color:#fff}
-.header-info p{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px}
-.school-badge{font-size:11px;background:rgba(168,230,195,0.2);border:1px solid rgba(168,230,195,0.5);color:#a8e6c3;padding:2px 10px;border-radius:20px;margin-top:3px;display:inline-block}
+.header{background:linear-gradient(90deg,#ddd9d0 0%,#f5f4f0 30%,#f5f4f0 70%,#ddd9d0 100%);border-bottom:3px solid var(--gd);padding:0.5rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header-logo{display:flex;align-items:center;gap:0px}
+.header-info h1{font-size:26px;font-weight:700;color:var(--gd);font-family:'Cairo',sans-serif}
+.header-info p{font-size:11px;color:var(--tm);margin-top:2px}
+.school-badge{font-size:11px;background:var(--gp);border:1px solid var(--bd);color:var(--gd);padding:2px 10px;border-radius:20px;margin-top:3px;display:inline-block}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* Nav */
@@ -60,16 +61,16 @@ body{background:#f0f7f3;direction:rtl;min-height:100vh}
 .pass-box .val{font-size:1.6rem;font-weight:700;color:var(--gd);letter-spacing:4px}
 
 /* Landing */
-.land-header{background:var(--gd);border-bottom:3px solid var(--gl);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-.land-logo{display:flex;align-items:center;gap:12px}
-.land-logo h1{font-size:1.05rem;font-weight:700;color:#fff}
-.land-logo p{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px}
+.land-header{background:linear-gradient(90deg,#ddd9d0 0%,#f5f4f0 30%,#f5f4f0 70%,#ddd9d0 100%);border-bottom:3px solid var(--gd);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.land-logo{display:flex;align-items:center;gap:0px}
+.land-logo h1{font-size:26px;font-weight:700;color:var(--gd);font-family:'Cairo',sans-serif}
+.land-logo p{font-size:11px;color:var(--tm);margin-top:2px}
 .land-nav{display:flex;gap:8px}
-.btn-ln{background:transparent;border:1.5px solid rgba(255,255,255,0.6);color:#fff;padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:600}
-.btn-ln:hover{background:rgba(255,255,255,0.15)}
-.btn-lr{background:#fff;border:none;color:var(--gd);padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700}
-.btn-lr:hover{background:#e8f5ee}
-.hero{background:linear-gradient(160deg,#f8faf9,#eef4f1);padding:5rem 2rem;text-align:center;border-bottom:3px solid #c8e6d8}
+.btn-ln{background:transparent;border:1.5px solid var(--gd);color:var(--gd);padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:600}
+.btn-ln:hover{background:var(--gp)}
+.btn-lr{background:var(--gd);border:none;color:#fff;padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700}
+.btn-lr:hover{background:var(--gm)}
+.hero{background:linear-gradient(160deg,#f5f4f0,#eaecf5);padding:5rem 2rem;text-align:center;border-bottom:3px solid #c8d4e8}
 .hero h2{font-size:1.9rem;color:var(--gd);font-weight:700;margin-bottom:1rem;line-height:1.5}
 .hero h2 span{color:var(--gl)}
 .hero p{font-size:0.95rem;color:var(--tm);max-width:580px;margin:0 auto 2rem;line-height:1.9}
@@ -81,14 +82,14 @@ body{background:#f0f7f3;direction:rtl;min-height:100vh}
 .features{padding:3rem 2rem;background:#fff}
 .features h3{text-align:center;font-size:1.3rem;color:var(--gd);margin-bottom:1.5rem;font-weight:700}
 .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:860px;margin:0 auto}
-.feat-card{background:var(--gb);border-radius:10px;padding:1.2rem;text-align:center;border:1px solid #c8e6d8}
+.feat-card{background:var(--gb);border-radius:10px;padding:1.2rem;text-align:center;border:1px solid #c8d4e8}
 .feat-icon{font-size:2rem;margin-bottom:0.6rem}
 .feat-title{font-size:14px;font-weight:700;color:var(--gd);margin-bottom:4px}
 .feat-desc{font-size:12px;color:var(--tm);line-height:1.6}
 .stats-bar{background:var(--gd);padding:1.5rem 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;text-align:center}
-.stat-n{font-size:1.8rem;font-weight:700;color:#a8e6c3}
+.stat-n{font-size:1.8rem;font-weight:700;color:#a8d8f0}
 .stat-l{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px}
-.land-footer{background:#0f4a28;padding:1rem;text-align:center;color:rgba(255,255,255,0.5);font-size:12px}
+.land-footer{background:#0f1e3a;padding:1rem;text-align:center;color:rgba(255,255,255,0.5);font-size:12px}
 
 /* Dashboard content */
 .dash-content{padding:1.2rem 1.5rem}
@@ -138,17 +139,17 @@ tr:hover td{background:var(--gb)}
 .wa-btn{background:#25d366;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit}
 
 /* Circular */
-.circ-tag{display:inline-flex;align-items:center;gap:5px;background:var(--gp);color:var(--gd);border:1px solid #c8e6d8;border-radius:20px;padding:4px 10px;font-size:12px;margin:3px;font-weight:500}
+.circ-tag{display:inline-flex;align-items:center;gap:5px;background:var(--gp);color:var(--gd);border:1px solid #c8d4e8;border-radius:20px;padding:4px 10px;font-size:12px;margin:3px;font-weight:500}
 
 /* Upload */
 .upload-page{min-height:100vh;background:var(--gb);display:flex;flex-direction:column}
 .upload-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1.5rem}
-.upload-card{background:#fff;border-radius:12px;padding:2rem;width:100%;max-width:480px;box-shadow:0 4px 20px rgba(26,110,60,0.1);border-top:4px solid var(--gd)}
+.upload-card{background:#fff;border-radius:12px;padding:2rem;width:100%;max-width:480px;box-shadow:0 4px 20px rgba(26,58,107,0.1);border-top:4px solid var(--gd)}
 .upload-card h2{color:var(--gd);margin-bottom:4px;font-size:1.1rem;font-weight:700}
-.t-info-box{background:var(--gp);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;border:1px solid #c8e6d8}
-.drive-box{background:var(--gb);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;border:1px solid #c8e6d8}
+.t-info-box{background:var(--gp);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;border:1px solid #c8d4e8}
+.drive-box{background:var(--gb);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;border:1px solid #c8d4e8}
 .inst-box{background:#fff8e1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#7d5a00;line-height:1.8;border:1px solid #ffe082}
-.success-upload{background:var(--gp);border-radius:10px;padding:1.5rem;text-align:center;display:none;border:1px solid #c8e6d8}
+.success-upload{background:var(--gp);border-radius:10px;padding:1.5rem;text-align:center;display:none;border:1px solid #c8d4e8}
 
 /* SVG Dots */
 .dots-w{width:52px;height:37px}
@@ -161,8 +162,8 @@ tr:hover td{background:var(--gb)}
 <div id="pgLanding">
   <div class="land-header">
     <div class="land-logo">
-      <svg class="dots-w" viewBox="0 0 130 90" fill="none"><circle cx="70" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="46" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="118" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="42" r="3.5" fill="#3a9e6e" opacity="0.8"/><circle cx="82" cy="42" r="3.5" fill="#3a9e6e" opacity="0.8"/><circle cx="94" cy="42" r="3.5" fill="#3a9e6e" opacity="0.8"/><circle cx="82" cy="52" r="2.5" fill="#3a9e6e" opacity="0.5"/></svg>
-      <div><h1>منصة ناظر للإدارة المدرسية</h1><p>وزارة التعليم — المملكة العربية السعودية</p></div>
+      <img src="logo.png" style="height:115px;width:auto;">
+      <div><h1>منصة رابط للإدارة المدرسية</h1></div>
     </div>
     <div class="land-nav">
       <button class="btn-ln" onclick="showModal('mdlLogin')">دخول المدير</button>
@@ -171,7 +172,7 @@ tr:hover td{background:var(--gb)}
   </div>
   <div class="hero">
     <h2>منصتك الذكية <span>لإدارة مدرستك</span><br>بكفاءة واحترافية</h2>
-    <p>منصة ناظر — منصة متكاملة تتيح لمديري المدارس متابعة خطط الدروس الأسبوعية وإدارة الأعمال الإدارية بكل سهولة ويسر</p>
+    <p>منصة رابط — منصة متكاملة تتيح لمديري المدارس متابعة خطط الدروس الأسبوعية وإدارة الأعمال الإدارية بكل سهولة ويسر</p>
     <div class="hero-btns">
       <button class="btn-hp" onclick="showModal('mdlRegister')">سجّل مدرستك الآن — مجاناً</button>
       <button class="btn-hs" onclick="showModal('mdlLogin')">دخول المدارس المسجلة</button>
@@ -193,7 +194,7 @@ tr:hover td{background:var(--gb)}
     <div><div class="stat-n">مجاني</div><div class="stat-l">للمرحلة الحالية</div></div>
   </div>
   <div class="land-footer">
-    منصة ناظر للإدارة المدرسية © 2026 — جميع الحقوق محفوظة
+    منصة رابط للإدارة المدرسية © 2026 — جميع الحقوق محفوظة
     <br>
     <button onclick="doAdminLogin()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:inherit;margin-top:6px">لوحة التحكم</button>
   </div>
@@ -254,7 +255,7 @@ tr:hover td{background:var(--gb)}
 <!-- MODAL FIRST LOGIN -->
 <div class="modal-bg hidden" id="mdlFirstLogin">
   <div class="modal">
-    <h2>🎉 مرحباً بك في منصة ناظر!</h2>
+    <h2>🎉 مرحباً بك في منصة رابط!</h2>
     <p class="modal-desc">لحماية حسابك، يرجى تغيير بيانات الدخول قبل المتابعة</p>
     <div class="form-g">
       <label>اسم المستخدم الجديد (كود المدرسة)</label>
@@ -295,8 +296,8 @@ tr:hover td{background:var(--gb)}
 <div id="pgDashboard" class="hidden">
   <div class="header">
     <div class="header-logo">
-      <img src="https://nathirtech.github.io/nathir/logo.png" style="height:50px;width:auto;filter:brightness(0) invert(1);" onerror="this.style.display='none'">
-      <div style="width:1px;height:36px;background:rgba(255,255,255,0.2);margin:0 10px"></div>
+      <img src="logo.png" style="height:115px;width:auto;">
+      <div style="width:1px;height:36px;background:rgba(26,58,107,0.2);margin:0 10px"></div>
       <div class="header-info"><h1 id="hSchoolName">—</h1><div class="school-badge" id="hSchoolCode">—</div></div>
     </div>
     <div class="header-actions">
@@ -466,7 +467,7 @@ tr:hover td{background:var(--gb)}
       <svg style="width:48px;height:34px" viewBox="0 0 130 90" fill="none"><circle cx="70" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="46" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="118" cy="30" r="4.5" fill="#3a9e6e"/></svg>
       <div>
         <div style="font-size:11px;color:#a8e6c3;margin-bottom:2px">لوحة تحكم المشرف العام</div>
-        <div style="font-size:15px;font-weight:700;color:#fff">منصة ناظر للإدارة المدرسية</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">منصة رابط للإدارة المدرسية</div>
       </div>
     </div>
     <button class="btn btn-o btn-sm" onclick="adminLogout()">خروج</button>
@@ -546,7 +547,7 @@ tr:hover td{background:var(--gb)}
 <div id="pgUpload" class="upload-page hidden">
   <div class="header" style="padding:0.85rem 1.5rem">
     <div class="header-logo">
-      <svg style="width:40px;height:29px" viewBox="0 0 130 90" fill="none"><circle cx="70" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="6" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="18" r="4.5" fill="#3a9e6e"/><circle cx="46" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="58" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="70" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="82" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="94" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="106" cy="30" r="4.5" fill="#3a9e6e"/><circle cx="118" cy="30" r="4.5" fill="#3a9e6e"/></svg>
+      <img src="logo.png" style="height:75px;width:auto;">
       <div class="header-info"><h1 id="upSchoolName">—</h1></div>
     </div>
   </div>
@@ -588,7 +589,7 @@ tr:hover td{background:var(--gb)}
   <div class="upload-wrap">
     <div class="upload-card">
       <div id="cvForm">
-        <div style="background:var(--gp);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid #c8e6d8">
+        <div style="background:var(--gp);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid #c8d4e8">
           <div style="font-size:11px;color:var(--gl);margin-bottom:2px">تعميم رسمي</div>
           <div style="font-weight:700;font-size:15px;color:var(--gd)" id="cvTitle">—</div>
         </div>
@@ -1023,12 +1024,12 @@ function renderReport(){
     var subj=(d.teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;
     return '<tr><td><b>'+r.teacherName+'</b></td><td>'+subj+'</td><td>'+r.date+'</td><td>'+r.week+'</td>'+
       '<td><span class="badge bg">✓ مرسل</span></td>'+
-      '<td><a href="'+driveUrl+'" target="_blank" style="background:var(--gp);color:var(--gd);padding:3px 8px;border-radius:4px;font-size:12px;text-decoration:none;border:1px solid #c8e6d8">فتح Drive</a></td></tr>';
+      '<td><a href="'+driveUrl+'" target="_blank" style="background:var(--gp);color:var(--gd);padding:3px 8px;border-radius:4px;font-size:12px;text-decoration:none;border:1px solid #c8d4e8">فتح Drive</a></td></tr>';
   }).join('');
   html+=notSent.map(function(t){
     return '<tr><td><b>'+t.name+'</b></td><td>'+(t.subject||'—')+'</td><td>—</td><td>'+wk+'</td>'+
       '<td><span class="badge br">✗ لم يرسل</span></td>'+
-      '<td>'+(t.phone?'<button onclick="sendReminder(\''+t.phone+'\',\''+t.name+'\',\''+wk+'\')" style="background:var(--gp);color:var(--gd);border:1px solid #c8e6d8;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:12px">تذكير</button>':'—')+'</td></tr>';
+      '<td>'+(t.phone?'<button onclick="sendReminder(\''+t.phone+'\',\''+t.name+'\',\''+wk+'\')" style="background:var(--gp);color:var(--gd);border:1px solid #c8d4e8;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:12px">تذكير</button>':'—')+'</td></tr>';
   }).join('');
   document.getElementById('reportBody').innerHTML=html||'<tr><td colspan="6" style="text-align:center;padding:2rem;color:#999">لا توجد بيانات</td></tr>';
 }
