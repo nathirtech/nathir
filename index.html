@@ -282,13 +282,47 @@ tr:hover td{background:var(--gb)}
   </div>
 </div>
 <div class="modal-bg hidden" id="mdlChangePass">
-  <div class="modal">
+  <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="hideModal('mdlChangePass')">✕</button>
-    <h2>تغيير كلمة المرور</h2>
-    <div class="form-g"><label>كلمة المرور الحالية</label><input type="password" id="cpCur" placeholder="••••••"></div>
-    <div class="form-g"><label>كلمة المرور الجديدة</label><input type="password" id="cpNew" placeholder="••••••"></div>
-    <div class="form-g"><label>تأكيد كلمة المرور</label><input type="password" id="cpCon" placeholder="••••••"><div class="err" id="cpErr"></div></div>
-    <button class="btn btn-g btn-full" onclick="doChangePass()">تغيير كلمة المرور</button>
+    <h2>⚙️ إعدادات المدرسة</h2>
+    <p class="modal-desc">إدارة بيانات المدرسة وبيانات الدخول</p>
+
+    <!-- بيانات المدرسة -->
+    <div style="background:var(--gp);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--bd)">
+      <div style="font-size:13px;font-weight:700;color:var(--gd);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bd)">🏫 بيانات المدرسة</div>
+      <div class="form-row">
+        <div class="form-g"><label>اسم المدرسة</label><input type="text" id="stSchoolName" readonly style="background:#f0f0f0;color:#888;cursor:not-allowed"></div>
+        <div class="form-g"><label>المنطقة التعليمية</label><input type="text" id="stRegion" readonly style="background:#f0f0f0;color:#888;cursor:not-allowed"></div>
+      </div>
+      <div class="form-g"><label>اسم المدير</label><input type="text" id="stDirector" placeholder="اسم مدير المدرسة"></div>
+      <div class="form-row">
+        <div class="form-g"><label>رقم الجوال</label><input type="text" id="stPhone" placeholder="05xxxxxxxx" style="direction:ltr;text-align:right"></div>
+        <div class="form-g"><label>البريد الإلكتروني</label><input type="email" id="stEmail" placeholder="example@school.sa" style="direction:ltr;text-align:right"></div>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="saveSettingsInfo()">💾 حفظ بيانات المدرسة</button>
+    </div>
+
+    <!-- بيانات الدخول -->
+    <div style="background:var(--gp);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+      <div style="font-size:13px;font-weight:700;color:var(--gd);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bd)">🔐 بيانات الدخول</div>
+      <div class="form-g">
+        <label>اسم المستخدم (رقم الهوية أو أي اسم مستخدم)</label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="stUsername" placeholder="مثال: 1234567890" style="flex:1;direction:ltr;text-align:right">
+          <button class="btn btn-g btn-sm" onclick="saveUsername()">حفظ</button>
+        </div>
+        <div style="font-size:11px;color:var(--tl);margin-top:4px">⚠️ احفظ اسم المستخدم الجديد قبل الخروج</div>
+      </div>
+      <div style="height:1px;background:var(--bd);margin:12px 0"></div>
+      <div style="font-size:12px;color:var(--tl);margin-bottom:10px;font-weight:600">تغيير كلمة المرور</div>
+      <div class="form-g"><label>كلمة المرور الحالية</label><input type="password" id="cpCur" placeholder="••••••"></div>
+      <div class="form-row">
+        <div class="form-g"><label>كلمة المرور الجديدة</label><input type="password" id="cpNew" placeholder="••••••"></div>
+        <div class="form-g"><label>تأكيد كلمة المرور</label><input type="password" id="cpCon" placeholder="••••••"></div>
+      </div>
+      <div class="err" id="cpErr"></div>
+      <button class="btn btn-g btn-sm" onclick="doChangePass()">🔑 تغيير كلمة المرور</button>
+    </div>
   </div>
 </div>
 
@@ -301,7 +335,7 @@ tr:hover td{background:var(--gb)}
       <div class="header-info"><h1 id="hSchoolName">—</h1><div class="school-badge" id="hSchoolCode">—</div></div>
     </div>
     <div class="header-actions">
-      <button class="btn btn-o btn-sm" onclick="showModal('mdlChangePass')">⚙️ الإعدادات</button>
+      <button class="btn btn-o btn-sm" onclick="openSettingsModal()">⚙️ الإعدادات</button>
       <button class="btn btn-o btn-sm" onclick="doLogout()">خروج</button>
     </div>
   </div>
@@ -309,10 +343,13 @@ tr:hover td{background:var(--gb)}
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="goTab('report',this)">📊 تقرير الخطة الأسبوعي</button>
       <button class="nav-tab" onclick="goTab('circulars',this)">📢 التعاميم</button>
-      <button class="nav-tab" onclick="goTab('teachers',this)">👨‍🏫 المعلمون</button>
+      <button class="nav-tab" onclick="goTab('surveys',this)">📋 الاستبانات</button>
       <button class="nav-tab" onclick="goTab('send',this)">📱 إرسال الروابط</button>
     </div>
-    <button class="nav-tab" onclick="goTab('parents',this)" style="color:var(--gd)">👨‍👩‍👧 أولياء الأمور</button>
+    <div style="display:flex;gap:4px">
+      <button class="nav-tab" onclick="goTab('teachers',this)" style="color:var(--gd)">👨‍🏫 المعلمون</button>
+      <button class="nav-tab" onclick="goTab('parents',this)" style="color:var(--gd)">👨‍👩‍👧 أولياء الأمور</button>
+    </div>
   </div>
   <div class="dash-content">
 
@@ -341,12 +378,12 @@ tr:hover td{background:var(--gb)}
           <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:end;margin-bottom:8px">
             <div>
               <div style="font-size:11px;color:var(--tl);margin-bottom:3px">الاسم</div>
-              <select id="circAddName" style="width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;outline:none"><option value="">اختر المنتسب</option></select>
+              <select id="circAddName" style="width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;outline:none"><option value="">اختر المعلم</option></select>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--tl);margin-bottom:3px">المهمة</div>
+              <div style="font-size:11px;color:var(--tl);margin-bottom:3px">الوظيفة</div>
               <select id="circAddRole" style="width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;outline:none">
-                <option value="">اختر المهمة</option>
+                <option value="">الوظيفة</option>
                 <option>معلم</option><option>وكيل</option><option>وكيل الشؤون التعليمية</option>
                 <option>وكيل شؤون الطلاب</option><option>الموجه الطلابي</option>
                 <option>رائد النشاط</option><option>مسؤول الأمن والسلامة</option>
@@ -411,6 +448,40 @@ tr:hover td{background:var(--gb)}
           <button class="btn btn-g btn-sm" onclick="sendSelected()">📱 إرسال للمحددين</button>
         </div>
       </div>
+    </div>
+
+    <!-- SURVEYS -->
+    <div id="tabSurveys" class="hidden">
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <h3 style="font-size:14px;font-weight:600;color:var(--gd);margin-bottom:12px">📋 إرسال استبانة جديدة</h3>
+        <div class="form-g"><label>عنوان الاستبانة</label><input type="text" id="survTitle" placeholder="مثال: استبانة تقييم الأداء الوظيفي"></div>
+        <div class="form-g"><label>رابط الاستبانة</label><input type="url" id="survUrl" placeholder="https://forms.google.com/..."></div>
+        <div class="form-g">
+          <label>الموجه إلى</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:end;margin-bottom:8px">
+            <div>
+              <div style="font-size:11px;color:var(--tl);margin-bottom:3px">الاسم</div>
+              <select id="survAddName" style="width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;outline:none"><option value="">اختر المعلم</option></select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--tl);margin-bottom:3px">الوظيفة</div>
+              <select id="survAddRole" style="width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;outline:none">
+                <option value="">الوظيفة</option>
+                <option>معلم</option><option>وكيل</option><option>وكيل الشؤون التعليمية</option>
+                <option>وكيل شؤون الطلاب</option><option>الموجه الطلابي</option>
+                <option>رائد النشاط</option><option>مسؤول الأمن والسلامة</option>
+              </select>
+            </div>
+            <button class="btn btn-g btn-sm" style="height:34px" onclick="addSurvTarget()">إضافة</button>
+            <button class="btn btn-o btn-sm" style="height:34px" onclick="addAllSurvTargets()">الكل</button>
+          </div>
+          <div id="survTargetsList" style="border:1.5px solid var(--bd);border-radius:8px;padding:6px;background:#fafafa;min-height:38px">
+            <span id="survTargetsEmpty" style="color:#bbb;font-size:12px;padding:6px;display:block;text-align:center">لم يتم إضافة أي مستلم</span>
+          </div>
+        </div>
+        <button class="btn btn-g" onclick="addSurvey()">📋 إرسال الاستبانة</button>
+      </div>
+      <div id="survList"></div>
     </div>
 
     <!-- PARENTS -->
@@ -579,6 +650,41 @@ tr:hover td{background:var(--gb)}
 </div>
 
 <!-- CIRCULAR VIEW -->
+<div id="pgSurvey" class="upload-page hidden">
+  <div class="header" style="padding:0.85rem 1.5rem">
+    <div class="header-logo">
+      <img src="logo.png" style="height:55px;width:auto;">
+      <div class="header-info"><h1 id="svSchoolName">—</h1></div>
+    </div>
+  </div>
+  <div class="upload-wrap">
+    <div class="upload-card">
+      <div id="svForm">
+        <div style="background:var(--gp);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid #c8d4e8">
+          <div style="font-size:11px;color:var(--gl);margin-bottom:2px">استبانة رسمية</div>
+          <div style="font-weight:700;font-size:15px;color:var(--gd)" id="svTitle">—</div>
+        </div>
+        <div class="t-info-box">
+          <span style="font-size:1.2rem">👤</span>
+          <div><div style="font-weight:600;font-size:14px" id="svName">—</div><div style="font-size:11px;color:var(--tl)">يرجى تعبئة الاستبانة أدناه</div></div>
+        </div>
+        <div class="drive-box">
+          <div style="font-size:2rem;margin-bottom:8px">📋</div>
+          <p style="font-size:14px;color:#333;font-weight:600;margin-bottom:6px">اضغط لفتح الاستبانة وتعبئتها</p>
+          <button onclick="openSurveyLink()" style="background:var(--gd);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">📋 فتح الاستبانة</button>
+        </div>
+        <div class="inst-box"><b>تعليمات:</b><br>1️⃣ اضغط "فتح الاستبانة" وقم بتعبئتها<br>2️⃣ بعد الانتهاء اضغط "تم تعبئة الاستبانة ✓"</div>
+        <button onclick="confirmSurveyFilled()" style="width:100%;padding:12px;background:var(--gd);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">تم تعبئة الاستبانة ✓</button>
+      </div>
+      <div class="success-upload" id="svSuccess">
+        <div style="font-size:2.5rem">✅</div>
+        <h3 style="color:var(--gd);margin-top:8px">تم تسجيل تعبئتك!</h3>
+        <p style="color:#555;font-size:13px;margin-top:4px">شكراً لتعاونك</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="pgCircular" class="upload-page hidden">
   <div class="header" style="padding:0.85rem 1.5rem">
     <div class="header-logo">
@@ -648,6 +754,7 @@ function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars
 var schools=getSchools();
 var cur=null; // current school
 var circTargets=[]; // selected circular targets
+var survTargets=[]; // selected survey targets
 
 // ====== INIT DORI ======
 (function(){
@@ -694,7 +801,7 @@ var circTargets=[]; // selected circular targets
 
 // ====== PAGES ======
 function showPage(id){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgAdmin'].forEach(function(p){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin'].forEach(function(p){
     document.getElementById(p).classList.add('hidden');
   });
   document.getElementById(id).classList.remove('hidden');
@@ -755,7 +862,7 @@ function doLogin(){
   var code=document.getElementById('lCode').value.trim().toUpperCase();
   var pass=document.getElementById('lPass').value.trim();
   var err=document.getElementById('loginErr');
-  var school=schools.find(function(s){return s.code===code&&s.pass===pass;});
+  var school=schools.find(function(s){return (s.user||s.code)===code&&s.pass===pass;});
   if(school){
     err.style.display='none';
     cur=school;
@@ -784,7 +891,7 @@ function doAdminLogin(){
 }
 
 function showAdminDashboard(){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular'].forEach(function(pg){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey'].forEach(function(pg){
     document.getElementById(pg).classList.add('hidden');
   });
   document.getElementById('pgAdmin').classList.remove('hidden');
@@ -970,7 +1077,7 @@ function showDashboard(){
 }
 
 function goTab(name,btn){
-  ['Report','Circulars','Teachers','Send','Parents','Settings'].forEach(function(t){
+  ['Report','Circulars','Teachers','Send','Surveys','Parents','Settings'].forEach(function(t){
     document.getElementById('tab'+t).classList.add('hidden');
   });
   document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
@@ -980,6 +1087,7 @@ function goTab(name,btn){
   if(name==='circulars'){circTargets=[];buildCircNameSel();renderCirculars();}
   if(name==='teachers') renderTeachers();
   if(name==='send'){buildWeekSel('sendWeekSel');renderWaList();}
+  if(name==='surveys'){survTargets=[];buildSurvNameSel();renderSurveys();}
   if(name==='settings') renderSettings();
 }
 
@@ -1218,7 +1326,7 @@ function buildCircNameSel(){
   var d=getSD(cur.code)||{teachers:[]};
   var sel=document.getElementById('circAddName');
   if(!sel) return;
-  sel.innerHTML='<option value="">اختر المنتسب</option>'+
+  sel.innerHTML='<option value="">اختر المعلم</option>'+
     d.teachers.map(function(t){return '<option value="'+t.id+'">'+t.name+(t.role?' — '+t.role:'')+'</option>';}).join('');
 }
 
@@ -1359,6 +1467,161 @@ function exportCircReport(circId){
   var w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
+// ====== SURVEYS ======
+function buildSurvNameSel(){
+  var d=getSD(cur.code)||{teachers:[]};
+  var sel=document.getElementById('survAddName');
+  if(!sel) return;
+  sel.innerHTML='<option value="">اختر المعلم</option>'+
+    d.teachers.map(function(t){return '<option value="'+t.id+'">'+t.name+(t.role?' — '+t.role:'')+'</option>';}).join('');
+}
+
+function renderSurvTargetsList(){
+  var el=document.getElementById('survTargetsList');
+  var empty=document.getElementById('survTargetsEmpty');
+  if(!el) return;
+  el.querySelectorAll('.circ-tag').forEach(function(e){e.remove();});
+  if(survTargets.length===0){if(empty)empty.style.display='block';return;}
+  if(empty) empty.style.display='none';
+  survTargets.forEach(function(t){
+    var tag=document.createElement('span');
+    tag.className='circ-tag';
+    tag.innerHTML=t.name+(t.role?' <span style="opacity:0.7;font-size:11px">('+t.role+')</span>':'')+
+      ' <span onclick="removeSurvTarget('+t.id+')" style="cursor:pointer;color:var(--red);font-size:14px;font-weight:700">×</span>';
+    el.appendChild(tag);
+  });
+}
+
+function addSurvTarget(){
+  var d=getSD(cur.code)||{teachers:[]};
+  var nv=document.getElementById('survAddName').value;
+  var rv=document.getElementById('survAddRole').value;
+  var toAdd=[];
+  if(nv){var t=d.teachers.find(function(x){return x.id==nv;});if(t)toAdd=[t];}
+  else if(rv){toAdd=d.teachers.filter(function(t){return t.role===rv;});}
+  else{alert('اختر منتسباً أو مهمة');return;}
+  toAdd.forEach(function(t){if(!survTargets.find(function(s){return s.id===t.id;}))survTargets.push(t);});
+  document.getElementById('survAddName').value='';
+  document.getElementById('survAddRole').value='';
+  renderSurvTargetsList();
+}
+
+function addAllSurvTargets(){
+  var d=getSD(cur.code)||{teachers:[]};
+  survTargets=d.teachers.slice();
+  renderSurvTargetsList();
+}
+
+function removeSurvTarget(id){
+  survTargets=survTargets.filter(function(t){return t.id!==id;});
+  renderSurvTargetsList();
+}
+
+function addSurvey(){
+  var title=document.getElementById('survTitle').value.trim();
+  var url=document.getElementById('survUrl').value.trim();
+  if(!title){alert('يرجى إدخال عنوان الاستبانة');return;}
+  if(!url){alert('يرجى إدخال رابط الاستبانة');return;}
+  if(survTargets.length===0){alert('يرجى إضافة مستلم واحد على الأقل');return;}
+  var ids=survTargets.map(function(t){return t.id;});
+  var d=initSD(cur.code);
+  if(!d.surveys) d.surveys=[];
+  d.surveys.push({id:Date.now(),title:title,url:url,date:new Date().toISOString().split('T')[0],targetIds:ids});
+  setSD(cur.code,d);
+  document.getElementById('survTitle').value='';
+  document.getElementById('survUrl').value='';
+  survTargets=[];
+  renderSurvTargetsList();
+  renderSurveys();
+  alert('تم إضافة الاستبانة ✅');
+}
+
+function renderSurveys(){
+  var d=getSD(cur.code)||{surveys:[],teachers:[]};
+  var survs=d.surveys||[];
+  if(survs.length===0){
+    document.getElementById('survList').innerHTML='<div class="card" style="padding:2rem;text-align:center"><p style="color:#999;font-size:14px">لا توجد استبانات — أضف استبانة جديدة</p></div>';
+    return;
+  }
+  document.getElementById('survList').innerHTML=survs.slice().reverse().map(function(s){
+    var total=s.targetIds?s.targetIds.length:0;
+    var filled=s.completions?s.completions.length:0;
+    var pct=total>0?Math.round(filled/total*100):0;
+    return '<div class="card" style="margin-bottom:12px">'+
+      '<div class="card-header">'+
+        '<div><div style="font-weight:600;color:var(--gd);font-size:14px">📋 '+s.title+'</div>'+
+        '<div style="font-size:12px;color:#888;margin-top:2px">'+s.date+'</div></div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+          '<button class="btn btn-g btn-sm" onclick="sendSurveyLinks('+s.id+')">📱 إرسال</button>'+
+          '<button class="btn btn-o btn-sm" onclick="exportSurveyReport('+s.id+')">⬇ تقرير</button>'+
+          '<button class="btn btn-r btn-sm" onclick="delSurvey('+s.id+')">حذف</button>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding:12px 14px">'+
+        '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">'+
+          '<span class="badge bg">✓ عبّأ: '+filled+'</span>'+
+          '<span class="badge br">✗ لم يعبئ: '+(total-filled)+'</span>'+
+          '<span style="background:#fef9e7;color:#9a7d0a;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600">'+pct+'%</span>'+
+        '</div>'+
+        '<div style="background:#f0f0f0;border-radius:20px;height:7px;overflow:hidden">'+
+          '<div style="background:var(--gd);height:100%;width:'+pct+'%;border-radius:20px"></div>'+
+        '</div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function sendSurveyLinks(survId){
+  var d=getSD(cur.code);
+  var s=d.surveys.find(function(x){return x.id===survId;});
+  if(!s) return;
+  var targets=d.teachers.filter(function(t){return t.phone&&s.targetIds&&s.targetIds.includes(t.id);});
+  if(!targets.length){alert('لا يوجد مستلمون بأرقام واتساب');return;}
+  targets.forEach(function(t){
+    var link=location.href.split('#')[0]+'#survey='+cur.code+'|'+survId+'|'+t.id;
+    var msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n'+link+'\nإدارة '+cur.name);
+    window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+  });
+}
+
+function delSurvey(id){
+  if(!confirm('حذف هذه الاستبانة؟')) return;
+  var d=getSD(cur.code);
+  d.surveys=d.surveys.filter(function(s){return s.id!==id;});
+  setSD(cur.code,d);renderSurveys();
+}
+
+function exportSurveyReport(survId){
+  var d=getSD(cur.code);
+  var s=d.surveys.find(function(x){return x.id===survId;});
+  if(!s) return;
+  var completed=s.completions||[];
+  var targets=d.teachers.filter(function(t){return s.targetIds&&s.targetIds.includes(t.id);});
+  var notFilled=targets.filter(function(t){return !completed.find(function(c){return c.tid===t.id;});});
+  var today=new Date().toLocaleDateString('ar-SA');
+  var html='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><style>'+
+    'body{font-family:Arial;direction:rtl;padding:20px}'+
+    'h2{text-align:center;color:var(--gd,#1a3a6b);border-bottom:3px solid #0099b8;padding-bottom:8px}'+
+    '.meta{text-align:center;color:#555;font-size:13px;margin-bottom:20px}'+
+    'table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}'+
+    'th{background:#1a3a6b;color:#fff;padding:8px;text-align:right}'+
+    'td{padding:7px 8px;border:1px solid #ddd}'+
+    '.ok{color:#1a3a6b;font-weight:bold}.no{color:#c0392b;font-weight:bold}'+
+    '.sec{background:#f0f0f0;padding:6px 10px;font-weight:bold;margin:10px 0 4px;border-right:4px solid #0099b8}'+
+    '</style></head><body>'+
+    '<h2>'+cur.name+'</h2>'+
+    '<div class="meta">تقرير الاستبانة — '+s.title+' — '+today+'</div>'+
+    '<div class="sec">من عبّأ الاستبانة ('+completed.length+')</div>'+
+    '<table><thead><tr><th>#</th><th>الاسم</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>'+
+    completed.map(function(c,i){return '<tr><td>'+(i+1)+'</td><td>'+c.name+'</td><td>'+c.date+'</td><td class="ok">✓ عبّأ</td></tr>';}).join('')+
+    '</tbody></table>'+
+    '<div class="sec">لم يعبئ الاستبانة ('+notFilled.length+')</div>'+
+    '<table><thead><tr><th>#</th><th>الاسم</th><th>التخصص</th><th>الحالة</th></tr></thead><tbody>'+
+    notFilled.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+t.name+'</td><td>'+(t.subject||'—')+'</td><td class="no">✗ لم يعبئ</td></tr>';}).join('')+
+    '</tbody></table>'+
+    '<script>window.onload=function(){window.print()}<\/script></body></html>';
+  var w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
 // ====== SETTINGS ======
 function renderSettings(){
   if(!cur) return;
@@ -1393,6 +1656,42 @@ function clearSubs(){
   var d=getSD(cur.code);d.submissions=[];setSD(cur.code,d);renderReport();alert('تم المسح ✅');
 }
 
+function openSettingsModal(){
+  document.getElementById('stSchoolName').value=cur.name||'';
+  document.getElementById('stRegion').value=cur.region||'';
+  document.getElementById('stDirector').value=cur.director||'';
+  document.getElementById('stPhone').value=cur.phone||'';
+  document.getElementById('stEmail').value=cur.email||'';
+  document.getElementById('stUsername').value=cur.user||cur.code||'';
+  document.getElementById('cpCur').value='';
+  document.getElementById('cpNew').value='';
+  document.getElementById('cpCon').value='';
+  document.getElementById('cpErr').style.display='none';
+  showModal('mdlChangePass');
+}
+
+function saveUsername(){
+  var newUser=document.getElementById('stUsername').value.trim();
+  if(!newUser){alert('يرجى إدخال اسم المستخدم');return;}
+  var exists=schools.find(function(s){return (s.user||s.code)===newUser&&s.code!==cur.code;});
+  if(exists){alert('اسم المستخدم مستخدم من قبل، اختر اسماً آخر');return;}
+  cur.user=newUser;
+  var idx=schools.findIndex(function(s){return s.code===cur.code;});
+  if(idx>-1){schools[idx]=cur;setSchools(schools);}
+  alert('تم تغيير اسم المستخدم ✅\nاسم المستخدم الجديد: '+newUser);
+}
+
+function saveSettingsInfo(){
+  var dir=document.getElementById('stDirector').value.trim();
+  var ph=document.getElementById('stPhone').value.trim();
+  var em=document.getElementById('stEmail').value.trim();
+  if(!dir){alert('يرجى إدخال اسم المدير');return;}
+  cur.director=dir; cur.phone=ph; cur.email=em;
+  var idx=schools.findIndex(function(s){return s.code===cur.code;});
+  if(idx>-1){schools[idx]=cur;setSchools(schools);}
+  alert('تم حفظ بيانات المدرسة ✅');
+}
+
 function doChangePass(){
   var cc=document.getElementById('cpCur').value.trim();
   var np=document.getElementById('cpNew').value.trim();
@@ -1405,7 +1704,6 @@ function doChangePass(){
   cur.pass=np;
   var idx=schools.findIndex(function(s){return s.code===cur.code;});
   if(idx>-1){schools[idx]=cur;setSchools(schools);}
-  hideModal('mdlChangePass');
   document.getElementById('cpCur').value='';
   document.getElementById('cpNew').value='';
   document.getElementById('cpCon').value='';
@@ -1494,6 +1792,48 @@ function confirmView(){
   document.getElementById('cvSuccess').style.display='block';
 }
 
+// ====== SURVEY PAGE ======
+function showSurveyPage(sCode,sId,tId){
+  var school=schools.find(function(s){return s.code===sCode;});
+  var d=school?getSD(sCode):null;
+  var surv=d&&d.surveys?d.surveys.find(function(s){return s.id===sId;}):null;
+  var teacher=d?d.teachers.find(function(t){return t.id===tId;}):null;
+  showPage('pgSurvey');
+  document.getElementById('svSchoolName').textContent=school?school.name:'المدرسة';
+  document.getElementById('svTitle').textContent=surv?surv.title:'—';
+  document.getElementById('svName').textContent=teacher?teacher.name:'المستلم';
+}
+
+function openSurveyLink(){
+  var hash=location.hash;
+  var parts=hash.split('#survey=')[1].split('|');
+  var sCode=parts[0];
+  var sId=parseInt(parts[1]);
+  var d=getSD(sCode)||{surveys:[]};
+  var s=d.surveys?d.surveys.find(function(x){return x.id===sId;}):null;
+  if(s&&s.url) window.open(s.url,'_blank');
+  else alert('لا يوجد رابط');
+}
+
+function confirmSurveyFilled(){
+  var hash=location.hash;
+  var parts=hash.split('#survey=')[1].split('|');
+  var sCode=parts[0];
+  var sId=parseInt(parts[1]);
+  var tId=parseInt(parts[2]);
+  var d=getSD(sCode);
+  var s=d.surveys?d.surveys.find(function(x){return x.id===sId;}):null;
+  var t=d.teachers.find(function(x){return x.id===tId;});
+  if(!s) return;
+  if(!s.completions) s.completions=[];
+  if(!s.completions.find(function(c){return c.tid===tId;})){
+    s.completions.push({tid:tId,name:t?t.name:'مستلم',date:new Date().toISOString().split('T')[0]});
+    setSD(sCode,d);
+  }
+  document.getElementById('svForm').style.display='none';
+  document.getElementById('svSuccess').style.display='block';
+}
+
 // ====== ROUTING ======
 function init(){
   var hash=location.hash;
@@ -1507,6 +1847,9 @@ function init(){
   } else if(hash.startsWith('#circ=')){
     var cp=hash.split('#circ=')[1].split('|');
     showCircularPage(cp[0],parseInt(cp[1]),parseInt(cp[2]));
+  } else if(hash.startsWith('#survey=')){
+    var sp=hash.split('#survey=')[1].split('|');
+    showSurveyPage(sp[0],parseInt(sp[1]),parseInt(sp[2]));
   } else {
     showPage('pgLanding');
     updateLandingStats();
