@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',sans-serif}
 body{background:#f5f4f0;direction:rtl;min-height:100vh}
@@ -154,9 +156,23 @@ tr:hover td{background:var(--gb)}
 /* SVG Dots */
 .dots-w{width:52px;height:37px}
 .dots-g{width:52px;height:37px}
+
+/* Loading overlay */
+#loadingOverlay{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#loadingOverlay img{width:120px;height:auto}
+#loadingOverlay p{font-size:14px;color:var(--tm)}
+.spinner{width:40px;height:40px;border:4px solid var(--gp);border-top-color:var(--gd);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <img src="logo.png" alt="رابط">
+  <div class="spinner"></div>
+  <p>جاري تحميل البيانات...</p>
+</div>
 
 <!-- LANDING -->
 <div id="pgLanding">
@@ -746,11 +762,45 @@ const WEEKS=[
 ];
 
 // ====== STORAGE ======
+// ====== FIREBASE SETUP ======
+var fbDB=null;
+try{
+  firebase.initializeApp({
+    apiKey:"AIzaSyC7hxGVzicBkNqG2qjqOvC6mcfd2YiArg8",
+    authDomain:"rabit-platform.firebaseapp.com",
+    databaseURL:"https://rabit-platform-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:"rabit-platform",
+    storageBucket:"rabit-platform.firebasestorage.app",
+    messagingSenderId:"237651221352",
+    appId:"1:237651221352:web:f4e2c58ff34088324a54dd"
+  });
+  fbDB=firebase.database();
+}catch(e){console.warn('Firebase init error',e);}
+
+function fbWrite(path,data){if(fbDB)return fbDB.ref(path).set(data).catch(function(e){console.warn('FB write error',e);});return Promise.resolve();}
+function fbRead(path){if(fbDB)return fbDB.ref(path).get().then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});return Promise.resolve(null);}
+
 function getSchools(){try{return JSON.parse(localStorage.getItem('pt_schools')||'[]');}catch(e){return[];}}
-function setSchools(d){localStorage.setItem('pt_schools',JSON.stringify(d));}
+function setSchools(d){localStorage.setItem('pt_schools',JSON.stringify(d));fbWrite('pt_schools',d);}
 function getSD(c){try{return JSON.parse(localStorage.getItem('pt_'+c)||'null');}catch(e){return null;}}
-function setSD(c,d){localStorage.setItem('pt_'+c,JSON.stringify(d));}
-function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars:[],driveUrl:''};setSD(c,d);}return d;}
+function setSD(c,d){try{localStorage.setItem('pt_'+c,JSON.stringify(d));}catch(e){}fbWrite('pt_'+c,d);}
+function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars:[],surveys:[],driveUrl:''};setSD(c,d);}return d;}
+
+async function loadFromFirebase(){
+  try{
+    var fbSchools=await fbRead('pt_schools');
+    if(fbSchools&&Array.isArray(fbSchools)){
+      localStorage.setItem('pt_schools',JSON.stringify(fbSchools));
+      schools=fbSchools;
+    }
+    // Load data for all known schools
+    for(var i=0;i<schools.length;i++){
+      var code=schools[i].code;
+      var fbSD=await fbRead('pt_'+code);
+      if(fbSD){try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}}
+    }
+  }catch(e){console.warn('Firebase load failed, using local data',e);}
+}
 
 var schools=getSchools();
 var cur=null; // current school
@@ -1084,7 +1134,12 @@ function goTab(name,btn){
   document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
   document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  if(name==='report'){buildWeekSel('weekSel');renderReport();}
+  if(name==='report'){
+    fbRead('pt_'+cur.code).then(function(fbSD){
+      if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+      buildWeekSel('weekSel');renderReport();
+    }).catch(function(){buildWeekSel('weekSel');renderReport();});
+  }
   if(name==='circulars'){circTargets=[];buildCircNameSel();renderCirculars();}
   if(name==='teachers') renderTeachers();
   if(name==='send'){buildWeekSel('sendWeekSel');renderWaList();}
@@ -1741,10 +1796,10 @@ function confirmUpload(){
   if(file.size>10*1024*1024){alert('حجم الملف يتجاوز 10MB، يرجى اختيار ملف أصغر');return;}
   var hash=location.hash;
   var parts=hash.split('#upload=')[1];
-  var dashIdx=parts.indexOf('-');
-  var sCode=parts.substring(0,dashIdx);
-  var rest=parts.substring(dashIdx+1).split('&')[0];
-  var tId=parseInt(rest);
+  var noWeek=parts.split('&')[0];
+  var dashIdx=noWeek.lastIndexOf('-');
+  var sCode=noWeek.substring(0,dashIdx);
+  var tId=parseInt(noWeek.substring(dashIdx+1));
   var weekParam=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
   var wk=getWKey(weekParam);
   var reader=new FileReader();
@@ -1867,7 +1922,7 @@ function init(){
   var hash=location.hash;
   if(hash.startsWith('#upload=')){
     var p=hash.split('#upload=')[1].split('&')[0];
-    var di=p.indexOf('-');
+    var di=p.lastIndexOf('-');
     var sc=p.substring(0,di);
     var ti=parseInt(p.substring(di+1));
     var wp=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
@@ -1886,7 +1941,13 @@ function init(){
 
 window.addEventListener('hashchange',init);
 document.getElementById('sendWeekSel').addEventListener('change',renderWaList);
-init();
+
+async function startup(){
+  try{await loadFromFirebase();}catch(e){}
+  document.getElementById('loadingOverlay').style.display='none';
+  init();
+}
+startup();
 </script>
 </body>
 </html>
