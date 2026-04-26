@@ -297,6 +297,19 @@ tr:hover td{background:var(--gb)}
     <p style="font-size:11px;color:var(--tl);text-align:center;margin-top:10px">⚠️ احتفظ ببيانات الدخول الجديدة في مكان آمن</p>
   </div>
 </div>
+<div class="modal-bg hidden" id="mdlSendWa">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="hideModal('mdlSendWa')">✕</button>
+    <h2 id="mdlSendWaTitle">📱 إرسال واتساب</h2>
+    <p class="modal-desc">اضغط على زر الإرسال بجانب كل معلم لفتح واتساب</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:var(--tl)">
+      <span>إجمالي: <b id="waTotalCount">0</b></span>
+      <span style="color:var(--gd)">تم الإرسال: <b id="waSentCount">0</b></span>
+    </div>
+    <div id="mdlWaList" style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+
 <div class="modal-bg hidden" id="mdlChangePass">
   <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="hideModal('mdlChangePass')">✕</button>
@@ -1421,25 +1434,69 @@ function updateSelCount(){
 function selAll(){document.querySelectorAll('.wa-cb:not(:disabled)').forEach(function(cb){cb.checked=true;});updateSelCount();}
 function deselAll(){document.querySelectorAll('.wa-cb').forEach(function(cb){cb.checked=false;});updateSelCount();}
 
+var _waQueue=[];
+
+function openWaModal(title,items){
+  // items: [{name, phone, url}]
+  _waQueue=items.slice();
+  document.getElementById('mdlSendWaTitle').textContent='📱 '+title;
+  document.getElementById('waTotalCount').textContent=items.length;
+  document.getElementById('waSentCount').textContent=0;
+  document.getElementById('mdlWaList').innerHTML=items.map(function(item,i){
+    return '<div id="waRow'+i+'" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--gb);border-radius:8px;border:1px solid var(--bd)">'+
+      '<div><div style="font-weight:600;font-size:13px">'+item.name+'</div>'+
+      (item.subject?'<div style="font-size:11px;color:var(--tl)">'+item.subject+'</div>':'')+'</div>'+
+      '<button onclick="sendWaItem('+i+')" id="waBtnRow'+i+'" style="background:#25d366;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap">📱 إرسال</button>'+
+    '</div>';
+  }).join('');
+  showModal('mdlSendWa');
+}
+
+function sendWaItem(i){
+  var item=_waQueue[i];
+  if(!item||!item.phone) return;
+  var msg=encodeURIComponent(item.msg);
+  window.open('https://wa.me/'+item.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+  var btn=document.getElementById('waBtnRow'+i);
+  if(btn){btn.textContent='✓ تم';btn.style.background='var(--gd)';btn.disabled=true;}
+  var cnt=document.getElementById('waSentCount');
+  if(cnt) cnt.textContent=parseInt(cnt.textContent)+1;
+}
+
 function sendWa(id){
   var d=getSD(cur.code);
   var t=d.teachers.find(function(x){return x.id===id;});
   var w=document.getElementById('sendWeekSel').value;
   var wk=getWKey(w);
   var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+id+'&week='+encodeURIComponent(w);
-  var msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name);
-  window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+  openWaModal('إرسال رابط الخطة',[{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name}]);
 }
 
 function sendAll(){
   var d=getSD(cur.code);
-  d.teachers.filter(function(t){return t.phone;}).forEach(function(t){sendWa(t.id);});
+  var w=document.getElementById('sendWeekSel').value;
+  var wk=getWKey(w);
+  var items=d.teachers.filter(function(t){return t.phone;}).map(function(t){
+    var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+t.id+'&week='+encodeURIComponent(w);
+    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name};
+  });
+  openWaModal('إرسال روابط الخطة للجميع',items);
 }
 
 function sendSelected(){
   var checked=document.querySelectorAll('.wa-cb:checked');
   if(!checked.length){alert('حدد منتسباً واحداً على الأقل');return;}
-  checked.forEach(function(cb){sendWa(parseInt(cb.value));});
+  var d=getSD(cur.code);
+  var w=document.getElementById('sendWeekSel').value;
+  var wk=getWKey(w);
+  var items=[];
+  checked.forEach(function(cb){
+    var t=d.teachers.find(function(x){return x.id===parseInt(cb.value);});
+    if(!t||!t.phone) return;
+    var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+t.id+'&week='+encodeURIComponent(w);
+    items.push({name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name});
+  });
+  openWaModal('إرسال روابط الخطة للمحددين',items);
 }
 
 // ====== CIRCULARS ======
@@ -1557,11 +1614,11 @@ function sendCircLinks(circId){
   if(!c) return;
   var targets=d.teachers.filter(function(t){return t.phone&&c.targetIds&&c.targetIds.includes(t.id);});
   if(!targets.length){alert('لا يوجد مستلمون بأرقام واتساب');return;}
-  targets.forEach(function(t){
+  var items=targets.map(function(t){
     var link=location.href.split('#')[0]+'#circ='+cur.code+'|'+circId+'|'+t.id;
-    var msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى الاطلاع على التعميم:\n'+c.title+'\n'+link+'\nإدارة '+cur.name);
-    window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى الاطلاع على التعميم:\n'+c.title+'\n'+link+'\nإدارة '+cur.name};
   });
+  openWaModal('إرسال التعميم: '+c.title,items);
 }
 
 function delCirc(id){
@@ -1697,11 +1754,11 @@ function sendSurveyLinks(survId){
   if(!s) return;
   var targets=d.teachers.filter(function(t){return t.phone&&s.targetIds&&s.targetIds.includes(t.id);});
   if(!targets.length){alert('لا يوجد مستلمون بأرقام واتساب');return;}
-  targets.forEach(function(t){
+  var items=targets.map(function(t){
     var link=location.href.split('#')[0]+'#survey='+cur.code+'|'+survId+'|'+t.id;
-    var msg=encodeURIComponent('السلام عليكم '+t.name+' ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n'+link+'\nإدارة '+cur.name);
-    window.open('https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+msg,'_blank');
+    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n'+link+'\nإدارة '+cur.name};
   });
+  openWaModal('إرسال الاستبانة: '+s.title,items);
 }
 
 function delSurvey(id){
