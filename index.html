@@ -793,9 +793,10 @@ async function loadFromFirebase(){
       var merged=toArr(fbSchools);
       localStorage.setItem('pt_schools',JSON.stringify(merged));
       schools=merged;
-    } else if(localSchools.length>0){
-      await fbWrite('pt_schools',localSchools);
-      schools=localSchools;
+    } else {
+      // Firebase فارغة — امسح localStorage أيضاً ولا تعيد البيانات
+      schools=[];
+      localStorage.removeItem('pt_schools');
     }
     // تحميل بيانات كل مدرسة مع التطبيع
     for(var i=0;i<schools.length;i++){
@@ -843,6 +844,9 @@ function updateLandingStats(){
     if(fbSchools.length>0){
       schools=fbSchools;
       try{localStorage.setItem('pt_schools',JSON.stringify(fbSchools));}catch(e){}
+    } else {
+      schools=[];
+      localStorage.removeItem('pt_schools');
     }
     document.getElementById('landSchools').textContent=schools.length;
   }).catch(function(){
