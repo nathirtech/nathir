@@ -905,13 +905,13 @@ function hideModal(id){document.getElementById(id).classList.add('hidden');}
 
 // ====== LANDING ======
 function updateLandingStats(){
-  fbRead('pt_schools').then(function(fbSchools){
-    var list=fbSchools&&fbSchools.length>0?fbSchools:schools;
-    if(fbSchools&&fbSchools.length>0){
+  fbRead('pt_schools').then(function(raw){
+    var fbSchools=toArr(raw);
+    if(fbSchools.length>0){
       schools=fbSchools;
       try{localStorage.setItem('pt_schools',JSON.stringify(fbSchools));}catch(e){}
     }
-    document.getElementById('landSchools').textContent=list.length;
+    document.getElementById('landSchools').textContent=schools.length;
   }).catch(function(){
     document.getElementById('landSchools').textContent=schools.length;
   });
