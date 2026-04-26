@@ -852,7 +852,8 @@ var survTargets=[]; // selected survey targets
 (function(){
   if(!schools.find(function(s){return s.code==='SCH-DORI';})){
     schools.push({code:'SCH-DORI',name:'متوسطة الإمام الدوري لتحفيظ القرآن الكريم',region:'الرياض',stage:'متوسطة',gender:'بنين',director:'بندر عبدالله البصير',phone:'0547889932',email:'meaz2011@gmail.com',pass:'AAss1122@',createdAt:new Date().toISOString()});
-    setSchools(schools);
+    // localStorage فقط — Firebase تُحدَّث لاحقاً في loadFromFirebase
+    localStorage.setItem('pt_schools',JSON.stringify(schools));
   }
   var d=getSD('SCH-DORI');
   if(!d||!d.teachers||d.teachers.length===0){
@@ -887,7 +888,8 @@ var survTargets=[]; // selected survey targets
     nd.teachers=ts;
     if(d&&d.submissions) nd.submissions=d.submissions;
     if(d&&d.circulars) nd.circulars=d.circulars;
-    setSD('SCH-DORI',nd);
+    // localStorage فقط — Firebase تُحدَّث في loadFromFirebase
+    localStorage.setItem('pt_SCH-DORI',JSON.stringify(nd));
   }
 })();
 
