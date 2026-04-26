@@ -362,6 +362,7 @@ tr:hover td{background:var(--gb)}
       <div class="header-info"><h1 id="hSchoolName">—</h1><div class="school-badge" id="hSchoolCode">—</div></div>
     </div>
     <div class="header-actions">
+      <button class="btn btn-o btn-sm" onclick="refreshDashboard(this)">🔄 تحديث</button>
       <button class="btn btn-o btn-sm" onclick="openSettingsModal()">⚙️ الإعدادات</button>
       <button class="btn btn-o btn-sm" onclick="doLogout()">خروج</button>
     </div>
@@ -1153,6 +1154,29 @@ function resetPlatform(){
 }
 
 function doLogout(){cur=null;showPage('pgLanding');updateLandingStats();}
+
+function refreshDashboard(btn){
+  var orig=btn.textContent;
+  btn.textContent='⏳';
+  btn.disabled=true;
+  fbRead('pt_'+cur.code).then(function(raw){
+    var fbSD=normalizeSD(raw);
+    var localSD=getSD(cur.code);
+    var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
+    var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
+    if(fbHas){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+    else if(locHas){fbWrite('pt_'+cur.code,localSD);}
+    // أعد رسم التبويب النشط
+    var activeTab=document.querySelector('.nav-tab.active');
+    if(activeTab) activeTab.click();
+    else{buildWeekSel('weekSel');renderReport();}
+    btn.textContent=orig;
+    btn.disabled=false;
+  }).catch(function(){
+    btn.textContent=orig;
+    btn.disabled=false;
+  });
+}
 
 // ====== DASHBOARD ======
 function showDashboard(){
