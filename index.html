@@ -905,7 +905,16 @@ function hideModal(id){document.getElementById(id).classList.add('hidden');}
 
 // ====== LANDING ======
 function updateLandingStats(){
-  document.getElementById('landSchools').textContent=schools.length;
+  fbRead('pt_schools').then(function(fbSchools){
+    var list=fbSchools&&fbSchools.length>0?fbSchools:schools;
+    if(fbSchools&&fbSchools.length>0){
+      schools=fbSchools;
+      try{localStorage.setItem('pt_schools',JSON.stringify(fbSchools));}catch(e){}
+    }
+    document.getElementById('landSchools').textContent=list.length;
+  }).catch(function(){
+    document.getElementById('landSchools').textContent=schools.length;
+  });
 }
 
 // ====== REGISTER ======
@@ -1006,6 +1015,15 @@ function adminTab(name,btn){
 }
 
 function renderAdminStats(){
+  fbRead('pt_schools').then(function(fbSchools){
+    if(fbSchools&&toArr(fbSchools).length>0){
+      schools=toArr(fbSchools);
+      try{localStorage.setItem('pt_schools',JSON.stringify(schools));}catch(e){}
+    }
+    _renderAdminStatsNow();
+  }).catch(function(){_renderAdminStatsNow();});
+}
+function _renderAdminStatsNow(){
   var total=schools.length;
   var totalT=0,totalP=0,totalC=0;
   schools.forEach(function(s){
