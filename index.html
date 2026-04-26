@@ -780,9 +780,20 @@ try{
 function fbWrite(path,data){if(fbDB)return fbDB.ref(path).set(data).catch(function(e){console.warn('FB write error',e);});return Promise.resolve();}
 function fbRead(path){if(fbDB)return fbDB.ref(path).get().then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});return Promise.resolve(null);}
 
+// تحويل كائنات Firebase مجدداً إلى مصفوفات
+function toArr(v){if(!v)return[];if(Array.isArray(v))return v;return Object.values(v);}
+function normalizeSD(d){
+  if(!d)return null;
+  d.teachers=toArr(d.teachers);
+  d.submissions=toArr(d.submissions);
+  d.circulars=toArr(d.circulars);
+  d.surveys=toArr(d.surveys);
+  return d;
+}
+
 function getSchools(){try{return JSON.parse(localStorage.getItem('pt_schools')||'[]');}catch(e){return[];}}
 function setSchools(d){localStorage.setItem('pt_schools',JSON.stringify(d));fbWrite('pt_schools',d);}
-function getSD(c){try{return JSON.parse(localStorage.getItem('pt_'+c)||'null');}catch(e){return null;}}
+function getSD(c){try{var d=JSON.parse(localStorage.getItem('pt_'+c)||'null');return normalizeSD(d);}catch(e){return null;}}
 function setSD(c,d){try{localStorage.setItem('pt_'+c,JSON.stringify(d));}catch(e){}fbWrite('pt_'+c,d);}
 function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars:[],surveys:[],driveUrl:''};setSD(c,d);}return d;}
 
@@ -790,31 +801,31 @@ async function loadFromFirebase(){
   try{
     // تحميل قائمة المدارس
     var fbSchools=await fbRead('pt_schools');
-    if(fbSchools&&Array.isArray(fbSchools)&&fbSchools.length>0){
-      localStorage.setItem('pt_schools',JSON.stringify(fbSchools));
-      schools=fbSchools;
-    } else {
-      // ترحيل البيانات المحلية إلى Firebase
-      var localSchools=getSchools();
-      if(localSchools.length>0){
-        await fbWrite('pt_schools',localSchools);
-        schools=localSchools;
-      }
+    var localSchools=getSchools();
+    if(fbSchools&&toArr(fbSchools).length>0){
+      var merged=toArr(fbSchools);
+      localStorage.setItem('pt_schools',JSON.stringify(merged));
+      schools=merged;
+    } else if(localSchools.length>0){
+      await fbWrite('pt_schools',localSchools);
+      schools=localSchools;
     }
-    // تحميل بيانات كل مدرسة
+    // تحميل بيانات كل مدرسة مع التطبيع
     for(var i=0;i<schools.length;i++){
       var code=schools[i].code;
-      var fbSD=await fbRead('pt_'+code);
-      if(fbSD&&(fbSD.teachers&&fbSD.teachers.length>0)){
+      var fbSD=normalizeSD(await fbRead('pt_'+code));
+      var localSD=getSD(code);
+      var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
+      var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
+      if(fbHas&&locHas){
+        // استخدم الأحدث - Firebase
         try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
-      } else {
-        // ترحيل بيانات المدرسة من localStorage إلى Firebase
-        var localSD=getSD(code);
-        if(localSD&&localSD.teachers&&localSD.teachers.length>0){
-          await fbWrite('pt_'+code,localSD);
-        } else if(fbSD){
-          try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
-        }
+      } else if(fbHas){
+        // Firebase فقط - احفظ محلياً
+        try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
+      } else if(locHas){
+        // محلي فقط - رحّل إلى Firebase
+        await fbWrite('pt_'+code,localSD);
       }
     }
   }catch(e){console.warn('Firebase load failed, using local data',e);}
@@ -1141,15 +1152,16 @@ function showDashboard(){
   showPage('pgDashboard');
   document.getElementById('hSchoolName').textContent=cur.name;
   document.getElementById('hSchoolCode').textContent=cur.code;
-  // جلب بيانات المدرسة من Firebase أولاً ثم العرض
-  fbRead('pt_'+cur.code).then(function(fbSD){
-    if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+  fbRead('pt_'+cur.code).then(function(raw){
+    var fbSD=normalizeSD(raw);
+    var localSD=getSD(cur.code);
+    var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
+    var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
+    if(fbHas){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){};}
+    else if(locHas){fbWrite('pt_'+cur.code,localSD);}
     buildWeekSel('weekSel');
     renderReport();
-  }).catch(function(){
-    buildWeekSel('weekSel');
-    renderReport();
-  });
+  }).catch(function(){buildWeekSel('weekSel');renderReport();});
 }
 
 function goTab(name,btn){
