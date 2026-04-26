@@ -874,7 +874,7 @@ function doRegister(){
   if(!user||user.length<3){
     err.style.display='block';err.textContent='اسم المستخدم يجب أن يكون 3 أحرف أو أكثر';return;
   }
-  if(schools.find(function(s){return (s.user||s.code)===user;})){
+  if(schools.find(function(s){return (s.user||s.code).toLowerCase()===user.toLowerCase();})){
     err.style.display='block';err.textContent='اسم المستخدم مستخدم من قبل، اختر اسماً آخر';return;
   }
   if(!pass||pass.length<4){
@@ -902,13 +902,13 @@ function doRegister(){
 
 // ====== LOGIN ======
 function doLogin(){
-  var code=document.getElementById('lCode').value.trim().toUpperCase();
+  var code=document.getElementById('lCode').value.trim();
   var pass=document.getElementById('lPass').value.trim();
   var err=document.getElementById('loginErr');
   err.style.display='none';
 
   function tryLogin(list){
-    var school=list.find(function(s){return (s.user||s.code)===code&&s.pass===pass;});
+    var school=list.find(function(s){return (s.user||s.code).toLowerCase()===code.toLowerCase()&&s.pass===pass;});
     if(school){
       cur=school;
       hideModal('mdlLogin');
