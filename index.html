@@ -1866,6 +1866,26 @@ function openSettingsModal(){
   showModal('mdlChangePass');
 }
 
+function saveFirstLogin(){
+  var username=document.getElementById('flUsername').value.trim();
+  var np=document.getElementById('flNewPass').value.trim();
+  var cp=document.getElementById('flConPass').value.trim();
+  var err=document.getElementById('flErr');
+  err.style.display='none';
+  if(username.length<4){err.style.display='block';err.textContent='اسم المستخدم يجب أن يكون 4 أحرف أو أكثر';return;}
+  if(np.length<4){err.style.display='block';err.textContent='كلمة المرور يجب أن تكون 4 أحرف أو أكثر';return;}
+  if(np!==cp){err.style.display='block';err.textContent='كلمتا المرور غير متطابقتين';return;}
+  var exists=schools.find(function(s){return (s.user||s.code)===username&&s.code!==cur.code;});
+  if(exists){err.style.display='block';err.textContent='اسم المستخدم مستخدم من قبل، اختر اسماً آخر';return;}
+  cur.user=username;
+  cur.pass=np;
+  delete cur.firstLogin;
+  var idx=schools.findIndex(function(s){return s.code===cur.code;});
+  if(idx>-1){schools[idx]=cur;setSchools(schools);}
+  hideModal('mdlFirstLogin');
+  showDashboard();
+}
+
 function saveUsername(){
   var newUser=document.getElementById('stUsername').value.trim();
   if(!newUser){alert('يرجى إدخال اسم المستخدم');return;}
