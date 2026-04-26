@@ -1123,8 +1123,15 @@ function showDashboard(){
   showPage('pgDashboard');
   document.getElementById('hSchoolName').textContent=cur.name;
   document.getElementById('hSchoolCode').textContent=cur.code;
-  buildWeekSel('weekSel');
-  renderReport();
+  // جلب بيانات المدرسة من Firebase أولاً ثم العرض
+  fbRead('pt_'+cur.code).then(function(fbSD){
+    if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+    buildWeekSel('weekSel');
+    renderReport();
+  }).catch(function(){
+    buildWeekSel('weekSel');
+    renderReport();
+  });
 }
 
 function goTab(name,btn){
@@ -1140,9 +1147,24 @@ function goTab(name,btn){
       buildWeekSel('weekSel');renderReport();
     }).catch(function(){buildWeekSel('weekSel');renderReport();});
   }
-  if(name==='circulars'){circTargets=[];buildCircNameSel();renderCirculars();}
-  if(name==='teachers') renderTeachers();
-  if(name==='send'){buildWeekSel('sendWeekSel');renderWaList();}
+  if(name==='circulars'){
+    fbRead('pt_'+cur.code).then(function(fbSD){
+      if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+      circTargets=[];buildCircNameSel();renderCirculars();
+    }).catch(function(){circTargets=[];buildCircNameSel();renderCirculars();});
+  }
+  if(name==='teachers'){
+    fbRead('pt_'+cur.code).then(function(fbSD){
+      if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+      renderTeachers();
+    }).catch(function(){renderTeachers();});
+  }
+  if(name==='send'){
+    fbRead('pt_'+cur.code).then(function(fbSD){
+      if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
+      buildWeekSel('sendWeekSel');renderWaList();
+    }).catch(function(){buildWeekSel('sendWeekSel');renderWaList();});
+  }
   if(name==='surveys'){survTargets=[];buildSurvNameSel();renderSurveys();}
   if(name==='settings') renderSettings();
 }
