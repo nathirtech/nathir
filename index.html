@@ -1978,25 +1978,23 @@ function confirmUpload(){
     document.getElementById('upForm').style.display='none';
     document.getElementById('upSuccess').style.display='block';
   }
-  if(fbStorage){
-    var path='submissions/'+sCode+'/'+teacherName+'_'+wk+'_'+Date.now();
-    var ref=fbStorage.ref(path);
-    ref.put(file).then(function(){return ref.getDownloadURL();}).then(function(url){
-      saveSubmission(url,null);
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset','rabittec');
+  fd.append('folder','rabit/'+sCode);
+  fetch('https://api.cloudinary.com/v1_1/dqeaptszq/raw/upload',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.secure_url){
+        saveSubmission(data.secure_url,null);
+      } else {
+        throw new Error(data.error?data.error.message:'Upload failed');
+      }
     }).catch(function(err){
-      console.error('Storage upload error',err);
-      alert('حدث خطأ أثناء الرفع، يرجى المحاولة مجدداً');
+      console.error('Cloudinary upload error',err);
+      alert('حدث خطأ أثناء الرفع: '+err.message);
       if(btn){btn.disabled=false;btn.textContent=origTxt;}
     });
-  } else {
-    var reader=new FileReader();
-    reader.onload=function(e){
-      try{saveSubmission(null,e.target.result);}
-      catch(err){alert('الملف كبير جداً، يرجى ضغط الملف وإعادة المحاولة');
-      if(btn){btn.disabled=false;btn.textContent=origTxt;}}
-    };
-    reader.readAsDataURL(file);
-  }
 }
 
 document.addEventListener('DOMContentLoaded',function(){
