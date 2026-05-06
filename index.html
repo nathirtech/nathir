@@ -644,9 +644,13 @@ tr:hover td{background:var(--gb)}
       <div id="upForm">
         <h2>رفع خطة الدروس الأسبوعية</h2>
         <p style="color:var(--tl);font-size:13px;margin-bottom:14px">الأسبوع: <strong id="upWeek"></strong></p>
-        <div class="t-info-box">
-          <span style="font-size:1.2rem">👨‍🏫</span>
-          <div><div style="font-weight:600;font-size:14px" id="upTeacher"></div><div style="font-size:11px;color:var(--tl)">رابط خاص بك — لا تشاركه</div></div>
+        <div class="form-g">
+          <label>الاسم</label>
+          <input type="text" id="upTeacherName" placeholder="اكتب اسمك الكامل">
+        </div>
+        <div class="form-g">
+          <label>التخصص</label>
+          <input type="text" id="upTeacherSubject" placeholder="مثال: رياضيات، لغة عربية...">
         </div>
         <div class="drive-box">
           <div style="font-size:2rem;margin-bottom:8px">📄</div>
@@ -654,13 +658,13 @@ tr:hover td{background:var(--gb)}
           <input type="file" id="upFile" accept=".pdf,image/*" style="width:100%;padding:8px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;background:#fff;cursor:pointer;font-family:inherit">
           <div id="upFileInfo" style="margin-top:8px;font-size:12px;color:var(--gl);display:none">✓ تم اختيار الملف</div>
         </div>
-        <div class="inst-box"><b>تعليمات:</b><br>1️⃣ اختر ملف PDF لخطة الدرس<br>2️⃣ اضغط "رفع الخطة ✓"<br>⚠️ الحجم الأقصى للملف 10MB</div>
+        <div class="inst-box"><b>تعليمات:</b><br>1️⃣ اكتب اسمك وتخصصك<br>2️⃣ اختر ملف PDF لخطة الدرس<br>3️⃣ اضغط "رفع الخطة ✓"<br>⚠️ الحجم الأقصى للملف 10MB</div>
         <button onclick="confirmUpload()" style="width:100%;padding:12px;background:var(--gd);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">📤 رفع الخطة ✓</button>
       </div>
       <div class="success-upload" id="upSuccess">
         <div style="font-size:2.5rem">✅</div>
-        <h3 style="color:var(--gd);margin-top:8px">تم التسجيل بنجاح!</h3>
-        <p style="color:#555;font-size:13px;margin-top:4px">تم تسجيل إرسالك في النظام</p>
+        <h3 style="color:var(--gd);margin-top:8px">تم رفع الملف</h3>
+        <p style="color:#555;font-size:13px;margin-top:4px">شكراً لك</p>
         <p style="color:#999;font-size:12px;margin-top:8px">جزاك الله خيراً</p>
       </div>
     </div>
@@ -1274,7 +1278,7 @@ function renderReport(){
   var notSent=d.teachers.filter(function(t){return !sentNames.includes(t.name);});
   document.getElementById('weekBadge').textContent=rows.length+' خطة مستلمة';
   var html=rows.map(function(r,i){
-    var subj=(d.teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;
+    var subj=r.teacherSubject||(d.teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;
     var viewBtn=(r.fileUrl||r.fileData)?
       '<button onclick="viewPlan(\''+cur.code+'\',\''+r.teacherName+'\',\''+r.week+'\')" style="background:var(--gd);color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:inherit">👁 عرض</button>':
       '<span style="color:#bbb;font-size:12px">لا يوجد ملف</span>';
@@ -1308,7 +1312,8 @@ function viewPlan(sCode,teacherName,week){
 }
 
 function sendReminder(phone,name,week){
-  var msg=encodeURIComponent('تذكير: '+name+'، لم يتم استلام خطة الدروس لـ'+week+'. يرجى الرفع.\nإدارة '+cur.name);
+  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(week);
+  var msg=encodeURIComponent('تذكير: '+name+'، لم يتم استلام خطة الدروس لـ'+week+'. يرجى الرفع عبر:\n'+link+'\nإدارة '+cur.name);
   window.open('https://wa.me/'+phone.replace(/^0/,'966')+'?text='+msg,'_blank');
 }
 
@@ -1329,7 +1334,7 @@ function exportReport(){
   '<h2>'+cur.name+'</h2><div class="meta">تقرير خطة الدروس — '+wk+' — '+today+'</div>'+
   '<div class="sec">أولاً: المعلمون الذين أرسلوا ('+rows.length+')</div>'+
   '<table><thead><tr><th>#</th><th>الاسم</th><th>التخصص</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>'+
-  rows.map(function(r,i){var s=(d.teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;return '<tr><td>'+(i+1)+'</td><td>'+r.teacherName+'</td><td>'+s+'</td><td>'+r.date+'</td><td class="ok">✓ مرسل</td></tr>';}).join('')+
+  rows.map(function(r,i){var s=r.teacherSubject||(d.teachers.find(function(t){return t.name===r.teacherName;})||{subject:'—'}).subject;return '<tr><td>'+(i+1)+'</td><td>'+r.teacherName+'</td><td>'+s+'</td><td>'+r.date+'</td><td class="ok">✓ مرسل</td></tr>';}).join('')+
   '</tbody></table><div class="sec">ثانياً: لم يرسلوا ('+notSent.length+')</div>'+
   '<table><thead><tr><th>#</th><th>الاسم</th><th>التخصص</th><th>الحالة</th></tr></thead><tbody>'+
   notSent.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+t.name+'</td><td>'+(t.subject||'—')+'</td><td class="no">✗ لم يرسل</td></tr>';}).join('')+
@@ -1387,8 +1392,8 @@ function delTeacher(id){
 function copyLink(id){
   var sel=document.getElementById('weekSel');
   var week=sel?sel.value:WEEKS[0];
-  var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+id+'&week='+encodeURIComponent(week);
-  prompt('رابط المنتسب:',link);
+  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(week);
+  prompt('رابط الرفع:',link);
 }
 
 function removeDups(){
@@ -1524,35 +1529,28 @@ function sendWa(id){
   var t=d.teachers.find(function(x){return x.id===id;});
   var w=document.getElementById('sendWeekSel').value;
   var wk=getWKey(w);
-  var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+id+'&week='+encodeURIComponent(w);
-  openWaModal('إرسال رابط الخطة',[{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name}]);
+  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(w);
+  var msg='السلام عليكم ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name;
+  var url=t&&t.phone?'https://wa.me/'+t.phone.replace(/^0/,'966')+'?text='+encodeURIComponent(msg):'https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
 }
 
 function sendAll(){
-  var d=getSD(cur.code);
   var w=document.getElementById('sendWeekSel').value;
   var wk=getWKey(w);
-  var items=d.teachers.filter(function(t){return t.phone;}).map(function(t){
-    var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+t.id+'&week='+encodeURIComponent(w);
-    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name};
-  });
-  openWaModal('إرسال روابط الخطة للجميع',items);
+  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(w);
+  var msg='السلام عليكم ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
 function sendSelected(){
   var checked=document.querySelectorAll('.wa-cb:checked');
   if(!checked.length){alert('حدد منتسباً واحداً على الأقل');return;}
-  var d=getSD(cur.code);
   var w=document.getElementById('sendWeekSel').value;
   var wk=getWKey(w);
-  var items=[];
-  checked.forEach(function(cb){
-    var t=d.teachers.find(function(x){return x.id===parseInt(cb.value);});
-    if(!t||!t.phone) return;
-    var link=location.href.split('#')[0]+'#upload='+cur.code+'-'+t.id+'&week='+encodeURIComponent(w);
-    items.push({name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name});
-  });
-  openWaModal('إرسال روابط الخطة للمحددين',items);
+  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(w);
+  var msg='السلام عليكم ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
 // ====== CIRCULARS ======
@@ -1668,13 +1666,14 @@ function sendCircLinks(circId){
   var d=getSD(cur.code);
   var c=d.circulars.find(function(x){return x.id===circId;});
   if(!c) return;
-  var targets=d.teachers.filter(function(t){return t.phone&&c.targetIds&&c.targetIds.some(function(id){return id==t.id;});});
-  if(!targets.length){alert('لا يوجد مستلمون بأرقام واتساب');return;}
-  var items=targets.map(function(t){
+  var targets=d.teachers.filter(function(t){return c.targetIds&&c.targetIds.some(function(id){return id==t.id;});});
+  if(!targets.length){alert('لا يوجد مستلمون');return;}
+  var lines=targets.map(function(t){
     var link=location.href.split('#')[0]+'#circ='+cur.code+'|'+circId+'|'+t.id;
-    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى الاطلاع على التعميم:\n'+c.title+'\n'+link+'\nإدارة '+cur.name};
-  });
-  openWaModal('إرسال التعميم: '+c.title,items);
+    return t.name+':\n'+link;
+  }).join('\n\n');
+  var msg='السلام عليكم ،\nيرجى الاطلاع على التعميم:\n'+c.title+'\n\n'+lines+'\n\nإدارة '+cur.name;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
 function delCirc(id){
@@ -1808,13 +1807,14 @@ function sendSurveyLinks(survId){
   var d=getSD(cur.code);
   var s=d.surveys.find(function(x){return x.id===survId;});
   if(!s) return;
-  var targets=d.teachers.filter(function(t){return t.phone&&s.targetIds&&s.targetIds.some(function(id){return id==t.id;});});
-  if(!targets.length){alert('لا يوجد مستلمون بأرقام واتساب');return;}
-  var items=targets.map(function(t){
+  var targets=d.teachers.filter(function(t){return s.targetIds&&s.targetIds.some(function(id){return id==t.id;});});
+  if(!targets.length){alert('لا يوجد مستلمون');return;}
+  var lines=targets.map(function(t){
     var link=location.href.split('#')[0]+'#survey='+cur.code+'|'+survId+'|'+t.id;
-    return{name:t.name,subject:t.subject,phone:t.phone,msg:'السلام عليكم '+t.name+' ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n'+link+'\nإدارة '+cur.name};
-  });
-  openWaModal('إرسال الاستبانة: '+s.title,items);
+    return t.name+':\n'+link;
+  }).join('\n\n');
+  var msg='السلام عليكم ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n\n'+lines+'\n\nإدارة '+cur.name;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
 function delSurvey(id){
@@ -1965,36 +1965,31 @@ function doChangePass(){
 }
 
 // ====== UPLOAD PAGE ======
-function showUploadPage(sCode,tId,week){
+function showUploadPage(sCode,week){
   var school=schools.find(function(s){return s.code===sCode;});
-  var d=school?getSD(sCode):null;
-  var teacher=d?d.teachers.find(function(t){return t.id===tId;}):null;
   showPage('pgUpload');
   document.getElementById('upSchoolName').textContent=school?school.name:'المدرسة';
-  document.getElementById('upTeacher').textContent=teacher?teacher.name:'المعلم';
   document.getElementById('upWeek').textContent=getWKey(week||WEEKS[0]);
 }
 
 function confirmUpload(){
+  var teacherName=document.getElementById('upTeacherName').value.trim();
+  var teacherSubject=document.getElementById('upTeacherSubject').value.trim();
   var file=document.getElementById('upFile').files[0];
+  if(!teacherName){alert('يرجى إدخال اسمك');return;}
+  if(!teacherSubject){alert('يرجى إدخال تخصصك');return;}
   if(!file){alert('يرجى اختيار ملف الخطة أولاً');return;}
   if(file.size>10*1024*1024){alert('حجم الملف يتجاوز 10MB، يرجى اختيار ملف أصغر');return;}
   var hash=location.hash;
-  var parts=hash.split('#upload=')[1];
-  var noWeek=parts.split('&')[0];
-  var dashIdx=noWeek.lastIndexOf('-');
-  var sCode=noWeek.substring(0,dashIdx);
-  var tId=parseInt(noWeek.substring(dashIdx+1));
+  var sCode=hash.split('#upload=')[1].split('&')[0];
   var weekParam=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
   var wk=getWKey(weekParam);
   var btn=document.querySelector('button[onclick="confirmUpload()"]');
   var origTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='⏳ جاري الرفع...';}
   var d=initSD(sCode);
-  var teacher=d.teachers.find(function(t){return t.id===tId;});
-  var teacherName=teacher?teacher.name:'معلم';
   function saveSubmission(fileUrl,fileData){
-    var sub={teacherName:teacherName,date:new Date().toISOString().split('T')[0],week:wk,status:'مرسل',fileName:file.name};
+    var sub={teacherName:teacherName,teacherSubject:teacherSubject,date:new Date().toISOString().split('T')[0],week:wk,status:'مرسل',fileName:file.name};
     if(fileUrl) sub.fileUrl=fileUrl;
     if(fileData) sub.fileData=fileData;
     var existing=d.submissions.findIndex(function(s){return s.teacherName===teacherName&&s.week===wk;});
@@ -2123,12 +2118,9 @@ function confirmSurveyFilled(){
 function init(){
   var hash=location.hash;
   if(hash.startsWith('#upload=')){
-    var p=hash.split('#upload=')[1].split('&')[0];
-    var di=p.lastIndexOf('-');
-    var sc=p.substring(0,di);
-    var ti=parseInt(p.substring(di+1));
+    var sc=hash.split('#upload=')[1].split('&')[0];
     var wp=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
-    showUploadPage(sc,ti,wp);
+    showUploadPage(sc,wp);
   } else if(hash.startsWith('#circ=')){
     var cp=hash.split('#circ=')[1].split('|');
     showCircularPage(cp[0],parseInt(cp[1]),parseInt(cp[2]));
