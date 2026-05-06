@@ -446,24 +446,10 @@ tr:hover td{background:var(--gb)}
 
     <!-- SEND -->
     <div id="tabSend" class="hidden">
-      <div class="card" style="padding:14px;margin-bottom:12px">
-        <h3 style="font-size:14px;font-weight:600;color:var(--gd);margin-bottom:10px">📅 اختر الأسبوع الدراسي</h3>
-        <select id="sendWeekSel" style="width:100%;padding:8px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px"></select>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-g btn-sm" onclick="sendAll()">📱 إرسال للجميع</button>
-          <button class="btn btn-o btn-sm" onclick="selAll()">تحديد الكل</button>
-          <button class="btn btn-o btn-sm" onclick="deselAll()">إلغاء التحديد</button>
-        </div>
-      </div>
       <div class="card" style="padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-          <h3 style="font-size:14px;font-weight:600;color:var(--gd)">👨‍🏫 المنتسبون</h3>
-          <span id="selCount" style="font-size:12px;color:var(--tl)">0 محدد</span>
-        </div>
-        <div id="waList"></div>
-        <div style="margin-top:10px;text-align:left">
-          <button class="btn btn-g btn-sm" onclick="sendSelected()">📱 إرسال للمحددين</button>
-        </div>
+        <h3 style="font-size:14px;font-weight:600;color:var(--gd);margin-bottom:10px">📅 اختر الأسبوع الدراسي</h3>
+        <select id="sendWeekSel" style="width:100%;padding:8px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:12px"></select>
+        <button class="btn btn-g" onclick="sendAll()">📱 إرسال الرابط</button>
       </div>
     </div>
 
@@ -1234,8 +1220,8 @@ function goTab(name,btn){
   if(name==='send'){
     fbRead('pt_'+cur.code).then(function(fbSD){
       if(fbSD){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
-      buildWeekSel('sendWeekSel');renderWaList();
-    }).catch(function(){buildWeekSel('sendWeekSel');renderWaList();});
+      buildWeekSel('sendWeekSel');
+    }).catch(function(){buildWeekSel('sendWeekSel');});
   }
   if(name==='surveys'){survTargets=[];buildSurvNameSel();renderSurveys();}
   if(name==='settings') renderSettings();
@@ -1439,36 +1425,6 @@ function readExcel(e){
 }
 
 // ====== SEND ======
-function renderWaList(){
-  var d=getSD(cur.code)||{teachers:[],submissions:[]};
-  var w=document.getElementById('sendWeekSel').value;
-  var wk=getWKey(w);
-  var sentNames=d.submissions.filter(function(s){return s.week===wk;}).map(function(s){return s.teacherName;});
-  document.getElementById('waList').innerHTML=d.teachers.length===0?
-    '<p style="color:#999;font-size:13px;text-align:center;padding:1rem">لا يوجد منتسبون</p>':
-    d.teachers.map(function(t){
-      var sent=sentNames.includes(t.name);
-      return '<div class="wa-item">'+
-        '<div style="display:flex;align-items:center;gap:8px;flex:1">'+
-          '<input type="checkbox" class="wa-cb" value="'+t.id+'" '+(sent?'disabled':'')+' style="width:15px;height:15px;cursor:pointer">'+
-          '<div><div style="font-size:13px;font-weight:500">'+t.name+'</div>'+
-          '<div style="font-size:11px;color:#888">'+(t.role?t.role+' | ':'')+( t.phone||'لا يوجد رقم')+'</div></div>'+
-        '</div>'+
-        '<div style="display:flex;align-items:center;gap:6px">'+
-          (sent?'<span class="badge bg">✓ أرسل</span>':'')+
-          (t.phone?'<button class="wa-btn" onclick="sendWa('+t.id+')">📱</button>':'<span style="font-size:11px;color:#bbb">لا رقم</span>')+
-        '</div></div>';
-    }).join('');
-  updateSelCount();
-}
-
-function updateSelCount(){
-  var c=document.querySelectorAll('.wa-cb:checked').length;
-  document.getElementById('selCount').textContent=c+' محدد';
-}
-
-function selAll(){document.querySelectorAll('.wa-cb:not(:disabled)').forEach(function(cb){cb.checked=true;});updateSelCount();}
-function deselAll(){document.querySelectorAll('.wa-cb').forEach(function(cb){cb.checked=false;});updateSelCount();}
 
 var _waQueue=[];
 
@@ -1543,15 +1499,6 @@ function sendAll(){
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
-function sendSelected(){
-  var checked=document.querySelectorAll('.wa-cb:checked');
-  if(!checked.length){alert('حدد منتسباً واحداً على الأقل');return;}
-  var w=document.getElementById('sendWeekSel').value;
-  var wk=getWKey(w);
-  var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(w);
-  var msg='السلام عليكم ،\nيرجى رفع خطة الدروس لـ'+wk+' عبر:\n'+link+'\nإدارة '+cur.name;
-  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-}
 
 // ====== CIRCULARS ======
 function buildCircNameSel(){
@@ -2134,7 +2081,7 @@ function init(){
 }
 
 window.addEventListener('hashchange',init);
-document.getElementById('sendWeekSel').addEventListener('change',renderWaList);
+document.getElementById('sendWeekSel').addEventListener('change',function(){});
 
 async function startup(){
   try{await loadFromFirebase();}catch(e){}
