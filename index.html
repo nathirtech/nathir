@@ -437,6 +437,50 @@ tr:hover td{background:var(--gb)}
   #pgLanding .foot-grid{grid-template-columns:1fr;gap:18px}
   .header-logo img{height:54px!important}
 }
+/* ====== SELF ASSESSMENT PAGE ====== */
+#pgQawwim{min-height:100vh;background:#f5f7fa;direction:rtl}
+.qw-header{background:linear-gradient(135deg,#1a3a6b,#0099b8);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.qw-header h1{color:#fff;font-size:1.1rem;font-weight:700;margin:0}
+.qw-back{background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600}
+.qw-back:hover{background:rgba(255,255,255,0.3)}
+.qw-breadcrumb{font-size:12px;color:rgba(255,255,255,0.8);display:flex;align-items:center;gap:6px}
+.qw-breadcrumb span{color:#fff;font-weight:600}
+.qw-content{padding:1.5rem;max-width:960px;margin:0 auto}
+/* Domain cards */
+.qw-domains{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:2rem 1.5rem;max-width:960px;margin:0 auto}
+.qw-domain-card{background:#fff;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;border:2px solid transparent;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.qw-domain-card:hover{border-color:var(--gl);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.qw-domain-icon{font-size:2.2rem;margin-bottom:10px}
+.qw-domain-name{font-size:14px;font-weight:700;color:var(--gd);line-height:1.4}
+.qw-domain-count{font-size:11px;color:var(--tl);margin-top:4px}
+/* Standards */
+.qw-section-title{font-size:1rem;font-weight:700;color:var(--gd);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bd)}
+.qw-standard{background:#fff;border-radius:10px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden}
+.qw-standard-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:background 0.15s}
+.qw-standard-header:hover{background:#f0f5ff}
+.qw-standard-header.open{background:var(--gp)}
+.qw-standard-name{font-size:13px;font-weight:700;color:var(--gd)}
+.qw-standard-meta{font-size:11px;color:var(--tl)}
+.qw-caret{color:var(--tl);font-size:16px;transition:transform 0.2s}
+.qw-caret.open{transform:rotate(180deg)}
+.qw-standard-body{display:none;border-top:1px solid var(--bd)}
+.qw-standard-body.open{display:block}
+/* Indicators */
+.qw-indicator{border-bottom:1px solid var(--gb);padding:10px 16px;cursor:pointer;transition:background 0.15s}
+.qw-indicator:last-child{border-bottom:none}
+.qw-indicator:hover{background:#f8faff}
+.qw-indicator.open{background:#f0f8ff}
+.qw-ind-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.qw-ind-id{background:var(--gd);color:#fff;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.qw-ind-text{font-size:12px;color:var(--tx);line-height:1.5;flex:1}
+.qw-ind-source{font-size:11px;color:#888;margin-top:4px}
+.qw-ind-body{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.qw-ind-body.open{display:block}
+/* Items and docs */
+.qw-item{background:#f8faff;border-radius:8px;padding:10px 12px;margin-bottom:8px;border-right:3px solid var(--gl)}
+.qw-item-text{font-size:12px;color:var(--tx);margin-bottom:6px;line-height:1.5}
+.qw-docs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.qw-doc{background:#e8f4fd;color:#1a5276;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:500}
 </style>
 </head>
 <body>
@@ -446,6 +490,18 @@ tr:hover td{background:var(--gb)}
   <img src="logo.png" alt="رابط">
   <div class="spinner"></div>
   <p>جاري تحميل البيانات...</p>
+</div>
+
+<!-- SELF ASSESSMENT PAGE -->
+<div id="pgQawwim" class="hidden">
+  <div class="qw-header">
+    <button class="qw-back" onclick="qwGoBack()">&#8594; رجوع</button>
+    <div>
+      <div class="qw-breadcrumb" id="qwBreadcrumb"><span>التقويم الذاتي</span></div>
+      <h1 id="qwTitle">التقويم الذاتي</h1>
+    </div>
+  </div>
+  <div id="qwBody"></div>
 </div>
 
 <!-- LANDING -->
@@ -546,24 +602,23 @@ tr:hover td{background:var(--gb)}
       <h2>مجالات التقويم الذاتي</h2>
     </div>
     <div class="feat-grid" style="max-width:1180px;margin:0 auto">
-      <div class="feat-card">
+      <div class="feat-card" onclick="showQawwim();qwRenderDomain('d1')" style="cursor:pointer">
         <div class="sq sq-c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg></div>
         <h3>مجال الإدارة المدرسية</h3>
       </div>
-      <div class="feat-card">
+      <div class="feat-card" onclick="showQawwim();qwRenderDomain('d4')" style="cursor:pointer">
         <div class="sq sq-g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
         <h3>مجال البيئة المدرسية</h3>
       </div>
-      <div class="feat-card">
+      <div class="feat-card" onclick="showQawwim();qwRenderDomain('d2')" style="cursor:pointer">
         <div class="sq sq-y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
         <h3>مجال التعليم والتعلم</h3>
       </div>
-      <div class="feat-card">
+      <div class="feat-card" onclick="showQawwim();qwRenderDomain('d3')" style="cursor:pointer">
         <div class="sq sq-r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg></div>
         <h3>مجال نواتج التعلم</h3>
       </div>
     </div>
-    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--soft);font-weight:500">⚠️ هذا القسم تحت الإنشاء</div>
   </section>
 
   <!-- FOOTER -->
@@ -1175,6 +1230,235 @@ tr:hover td{background:var(--gb)}
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
+// ====== SELF ASSESSMENT DATA ======
+const QDATA=[
+  {id:'d1',name:'مجال الإدارة المدرسية',icon:'🏫',standards:[
+    {id:'s1-1',name:'معيار التخطيط',indicators:[
+      {id:'1-1-1-1',text:'تضع المدرسة خطة تشغيلية مكتملة العناصر، وفق أهداف تطويرية محددة',source:'مدير المدرسة',items:[
+        {text:'يوجد لدى المدرسة خطة تشغيلية مكتملة العناصر',docs:['سجل الخطة التشغيلية']},
+        {text:'أهداف خطة المدرسة محددة، وقابلة للقياس',docs:['سجل الخطة التشغيلية']},
+        {text:'البرامج والأنشطة تحقق الأهداف التطويرية للمدرسة',docs:['سجل برامج الخطة التشغيلية']},
+        {text:'تتوزع الأدوار والمسؤوليات في تنفيذ خطة المدرسة وفق خطتها الزمنية لتحقيق أهدافها التطويرية',docs:['سجل الخطة التشغيلية','سجل اللجان المدرسية','سجل التكليفات']}
+      ]},
+      {id:'2-1-1-1',text:'تتابع المدرسة تنفيذ خطتها وتطورها بما يضمن تحقيق أهدافها',source:'مدير المدرسة',items:[
+        {text:'تتابع المدرسة تنفيذ البرامج والأنشطة وفق الخطة الزمنية',docs:['سجل الخطة التشغيلية (قسم المتابعة والتقويم)','سجل برامج النشاط','سجل برامج الإرشاد']},
+        {text:'تقوّم المدرسة تنفيذ خطتها بما يضمن تحقيق أهدافها',docs:['سجل الخطة التشغيلية (قسم المتابعة والتقويم)','سجل توثيق البرامج','سجل اللجنة الإدارية']},
+        {text:'تطور المدرسة خطتها بما يضمن تحقيق أهدافها',docs:['سجل اللجنة الإدارية','سجل تطوير وتحسين الخطة التشغيلية']}
+      ]}
+    ]},
+    {id:'s1-2',name:'معيار قيادة العملية التعليمية',indicators:[
+      {id:'1-1-2-1',text:'تعزز المدرسة القيم الإسلامية والهوية الوطنية',source:'رائد النشاط، الموجه الطلابي',items:[
+        {text:'تستهدف المدرسة تعزيز القيم الإسلامية والهوية الوطنية في خططها وبرامجها وأنشطتها',docs:['سجل لجنة التوجيه والإرشاد','سجل التوجيه والإرشاد','سجل الأنشطة والبرامج']}
+      ]},
+      {id:'2-1-2-1',text:'تلتزم المدرسة بقيم مهنة التعليم وأخلاقياتها',source:'وكيل الشؤون التعليمية، رائد النشاط، مدير المدرسة، الموجه الطلابي',items:[
+        {text:'تنشر المدرسة الوعي بقيم مهنة التعليم وأخلاقياتها لدى منسوبيها',docs:['سجل الاجتماعات','سجل التبليغات','سجل البرامج والأنشطة','نشرات','خطة متابعة السلوك الوظيفي']},
+        {text:'تطبق المدرسة قيم مهنة التعليم وأخلاقياتها في التعامل مع منسوبيها',docs:['سجل التوجيه والإرشاد','سجل التحفيز والتكريم','سجل المخالفات','سجل حصر الغياب والتأخر','سجل استئذان الموظفين','خطة متابعة السلوك الوظيفي']}
+      ]},
+      {id:'3-1-2-1',text:'توفر المدرسة مناخاً آمناً للتعلم، والنمو نفسياً واجتماعياً',source:'وكيل الشؤون التعليمية، رائد النشاط',items:[
+        {text:'توفر المدرسة برامج وأنشطة تضمن مناخاً آمناً للتعلم وتحد حالات التنمر',docs:['سجل البرامج الوقائية والعلاجية','سجل التوجيه والإرشاد','سجل مجالس الحوار الطلابي','سجل المخالفات السلوكية','سجل الحالات الطارئة']}
+      ]},
+      {id:'4-1-2-1',text:'تنشر المدرسة قواعد السلوك والمواظبة، وتتابع تطبيقها',source:'وكيل الشؤون الطلابية، الموجه الطلابي',items:[
+        {text:'تنشر المدرسة الوعي بقواعد السلوك والمواظبة، وتتابع تطبيقها',docs:['سجل التوجيه والإرشاد','سجل الانضباط المدرسي','سجل التوقيع على قواعد السلوك والمواظبة','سجل الحالات الطارئة','سجل المخالفات السلوكية','سجل البرامج الوقائية والعلاجية','سجل تعزيز السلوك الإيجابي']}
+      ]},
+      {id:'5-1-2-1',text:'توفر المدرسة برامج وأنشطة تربوية داعمة للسلوك الإيجابي',source:'وكيل الشؤون الطلابية، الموجه الطلابي',items:[
+        {text:'توفر المدرسة برامج وأنشطة وقائية وعلاجية للمشكلات السلوكية التي تواجه المتعلمين بمن فيهم ذوو الإعاقة',docs:['سجل تعزيز السلوك الإيجابي','سجل لجنة التوجيه والإرشاد','سجل التوجيه والإرشاد','سجل المخالفات السلوكية']},
+        {text:'توفر المدرسة برامج وأنشطة تعزز السلوك الإيجابي لدى المتعلمين',docs:['سجل التوجيه والإرشاد','سجل تعزيز السلوك الإيجابي']}
+      ]},
+      {id:'6-1-2-1',text:'توفر المدرسة برامج وأنشطة إثرائية؛ لتطوير مواهب المتعلمين وتهيئهم للمستقبل',source:'وكيل الشؤون الطلابية، رائد النشاط، الموجه الطلابي، مدير المدرسة',items:[
+        {text:'توفر المدرسة خطة للأنشطة الإثرائية غير الصفية، وتتابع تنفيذها',docs:['سجل الأنشطة الإثرائية','سجل الأنشطة والبرامج']},
+        {text:'توفر المدرسة برامج إثرائية لتطوير مواهب المتعلمين، وتتابع تنفيذها',docs:['سجل لجنة التوجيه والإرشاد','سجل الأنشطة والبرامج','سجل الموهوبين']},
+        {text:'تدعم المدرسة المشاركة في المسابقات الوطنية والدولية',docs:['سجل لجنة التميز','سجل المسابقات','سجل لجنة التوجيه والإرشاد']},
+        {text:'توفر المدرسة برامج وأنشطة إثرائية تهيئ المتعلمين لمستقبلهم الأكاديمي والمهني',docs:['سجل الأنشطة الإثرائية','سجل الموهوبين','سجل لجنة التوجيه والإرشاد']}
+      ]}
+    ]},
+    {id:'s1-3',name:'معيار المجتمع المدرسي',indicators:[
+      {id:'1-1-3-1',text:'تعزز المدرسة العمل التعاوني، والعلاقات الإيجابية والتعاون في المجتمع المدرسي',source:'مدير المدرسة، وكيل الشؤون التعليمية، رائد النشاط',items:[
+        {text:'تضع المدرسة خطة لتعزيز العمل التعاوني بين منسوبيها، وتتابعها',docs:['سجل الخطة التشغيلية','سجل البرامج والأنشطة','سجل النمو المهني']}
+      ]},
+      {id:'2-1-3-1',text:'تعزز المدرسة مشاركة الأسرة في تعلم أبنائهم، والتحضير لمستقبلهم',source:'مدير المدرسة، وكيل الشؤون الطلابية، رائد النشاط، الموجه الطلابي',items:[
+        {text:'توفر المدرسة أنشطة وبرامج للتوعية بدور الأسرة في دعم تعلم أبنائها والتحضير لمستقبلهم',docs:['سجل استطلاع الرأي والاستبانات','سجل التواصل مع أولياء الأمور','سجل ملف البرامج والأنشطة','سجل التوجيه والإرشاد','سجل مجالس أولياء الأمور']},
+        {text:'توفر المدرسة فرصاً للتواصل الفعال مع الأسرة',docs:['سجل استطلاع الرأي والاستبانات','سجل التواصل مع الأسرة','سجل مجالس أولياء الأمور','سجل الشراكة المجتمعية','سجل الأنشطة والبرامج','سجل التوجيه والإرشاد']}
+      ]},
+      {id:'3-1-3-1',text:'تعزز المدرسة الشراكة المجتمعية لدعم التعلم والتأثير الإيجابي في المجتمع المحلي',source:'مدير المدرسة، رائد النشاط، الموجه الطلابي',items:[
+        {text:'توفر المدرسة فرصاً للتواصل والتعاون مع مؤسسات المجتمع لتعزيز تعلم المتعلمين',docs:['سجل الخطة التشغيلية','سجل البرامج والأنشطة','سجل الشراكة المجتمعية','سجل التوجيه والإرشاد']},
+        {text:'تستثمر المدرسة إمكانات المؤسسات الوطنية في تلبية احتياجات ذوي الإعاقة والموهوبين',docs:['سجل البرامج والأنشطة','سجل الشراكة المجتمعية']},
+        {text:'تقدم المدرسة أنشطة وفعاليات توعوية للمجتمع المحلي وتتيح إمكاناتها لخدمته',docs:['سجل البرامج والأنشطة','سجل الشراكة المجتمعية','سجل التوجيه والإرشاد']}
+      ]}
+    ]},
+    {id:'s1-4',name:'معيار التطوير المؤسسي',indicators:[
+      {id:'1-1-4-1',text:'توفر المدرسة كادراً تعليمياً مكتملاً ومؤهلاً',source:'وكيل الشؤون التعليمية',items:[
+        {text:'يوجد لدى المدرسة كادر تعليمي مكتمل ومؤهل',docs:['سجل أحوال الموظفين','سجل التكاليف','سجل اللجنة الإدارية','سجل توزيع الأنصبة','الجدول المدرسي']},
+        {text:'يتوافق مجال التخصص في المؤهل العلمي للكادر التعليمي مع العمل المكلف به',docs:['بيانات الكادر التعليمي من نظام نور','توزيع الأنصبة','سجل أحوال الموظفين']}
+      ]},
+      {id:'2-1-4-1',text:'توفر المدرسة كادراً إدارياً مكتملاً ومؤهلاً',source:'مدير المدرسة',items:[
+        {text:'يوجد لدى المدرسة تشكيل إداري مكتمل للقيام بالمهام الإدارية',docs:['سجل أحوال الموظفين','سجل التكاليف','سجل اللجنة الإدارية','بيانات الكادر الإداري من نظام نور']},
+        {text:'يتوافق مؤهل وخبرة الكادر الإداري مع المهام والأعمال المكلف بها',docs:['سجل الوصف الوظيفي','بيانات الكادر الإداري من نظام نور']}
+      ]},
+      {id:'3-1-4-1',text:'تظهر المدرسة ثباتاً واستدامة مالية',source:'مدير المدرسة',items:[
+        {text:'توفر المدرسة خطة وتقريراً مالياً سنوياً معتمداً',docs:['سجل الخطة المالية','سجل فريق الصندوق المدرسي']},
+        {text:'توزع المدرسة الموارد المالية وفق أولوياتها لدعم العملية التعليمية',docs:['سجل الخطة المالية']},
+        {text:'تظهر المدرسة القدرة على تغطية التزاماتها المالية',docs:['سجل الموازنة المالية']},
+        {text:'تنشر المدرسة سياسات واضحة في الرسوم والتحصيل لأصحاب المصلحة',docs:['سجل السياسات المالية','سجل تحصيل الرسوم','استمارة الرسوم الدراسية','الموقع الإلكتروني للمدرسة']}
+      ]},
+      {id:'4-1-4-1',text:'تشجع المدرسة منسوبيها للحصول على الرخصة المهنية',source:'مدير المدرسة',items:[
+        {text:'توفر المدرسة أنشطة وبرامج توعوية للحصول على الرخصة المهنية',docs:['سجل الرخص المهنية','سجل النمو المهني']}
+      ]},
+      {id:'5-1-4-1',text:'تدعم المدرسة التطوير المهني لمنسوبيها وفقاً لنتائج تقويم الأداء الوظيفي',source:'مدير المدرسة',items:[
+        {text:'تبني المدرسة خطة التطوير المهني وفق نتائج تقويم الأداء الوظيفي واحتياجات منسوبيها',docs:['سجل النمو المهني']},
+        {text:'تنفذ المدرسة خطة التطوير المهني لمنسوبيها وتتابعها بانتظام',docs:['سجل النمو المهني']}
+      ]},
+      {id:'6-1-4-1',text:'تطبق المدرسة التقويم الذاتي المبني على المعايير المعتمدة من الهيئة',source:'مدير المدرسة',items:[
+        {text:'تطبق المدرسة التقويم الذاتي المبني على المعايير المعتمدة من الهيئة',docs:['سجل لجنة التميز المدرسي','سجل التقويم الذاتي']},
+        {text:'تشرك المدرسة منسوبيها في عمليات التقويم الذاتي ونتائجه',docs:['سجل التقويم الذاتي']}
+      ]},
+      {id:'7-1-4-1',text:'تنفذ المدرسة خطة للتحسين بناء على نتائج التقويم المدرسي، وتتابعها',source:'مدير المدرسة',items:[
+        {text:'تبني المدرسة خطة التحسين في ضوء نتائج التقويم المدرسي',docs:['سجل تطوير وتحسين الخطة التشغيلية','سجل اللجنة الإدارية']},
+        {text:'تنفذ المدرسة خطة التحسين وتتابعها',docs:['سجل تطوير وتحسين الخطة التشغيلية']}
+      ]}
+    ]}
+  ]},
+  {id:'d2',name:'مجال التعليم والتعلم',icon:'📚',standards:[
+    {id:'s2-1',name:'معيار بناء خبرات التعلم',indicators:[
+      {id:'2-1-1-2',text:'تدعم المدرسة تنفيذ المناهج؛ لتحقيق نواتج التعلم المستهدفة وفق الخطة الدراسية',source:'وكيل الشؤون التعليمية',items:[
+        {text:'توفر المدرسة أنشطة ومصادر لدعم تعلم محتوى المناهج (المعارف والمهارات والقيم)',docs:['عينة من ملفات إنجاز المعلمين','عينة من الأنشطة الصفية']},
+        {text:'تتابع المدرسة تنفيذ المناهج لتحقيق نواتج التعلم المستهدفة وفق الخطة الدراسية',docs:['عينة من خطة توزيع المنهج','ملف متابعة تنفيذ المنهج','عينة من ملفات إنجاز المعلمين']}
+      ]},
+      {id:'6-1-1-2',text:'تنمي المدرسة المهارات القرائية والعددية الأساسية لدى المتعلمين',source:'وكيل الشؤون التعليمية، وكيل الشؤون الطلابية',items:[
+        {text:'تنمي المدرسة المهارات القرائية والعددية الأساسية لدى المتعلمين',docs:['سجل الأنشطة الإثرائية','سجل الأنشطة العلاجية','سجل المسابقات','نتائج الاختبارات الوطنية','سجل تحدي القراءة','سجل سد الفجوة (للرياضيات)']}
+      ]},
+      {id:'7-1-1-2',text:'تنمي المدرسة مهارات التفكير العليا لدى المتعلمين',source:'وكيل الشؤون الطلابية',items:[
+        {text:'توفر المدرسة أنشطة تنمي مهارات التفكير العليا (الناقد والإبداع وحل المشكلات) لدى المتعلمين',docs:['عينة من الأنشطة الصفية الخاصة بالمتعلمين']}
+      ]}
+    ]},
+    {id:'s2-2',name:'معيار تقويم التعلم',indicators:[
+      {id:'1-1-2-2',text:'تقوم المدرسة أداء المتعلمين باستخدام أساليب وأدوات تقويم متنوعة وفاعلة',source:'وكيل الشؤون التعليمية، وكيل الشؤون الطلابية',items:[
+        {text:'تستخدم المدرسة أساليب وأدوات تقويم متنوعة تظهر التمايز في أداء المتعلمين',docs:['عينة من الأنشطة الصفية الخاصة بالمتعلمين','سجل تحضير الدروس','سجل النمو المهني']}
+      ]},
+      {id:'2-1-2-2',text:'تحلل المدرسة نتائج التقويم وتوظفها في تحسين نواتج التعلم بانتظام',source:'مدير المدرسة، وكيل الشؤون الطلابية',items:[
+        {text:'تحلل المدرسة نتائج تقويم أداء المتعلمين، وتوظفها في تحسين تعلمهم بانتظام',docs:['سجل تحليل النتائج (لتخصصات مختلفة)','سجل الأنشطة العلاجية','سجل الأنشطة الإثرائية','سجل لجنة التحصيل الدراسي']}
+      ]},
+      {id:'3-1-2-2',text:'تقدم المدرسة التغذية الراجعة للمتعلمين بانتظام',source:'وكيل الشؤون التعليمية',items:[
+        {text:'تقدم المدرسة تغذية راجعة للمتعلمين بانتظام',docs:['سجل متابعة أداء المتعلمين','سجل إنجاز المتعلمين / الكتب']}
+      ]}
+    ]}
+  ]},
+  {id:'d3',name:'مجال نواتج التعلم',icon:'🏆',standards:[
+    {id:'s3-1',name:'معيار التطور الشخصي والصحي والاجتماعي',indicators:[
+      {id:'4-1-2-3',text:'يشارك المتعلمون في الأنشطة المجتمعية والأعمال التطوعية',source:'وكيل الشؤون الطلابية، الموجه الطلابي',items:[
+        {text:'يشارك المتعلمون في أعمال تطوعية تخدم المجتمع',docs:['سجل العمل التطوعي','سجل التوجيه والإرشاد']}
+      ]},
+      {id:'5-1-2-3',text:'يلتزم المتعلمون بقواعد السلوك والانضباط المدرسي',source:'وكيل الشؤون الطلابية، الموجه الطلابي',items:[
+        {text:'نسبة المتعلمين الملتزمين بقواعد السلوك',docs:['سجل المخالفات السلوكية','سجل التوجيه والإرشاد']},
+        {text:'نسبة المتعلمين المنتظمين في الحضور',docs:['سجل الانضباط المدرسي','سجل التوجيه والإرشاد (التكريم)']}
+      ]}
+    ]}
+  ]},
+  {id:'d4',name:'مجال البيئة المدرسية',icon:'🏗️',standards:[
+    {id:'s4-1',name:'الأمن والسلامة',indicators:[
+      {id:'1-1-2-4',text:'تتوافر في فصول المدرسة ومعاملها وجميع مرافقها متطلبات الأمن والسلامة',source:'وكيل الشؤون المدرسية',items:[
+        {text:'يوجد لدى المدرسة شهادة الأمن والسلامة من الدفاع المدني سارية العمل بها',docs:['ملف لجنة الأمن والسلامة','شهادة الأمن والسلامة من الدفاع المدني (سارية)']},
+        {text:'الشهادات الصحية للعاملين سارية المفعول',docs:['سجل الموجه الصحي']}
+      ]},
+      {id:'2-1-2-4',text:'تعمل المدرسة على صيانة جميع مرافق المبنى وتجهيزاته بانتظام',source:'وكيل الشؤون المدرسية',items:[
+        {text:'تتوافر خطط لأعمال الصيانة الوقائية والعلاجية بانتظام',docs:['سجل الصيانة']}
+      ]}
+    ]}
+  ]}
+];
+
+// ====== SELF ASSESSMENT FUNCTIONS ======
+var _qwStack=[];
+
+function showQawwim(){
+  _qwStack=[];
+  showPage('pgQawwim');
+  qwRenderDomains();
+}
+
+function qwGoBack(){
+  if(_qwStack.length===0){showPage('pgLanding');return;}
+  _qwStack.pop();
+  if(_qwStack.length===0){qwRenderDomains();}
+  else{qwRenderDomain(_qwStack[_qwStack.length-1]);}
+}
+
+function qwRenderDomains(){
+  document.getElementById('qwTitle').textContent='التقويم الذاتي';
+  document.getElementById('qwBreadcrumb').innerHTML='<span>التقويم الذاتي</span>';
+  var html='<div class="qw-domains">'+
+    QDATA.map(function(d){
+      var totalInd=d.standards.reduce(function(n,s){return n+s.indicators.length;},0);
+      return '<div class="qw-domain-card" onclick="qwRenderDomain(\''+d.id+'\')">'+
+        '<div class="qw-domain-icon">'+d.icon+'</div>'+
+        '<div class="qw-domain-name">'+d.name+'</div>'+
+        '<div class="qw-domain-count">'+d.standards.length+' معايير | '+totalInd+' مؤشرات</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+  document.getElementById('qwBody').innerHTML=html;
+}
+
+function qwRenderDomain(dId){
+  var d=QDATA.find(function(x){return x.id===dId;});
+  if(!d) return;
+  _qwStack=[dId];
+  document.getElementById('qwTitle').textContent=d.name;
+  document.getElementById('qwBreadcrumb').innerHTML=
+    '<span onclick="qwRenderDomains()" style="cursor:pointer;opacity:0.7">التقويم الذاتي</span>'+
+    ' › <span>'+d.name+'</span>';
+  var html='<div class="qw-content">'+
+    d.standards.map(function(s){
+      return '<div class="qw-standard">'+
+        '<div class="qw-standard-header" onclick="qwToggleStandard(this)">'+
+          '<div>'+
+            '<div class="qw-standard-name">'+s.name+'</div>'+
+            '<div class="qw-standard-meta">'+s.indicators.length+' مؤشرات</div>'+
+          '</div>'+
+          '<span class="qw-caret">▼</span>'+
+        '</div>'+
+        '<div class="qw-standard-body">'+
+          s.indicators.map(function(ind){
+            return '<div class="qw-indicator" onclick="qwToggleIndicator(this)">'+
+              '<div class="qw-ind-header">'+
+                '<span class="qw-ind-id">('+ind.id+')</span>'+
+                '<span class="qw-ind-text">'+ind.text+'</span>'+
+                '<span class="qw-caret" style="flex-shrink:0">▼</span>'+
+              '</div>'+
+              '<div class="qw-ind-source">المصدر: '+ind.source+'</div>'+
+              '<div class="qw-ind-body">'+
+                ind.items.map(function(item,i){
+                  return '<div class="qw-item">'+
+                    '<div class="qw-item-text"><b>'+(i+1)+'.</b> '+item.text+'</div>'+
+                    '<div class="qw-docs">'+
+                      item.docs.map(function(doc){return '<span class="qw-doc">📄 '+doc+'</span>';}).join('')+
+                    '</div>'+
+                  '</div>';
+                }).join('')+
+              '</div>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+  document.getElementById('qwBody').innerHTML=html;
+}
+
+function qwToggleStandard(el){
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+  var caret=el.querySelector('.qw-caret');
+  if(caret) caret.classList.toggle('open');
+}
+
+function qwToggleIndicator(el){
+  el.classList.toggle('open');
+  var body=el.querySelector('.qw-ind-body');
+  var caret=el.querySelector('.qw-ind-header .qw-caret');
+  if(body) body.classList.toggle('open');
+  if(caret) caret.classList.toggle('open');
+}
+
 const WEEKS=[
   'الأسبوع الأول — 29/7/1447 | 18/1/2026 إلى 22/1/2026',
   'الأسبوع الثاني — 6/8/1447 | 25/1/2026 إلى 29/1/2026',
@@ -1293,7 +1577,7 @@ var survTargets=[]; // selected survey targets
 
 // ====== PAGES ======
 function showPage(id){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin'].forEach(function(p){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim'].forEach(function(p){
     document.getElementById(p).classList.add('hidden');
   });
   document.getElementById(id).classList.remove('hidden');
@@ -1479,7 +1763,7 @@ function doAdminLogin(){
 }
 
 function showAdminDashboard(){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey'].forEach(function(pg){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgQawwim'].forEach(function(pg){
     document.getElementById(pg).classList.add('hidden');
   });
   document.getElementById('pgAdmin').classList.remove('hidden');
