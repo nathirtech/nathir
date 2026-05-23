@@ -781,8 +781,12 @@ tr:hover td{background:var(--gb)}
             </select>
           </div>
           <div class="wkf-field">
-            <label>تاريخ المؤهل (السنة)</label>
-            <input type="text" id="wkfQualYear" placeholder="مثل: 1432هـ">
+            <label>تاريخ المؤهل (ميلادي)</label>
+            <input type="date" id="wkfQualYear" onchange="wkfUpdateQualHijri()">
+          </div>
+          <div class="wkf-field">
+            <label>تاريخ المؤهل (هجري)</label>
+            <input type="text" id="wkfQualYearH" readonly placeholder="يتحدث تلقائياً" style="background:#f5f5f5;color:#333;cursor:default">
           </div>
           <div class="wkf-field">
             <label>التخصص الأصلي</label>
@@ -896,7 +900,7 @@ tr:hover td{background:var(--gb)}
             <tr>
               <td><input type="text" placeholder="اسم الدورة أو البرنامج التدريبي"></td>
               <td><input type="text" placeholder="مثل: 3 أسابيع"></td>
-              <td><input type="text" placeholder="1445/02/10هـ"></td>
+              <td><input type="date" onchange="wkfUpdateRowHijri(this)" style="width:100%;margin-bottom:3px"><input type="text" readonly placeholder="هجري تلقائي" style="width:100%;background:#f5f5f5;color:#333;font-size:11px;cursor:default"></td>
               <td><input type="text" placeholder="المدينة / الجهة"></td>
               <td><select><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="مقبول">مقبول</option></select></td>
               <td><button onclick="this.closest('tr').remove()" style="background:#fee;border:none;color:#c00;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:12px">✕</button></td>
@@ -3710,8 +3714,13 @@ function wkBuildReportHTML(rec, school){
   html+=sectionTitle('ثانياً','المؤهل العلمي والتخصص');
   html+='<tr>'+th('آخر مؤهل علمي')+th('تاريخ المؤهل')+th('التخصص الأصلي')+th('التخصص الفرعي')+th('نوع المؤهل')+th('مصدر المؤهل')+'</tr>';
   html+='<tr>';
-  [rec.qual,rec.qualYear,rec.spec1,rec.spec2,rec.prom,rec.qualSrc].forEach(function(v){
-    html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+  [rec.qual,null,rec.spec1,rec.spec2,rec.prom,rec.qualSrc].forEach(function(v,i){
+    if(i===1){
+      var qh=rec.qualYearH||''; var qg=rec.qualYear||'';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(qh||qg||'—')+(qh&&qg?'<br><span style="font-size:10px;color:#555">'+qg+'</span>':'')+'</td>';
+    } else {
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+    }
   });
   html+='</tr>';
 
@@ -3746,7 +3755,8 @@ function wkBuildReportHTML(rec, school){
       html+='<tr style="background:'+bg+'">';
       html+='<td colspan="2" style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(row.training||'—')+'</td>';
       html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.weeks||'—')+'</td>';
-      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.date||'—')+'</td>';
+      var dh=row.dateH||''; var dg=row.dateG||row.date||'';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(dh||dg||'—')+(dh&&dg?'<br><span style="font-size:10px;color:#555">'+dg+'</span>':'')+'</td>';
       html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.place||'—')+'</td>';
       html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.rating||'—')+'</td>';
       html+='</tr>';
@@ -4074,9 +4084,11 @@ function wkfFillForm(rec){
     var el=document.getElementById(id);
     if(el&&map[id]) el.value=map[id];
   });
-  // populate hijri either from saved value or auto-convert
+  // populate hijri fields
   if(rec.birthDateH) document.getElementById('wkfBirthDateH').value=rec.birthDateH;
   else if(rec.birthDate) wkfUpdateHijri();
+  if(rec.qualYearH) document.getElementById('wkfQualYearH').value=rec.qualYearH;
+  else if(rec.qualYear) wkfUpdateQualHijri();
   if(rec.history&&rec.history.length){
     var tbody=document.getElementById('wkfHistBody');
     tbody.innerHTML='';
@@ -4100,7 +4112,7 @@ function wkfAddHistRowData(row){
   tr.innerHTML=
     '<td><input type="text" value="'+(row.training||'')+'" placeholder="اسم الدورة أو البرنامج التدريبي"></td>'+
     '<td><input type="text" value="'+(row.weeks||'')+'" placeholder="مثل: 3 أسابيع"></td>'+
-    '<td><input type="text" value="'+(row.date||'')+'" placeholder="1445/02/10هـ"></td>'+
+    '<td><input type="date" value="'+(row.dateG||'')+'" onchange="wkfUpdateRowHijri(this)" style="width:100%;margin-bottom:3px"><input type="text" readonly value="'+(row.dateH||'')+'" placeholder="هجري تلقائي" style="width:100%;background:#f5f5f5;color:#333;font-size:11px;cursor:default"></td>'+
     '<td><input type="text" value="'+(row.place||'')+'" placeholder="المدينة / الجهة"></td>'+
     '<td><select>'+ratingOpts+'</select></td>'+
     '<td><button onclick="this.closest(\'tr\').remove()" style="background:#fee;border:none;color:#c00;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:12px">✕</button></td>';
@@ -4113,10 +4125,12 @@ function wkfCollectHistory(){
   rows.forEach(function(tr){
     var cells=tr.querySelectorAll('td');
     var inp=function(i){return cells[i]?cells[i].querySelector('input,select'):null;};
+    var dateInputs=cells[2]?cells[2].querySelectorAll('input'):[];
     var row={
       training: inp(0)?inp(0).value.trim():'',
       weeks:    inp(1)?inp(1).value.trim():'',
-      date:     inp(2)?inp(2).value.trim():'',
+      dateG:    dateInputs[0]?dateInputs[0].value.trim():'',
+      dateH:    dateInputs[1]?dateInputs[1].value.trim():'',
       place:    inp(3)?inp(3).value.trim():'',
       rating:   inp(4)?inp(4).value:''
     };
@@ -4125,12 +4139,26 @@ function wkfCollectHistory(){
   return result;
 }
 
+function gToH(isoDate){
+  if(!isoDate) return '';
+  try{return new Date(isoDate).toLocaleDateString('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});}
+  catch(e){return '';}
+}
+
 function wkfUpdateHijri(){
   var val=document.getElementById('wkfBirthDate').value;
   var hEl=document.getElementById('wkfBirthDateH');
-  if(!val){hEl.value='';return;}
-  try{hEl.value=new Date(val).toLocaleDateString('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});}
-  catch(e){hEl.value='';}
+  hEl.value=gToH(val);
+}
+
+function wkfUpdateQualHijri(){
+  var val=document.getElementById('wkfQualYear').value;
+  document.getElementById('wkfQualYearH').value=gToH(val);
+}
+
+function wkfUpdateRowHijri(dateInput){
+  var next=dateInput.nextElementSibling;
+  if(next) next.value=gToH(dateInput.value);
 }
 
 function wkfInitYearSelects(){
@@ -4193,6 +4221,7 @@ function wkfSubmit(){
     currentWork:document.getElementById('wkfCurrentWork').value.trim(),
     qual:document.getElementById('wkfQual').value,
     qualYear:document.getElementById('wkfQualYear').value.trim(),
+    qualYearH:document.getElementById('wkfQualYearH').value.trim(),
     spec1:document.getElementById('wkfSpec1').value.trim(),
     spec2:document.getElementById('wkfSpec2').value.trim(),
     prom:document.getElementById('wkfProm').value.trim(),
