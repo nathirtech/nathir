@@ -961,8 +961,8 @@ tr:hover td{background:var(--gb)}
     </div>
     <div id="wkfSuccess" class="wkf-submitted" style="display:none">
       <div class="big-icon">✅</div>
-      <h3>تم حفظ بياناتك بنجاح</h3>
-      <p>تم إرسال بياناتك إلى وكيل الشؤون التعليمية بنجاح</p>
+      <h3 id="wkfSuccessTitle">تم إرسال البيانات بنجاح</h3>
+      <p id="wkfSuccessMsg">شكراً جزيلاً، تم استلام بياناتك وحفظها في سجل أحوال الموظفين بنجاح.<br>نقدّر تعاونك ونتمنى لك التوفيق.</p>
     </div>
   </div>
 </div>
@@ -4050,9 +4050,9 @@ function wkfFillForm(rec){
     wkfJobNum:rec.jobNum, wkfLevel:rec.level, wkfGrade:rec.grade, wkfCurrentWork:rec.currentWork,
     wkfQual:rec.qual, wkfQualYear:rec.qualYear, wkfSpec1:rec.spec1, wkfSpec2:rec.spec2,
     wkfProm:rec.prom, wkfQualSrc:rec.qualSrc, wkfQualCountry:rec.qualCountry,
-    wkfWorkPhone:rec.workPhone, wkfWorkExt:rec.workExt, wkfFax:rec.fax,
+    wkfWorkPhone:rec.workPhone, wkfWorkExt:rec.workExt,
     wkfHomePhone:rec.homePhone, wkfMobile:rec.mobile, wkfEmail:rec.email,
-    wkfVacPhone:rec.vacPhone, wkfNeighbour:rec.neighbour, wkfStreet:rec.street,
+    wkfNeighbour:rec.neighbour, wkfStreet:rec.street,
     wkfHouseNum:rec.houseNum, wkfCity:rec.city, wkfZip:rec.zip,
     wkfPOBox:rec.poBox
   };
@@ -4174,11 +4174,9 @@ function wkfSubmit(){
     qualCountry:document.getElementById('wkfQualCountry').value.trim(),
     workPhone:document.getElementById('wkfWorkPhone').value.trim(),
     workExt:document.getElementById('wkfWorkExt').value.trim(),
-    fax:document.getElementById('wkfFax').value.trim(),
     homePhone:document.getElementById('wkfHomePhone').value.trim(),
     mobile:document.getElementById('wkfMobile').value.trim(),
     email:document.getElementById('wkfEmail').value.trim(),
-    vacPhone:document.getElementById('wkfVacPhone').value.trim(),
     neighbour:document.getElementById('wkfNeighbour').value.trim(),
     street:document.getElementById('wkfStreet').value.trim(),
     houseNum:document.getElementById('wkfHouseNum').value.trim(),
@@ -4193,8 +4191,10 @@ function wkfSubmit(){
   if(btn){btn.disabled=true;btn.textContent='جاري الحفظ...';}
   fbWrite('wk_records/'+_wkfSchoolCode+'/'+_wkfTeacherIdx, record)
     .then(function(){
+      document.getElementById('wkfSuccessTitle').textContent='تم إرسال البيانات بنجاح، '+name;
       document.getElementById('wkfFormWrap').style.display='none';
       document.getElementById('wkfSuccess').style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
     })
     .catch(function(){
       if(btn){btn.disabled=false;btn.textContent='حفظ وإرسال البيانات';}
