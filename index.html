@@ -941,21 +941,21 @@ tr:hover td{background:var(--gb)}
             </tr>
             <tr>
               <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ التكليف</th>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td>
             </tr>
             <tr>
               <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ المباشرة</th>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td>
             </tr>
             <tr>
               <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ النقل</th>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
-              <td><input type="text" placeholder="هجري"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td><td class="wkf-dcell"></td><td class="wkf-dcell"></td>
+              <td class="wkf-dcell"></td>
             </tr>
           </tbody>
         </table>
@@ -3773,8 +3773,10 @@ function wkBuildReportHTML(rec, school){
       html+='<table><tbody>';
       html+=sectionTitle('سادساً','التنقلات والتقديرات');
       var rowLabels=['العام الدراسي','اسم المدرسة','جهة بالمدرسة','رقم التكليف','تاريخ التكليف','تاريخ المباشرة','تاريخ النقل'];
-      var rowKeys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
-      // Header row
+      var simpleKeys=['years','schools','depts','taskNums'];
+      var dateGKeys=['taskDatesG','startDatesG','endDatesG'];
+      var dateHKeys=['taskDatesH','startDatesH','endDatesH'];
+      var legacyKeys=['taskDates','startDates','endDates'];
       html+='<tr><th style="background:#0d5e72;color:#fff;border:1px solid #0a4a5a;padding:5px 8px;font-size:11px">البيانات \\ العام</th>';
       activeCols.forEach(function(ci){
         html+='<th style="background:#cce8ed;color:#0a3a4a;border:1px solid #8fc4cc;padding:5px 8px;font-size:11px;text-align:center;font-weight:700">'+(trs.years[ci]||'—')+'</th>';
@@ -3783,8 +3785,16 @@ function wkBuildReportHTML(rec, school){
       rowLabels.slice(1).forEach(function(lbl,li){
         html+='<tr><th style="background:#cce8ed;color:#0a3a4a;border:1px solid #8fc4cc;padding:5px 8px;font-size:11px;text-align:right;font-weight:700">'+lbl+'</th>';
         activeCols.forEach(function(ci){
-          var val=trs[rowKeys[li+1]]&&trs[rowKeys[li+1]][ci]?trs[rowKeys[li+1]][ci]:'—';
-          html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:11px;text-align:center">'+val+'</td>';
+          var val;
+          if(li<3){
+            val=trs[simpleKeys[li+1]]&&trs[simpleKeys[li+1]][ci]?trs[simpleKeys[li+1]][ci]:'—';
+            html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:11px;text-align:center">'+val+'</td>';
+          } else {
+            var dh=(trs[dateHKeys[li-3]]||trs[legacyKeys[li-3]]||[])[ci]||'';
+            var dg=(trs[dateGKeys[li-3]]||[])[ci]||'';
+            val=(dh||dg||'—')+(dh&&dg?'<br><span style="font-size:9px;color:#666">'+dg+'</span>':'');
+            html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:11px;text-align:center">'+val+'</td>';
+          }
         });
         html+='</tr>';
       });
@@ -4171,19 +4181,36 @@ function wkfInitYearSelects(){
   document.getElementById('wkfYearRow').querySelectorAll('td').forEach(function(td){
     td.innerHTML='<select style="'+selStyle+'">'+opts+'</select>';
   });
+  var dcStyle='width:100%;font-size:11px;border:1px solid #ddd;border-radius:4px;padding:3px 5px;font-family:inherit;margin-bottom:2px';
+  var dhStyle='width:100%;font-size:10px;background:#f5f5f5;color:#333;cursor:default;border:1px solid #eee;border-radius:4px;padding:3px 5px;font-family:inherit';
+  document.querySelectorAll('#wkfTransferTable .wkf-dcell').forEach(function(td){
+    td.innerHTML='<input type="date" class="wkf-td-g" onchange="wkfUpdateRowHijri(this)" style="'+dcStyle+'">'
+      +'<input type="text" readonly class="wkf-td-h" placeholder="هجري" style="'+dhStyle+'">';
+  });
 }
 
 function wkfCollectTransfers(){
   var table=document.getElementById('wkfTransferTable');
   if(!table) return null;
   var rows=table.querySelectorAll('tbody tr');
-  var result={years:[],schools:[],depts:[],taskNums:[],taskDates:[],startDates:[],endDates:[]};
-  var keys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
+  var result={years:[],schools:[],depts:[],taskNums:[],
+    taskDatesG:[],taskDatesH:[],startDatesG:[],startDatesH:[],endDatesG:[],endDatesH:[]};
+  var simpleKeys=['years','schools','depts','taskNums'];
+  var dateGKeys=['taskDatesG','startDatesG','endDatesG'];
+  var dateHKeys=['taskDatesH','startDatesH','endDatesH'];
   rows.forEach(function(tr,ri){
-    var inputs=tr.querySelectorAll('td input, td select');
-    inputs.forEach(function(inp,ci){
-      if(result[keys[ri]]) result[keys[ri]][ci]=inp.value.trim();
-    });
+    if(ri<4){
+      tr.querySelectorAll('td input, td select').forEach(function(inp,ci){
+        result[simpleKeys[ri]][ci]=inp.value.trim();
+      });
+    } else {
+      tr.querySelectorAll('td.wkf-dcell').forEach(function(td,ci){
+        var gInp=td.querySelector('.wkf-td-g');
+        var hInp=td.querySelector('.wkf-td-h');
+        result[dateGKeys[ri-4]][ci]=gInp?gInp.value.trim():'';
+        result[dateHKeys[ri-4]][ci]=hInp?hInp.value.trim():'';
+      });
+    }
   });
   return result;
 }
@@ -4193,13 +4220,25 @@ function wkfFillTransfers(tr){
   var table=document.getElementById('wkfTransferTable');
   if(!table) return;
   var rows=table.querySelectorAll('tbody tr');
-  var keys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
+  var simpleKeys=['years','schools','depts','taskNums'];
+  var dateGKeys=['taskDatesG','startDatesG','endDatesG'];
+  var dateHKeys=['taskDatesH','startDatesH','endDatesH'];
+  // backward compat: old records used taskDates/startDates/endDates
+  var legacyKeys=['taskDates','startDates','endDates'];
   rows.forEach(function(row,ri){
-    var inputs=row.querySelectorAll('td input, td select');
-    var arr=tr[keys[ri]]||[];
-    inputs.forEach(function(inp,ci){
-      if(arr[ci]) inp.value=arr[ci];
-    });
+    if(ri<4){
+      var arr=tr[simpleKeys[ri]]||[];
+      row.querySelectorAll('td input, td select').forEach(function(inp,ci){if(arr[ci]) inp.value=arr[ci];});
+    } else {
+      var arrG=tr[dateGKeys[ri-4]]||[];
+      var arrH=tr[dateHKeys[ri-4]]||tr[legacyKeys[ri-4]]||[];
+      row.querySelectorAll('td.wkf-dcell').forEach(function(td,ci){
+        var gInp=td.querySelector('.wkf-td-g');
+        var hInp=td.querySelector('.wkf-td-h');
+        if(gInp&&arrG[ci]) gInp.value=arrG[ci];
+        if(hInp&&arrH[ci]) hInp.value=arrH[ci];
+      });
+    }
   });
 }
 
