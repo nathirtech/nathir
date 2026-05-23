@@ -580,6 +580,7 @@ tr:hover td{background:var(--gb)}
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span id="wkSchoolName" style="font-size:12px;color:var(--tm);font-weight:600"></span>
+      <button class="btn btn-o btn-sm" onclick="wkRefresh(this)">🔄 تحديث</button>
       <button class="btn btn-o btn-sm" onclick="wkLogout()">خروج</button>
     </div>
   </div>
@@ -3529,6 +3530,15 @@ function wkLogout(){
   wkStaff=null; wkSchool=null;
   document.getElementById('pgWakeel').classList.add('hidden');
   document.getElementById('pgLanding').classList.remove('hidden');
+}
+
+function wkRefresh(btn){
+  var orig=btn.textContent;
+  btn.textContent='⏳';
+  btn.disabled=true;
+  var activeTab=document.querySelector('#pgWakeel .nav-tab.active');
+  if(activeTab) activeTab.click();
+  setTimeout(function(){btn.textContent=orig;btn.disabled=false;},800);
 }
 
 function wkSwitchTab(tab,btn){
