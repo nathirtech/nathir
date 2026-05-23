@@ -722,8 +722,12 @@ tr:hover td{background:var(--gb)}
             <input type="text" id="wkfIdNum" placeholder="0000000000">
           </div>
           <div class="wkf-field">
-            <label>تاريخ الميلاد</label>
-            <input type="date" id="wkfBirthDate">
+            <label>تاريخ الميلاد (ميلادي)</label>
+            <input type="date" id="wkfBirthDate" onchange="wkfUpdateHijri()">
+          </div>
+          <div class="wkf-field">
+            <label>تاريخ الميلاد (هجري)</label>
+            <input type="text" id="wkfBirthDateH" readonly placeholder="يتحدث تلقائياً" style="background:#f5f5f5;color:#333;cursor:default">
           </div>
           <div class="wkf-field">
             <label>مكان الميلاد</label>
@@ -3692,7 +3696,7 @@ function wkBuildReportHTML(rec, school){
   html+='<td colspan="2" style="border:1px solid #aaa;padding:5px 8px;font-size:13px;font-weight:700">'+(rec.name||'—')+'</td>';
   html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.nat||'—')+'</td>';
   html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.idNum||'—')+'</td>';
-  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthDate||'—')+'</td>';
+  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthDateH||rec.birthDate||'—')+(rec.birthDateH&&rec.birthDate?'<br><span style="font-size:10px;color:#555">'+rec.birthDate+'</span>':'')+'</td>';
   html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthPlace||'—')+'</td>';
   html+='</tr>';
   html+='<tr>'+th('الحالة الاجتماعية')+th('الوظيفة')+th('رقم الوظيفة')+th('المستوى الوظيفي')+th('الدرجة الوظيفية')+th('العمل الحالي')+'</tr>';
@@ -4070,6 +4074,9 @@ function wkfFillForm(rec){
     var el=document.getElementById(id);
     if(el&&map[id]) el.value=map[id];
   });
+  // populate hijri either from saved value or auto-convert
+  if(rec.birthDateH) document.getElementById('wkfBirthDateH').value=rec.birthDateH;
+  else if(rec.birthDate) wkfUpdateHijri();
   if(rec.history&&rec.history.length){
     var tbody=document.getElementById('wkfHistBody');
     tbody.innerHTML='';
@@ -4116,6 +4123,14 @@ function wkfCollectHistory(){
     if(row.training) result.push(row);
   });
   return result;
+}
+
+function wkfUpdateHijri(){
+  var val=document.getElementById('wkfBirthDate').value;
+  var hEl=document.getElementById('wkfBirthDateH');
+  if(!val){hEl.value='';return;}
+  try{hEl.value=new Date(val).toLocaleDateString('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});}
+  catch(e){hEl.value='';}
 }
 
 function wkfInitYearSelects(){
@@ -4168,6 +4183,7 @@ function wkfSubmit(){
     nat:document.getElementById('wkfNat').value,
     idNum:document.getElementById('wkfIdNum').value.trim(),
     birthDate:document.getElementById('wkfBirthDate').value,
+    birthDateH:document.getElementById('wkfBirthDateH').value,
     birthPlace:document.getElementById('wkfBirthPlace').value.trim(),
     marital:document.getElementById('wkfMarital').value,
     jobTitle:document.getElementById('wkfJobTitle').value.trim(),
