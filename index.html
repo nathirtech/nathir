@@ -744,14 +744,22 @@ tr:hover td{background:var(--gb)}
           </div>
           <div class="wkf-field">
             <label>الوظيفة</label>
-            <input type="text" id="wkfJobTitle" placeholder="معلم / إداري...">
+            <select id="wkfJobTitle" onchange="wkfJobChange()">
+              <option value="">— اختر —</option>
+              <option value="معلم">معلم</option>
+              <option value="مدير">مدير</option>
+              <option value="وكيل">وكيل</option>
+              <option value="موجه طلابي">موجه طلابي</option>
+              <option value="رائد نشاط">رائد نشاط</option>
+              <option value="إداري">إداري</option>
+            </select>
           </div>
           <div class="wkf-field">
             <label>رقم الوظيفة</label>
             <input type="text" id="wkfJobNum" placeholder="---">
           </div>
           <div class="wkf-field">
-            <label>المستوى الوظيفي</label>
+            <label id="wkfLevelLabel">المستوى الوظيفي</label>
             <input type="text" id="wkfLevel" placeholder="الأول / الثاني / الثالث...">
           </div>
           <div class="wkf-field">
@@ -3703,7 +3711,8 @@ function wkBuildReportHTML(rec, school){
   html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthDateH||rec.birthDate||'—')+(rec.birthDateH&&rec.birthDate?'<br><span style="font-size:10px;color:#555">'+rec.birthDate+'</span>':'')+'</td>';
   html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthPlace||'—')+'</td>';
   html+='</tr>';
-  html+='<tr>'+th('الحالة الاجتماعية')+th('الوظيفة')+th('رقم الوظيفة')+th('المستوى الوظيفي')+th('الدرجة الوظيفية')+th('العمل الحالي')+'</tr>';
+  var levelLbl=rec.jobTitle==='إداري'?'المرتبة الوظيفية':'المستوى الوظيفي';
+  html+='<tr>'+th('الحالة الاجتماعية')+th('الوظيفة')+th('رقم الوظيفة')+th(levelLbl)+th('الدرجة الوظيفية')+th('العمل الحالي')+'</tr>';
   html+='<tr>';
   [rec.marital,rec.jobTitle,rec.jobNum,rec.level,rec.grade,rec.currentWork].forEach(function(v){
     html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
@@ -4094,6 +4103,7 @@ function wkfFillForm(rec){
     var el=document.getElementById(id);
     if(el&&map[id]) el.value=map[id];
   });
+  wkfJobChange();
   // populate hijri fields
   if(rec.birthDateH) document.getElementById('wkfBirthDateH').value=rec.birthDateH;
   else if(rec.birthDate) wkfUpdateHijri();
@@ -4153,6 +4163,11 @@ function gToH(isoDate){
   if(!isoDate) return '';
   try{return new Date(isoDate).toLocaleDateString('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});}
   catch(e){return '';}
+}
+
+function wkfJobChange(){
+  var isAdmin=document.getElementById('wkfJobTitle').value==='إداري';
+  document.getElementById('wkfLevelLabel').textContent=isAdmin?'المرتبة الوظيفية':'المستوى الوظيفي';
 }
 
 function wkfUpdateHijri(){
