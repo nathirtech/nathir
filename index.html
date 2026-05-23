@@ -437,6 +437,82 @@ tr:hover td{background:var(--gb)}
   #pgLanding .foot-grid{grid-template-columns:1fr;gap:18px}
   .header-logo img{height:54px!important}
 }
+/* ====== WAKEEL FORM (teacher fills) ====== */
+#pgWkForm{min-height:100vh;background:#f0f4f8;direction:rtl;padding-bottom:3rem}
+.wkf-header{background:linear-gradient(135deg,var(--gd) 0%,var(--gl) 100%);color:#fff;padding:1.2rem 1.5rem;text-align:center}
+.wkf-header h2{font-size:1.2rem;font-weight:700;margin:0;letter-spacing:.3px}
+.wkf-header p{font-size:12px;margin:4px 0 0;opacity:.85}
+.wkf-container{max-width:860px;margin:0 auto;padding:1.2rem 1rem}
+.wkf-section{background:#fff;border-radius:12px;border:1.5px solid var(--bd);margin-bottom:1.2rem;overflow:hidden}
+.wkf-section-title{background:var(--gp);padding:10px 16px;font-size:13px;font-weight:700;color:var(--gd);border-bottom:1.5px solid var(--bd);display:flex;align-items:center;gap:8px}
+.wkf-section-body{padding:14px 16px}
+.wkf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.wkf-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wkf-field{display:flex;flex-direction:column;gap:4px}
+.wkf-field label{font-size:11px;font-weight:700;color:var(--tm)}
+.wkf-field input,.wkf-field select,.wkf-field textarea{border:1.5px solid var(--bd);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:13px;color:var(--tx);background:#fafbfc;direction:rtl;transition:border-color .15s}
+.wkf-field input:focus,.wkf-field select:focus,.wkf-field textarea:focus{outline:none;border-color:var(--gl);background:#fff}
+.wkf-field input[readonly]{background:#f4f5f7;color:var(--tl)}
+.wkf-htable{width:100%;border-collapse:collapse;font-size:12px}
+.wkf-htable th{background:var(--gd);color:#fff;padding:7px 8px;text-align:right;font-weight:700;font-size:11px}
+.wkf-htable td{padding:6px 8px;border-bottom:1px solid #eee;vertical-align:middle}
+.wkf-htable td input{border:1px solid #ddd;border-radius:5px;padding:4px 7px;font-family:inherit;font-size:12px;width:100%;background:#fafbfc}
+.wkf-htable tr:hover td{background:#f8faff}
+.wkf-add-row{font-size:12px;color:var(--gl);background:none;border:1px dashed var(--gl);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;font-weight:600;margin-top:8px;width:100%;transition:all .15s}
+.wkf-add-row:hover{background:var(--gp)}
+.wkf-submit-bar{text-align:center;padding-top:.5rem}
+.wkf-submitted{text-align:center;padding:2rem;background:#fff;border-radius:12px;border:1.5px solid #c3e6cb}
+.wkf-submitted .big-icon{font-size:3rem;margin-bottom:.5rem}
+.wkf-submitted h3{color:#155724;font-size:1.1rem;margin:0 0 8px}
+.wkf-submitted p{color:var(--tm);font-size:13px;margin:0}
+.rec-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700}
+.rec-submitted{background:#d4edda;color:#155724}
+.rec-pending{background:#fff3cd;color:#856404}
+.rec-actions{display:flex;gap:6px;flex-wrap:wrap}
+@media print{
+  #pgWkForm .wkf-header,#pgWkForm .wkf-submit-bar,#pgWkForm .wkf-add-row,#pgWkForm .wkf-htable td button{display:none}
+  body{direction:rtl}
+  .wkf-container{padding:0;max-width:100%}
+  .wkf-section{page-break-inside:avoid;border:1px solid #aaa}
+  .wkf-field input,.wkf-field select,.wkf-field textarea{border:none;background:none;padding:0}
+}
+/* ====== WAKEEL DASHBOARD ====== */
+#pgWakeel{min-height:100vh;background:#f5f4f0;direction:rtl}
+.wk-header{background:linear-gradient(90deg,#ddd9d0 0%,#f5f4f0 30%,#f5f4f0 70%,#ddd9d0 100%);border-bottom:3px solid var(--gd);padding:0.5rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.wk-header-info h2{font-size:16px;font-weight:700;color:var(--gd)}
+.wk-header-info p{font-size:11px;color:var(--tm);margin-top:2px}
+#pgWakeel .nav{margin-top:-22px}
+.wk-body{max-width:960px;margin:0 auto;padding:1.5rem}
+.wk-section-title{font-size:14px;font-weight:700;color:var(--gd);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.wk-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;border:1.5px solid var(--bd)}
+.wk-table th{background:var(--gp);color:var(--gd);padding:9px 12px;text-align:right;font-size:12px;font-weight:700;border-bottom:1px solid var(--bd)}
+.wk-table td{padding:9px 12px;border-bottom:1px solid #f0f0f0;color:var(--tx);vertical-align:middle}
+.wk-table tr:last-child td{border-bottom:none}
+.wk-table tr:hover td{background:#fafbfc}
+.status-badge{padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
+.sb-present{background:#d4edda;color:#155724}
+.sb-absent{background:#f8d7da;color:#721c24}
+.sb-permission{background:#fff3cd;color:#856404}
+.sb-late{background:#d1ecf1;color:#0c5460}
+.wk-status-sel{padding:4px 8px;border:1.5px solid var(--bd);border-radius:6px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;background:#fff}
+.wk-card{background:#fff;border-radius:10px;border:1.5px solid var(--bd);padding:1.2rem;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px}
+.wk-card-icon{width:38px;height:38px;border-radius:8px;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.wk-card-info{flex:1;min-width:0}
+.wk-card-name{font-size:13px;font-weight:700;color:var(--tx)}
+.wk-card-meta{font-size:11px;color:var(--tl);margin-top:2px}
+.wk-card-actions{display:flex;gap:6px;flex-shrink:0}
+.wk-form-box{background:#fff;border-radius:10px;border:1.5px solid var(--bd);padding:1.2rem;margin-bottom:1.2rem}
+.wk-form-box h3{font-size:13px;font-weight:700;color:var(--gd);margin-bottom:0.8rem;padding-bottom:0.5rem;border-bottom:1px solid var(--bd)}
+.wk-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.wk-form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+.wk-input{width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:12px;font-family:inherit;outline:none}
+.wk-input:focus{border-color:var(--gl)}
+.perm-pill{padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+.perm-pending{background:#fff3cd;color:#856404}
+.perm-approved{background:#d4edda;color:#155724}
+.perm-rejected{background:#f8d7da;color:#721c24}
+.empty-wk{text-align:center;padding:2.5rem;color:var(--tl);font-size:13px}
+.empty-wk span{display:block;font-size:2.5rem;margin-bottom:0.5rem}
 /* ====== SELF ASSESSMENT PAGE ====== */
 #pgQawwim{min-height:100vh;background:#f5f7fa;direction:rtl}
 .qw-header{background:linear-gradient(135deg,#1a3a6b,#0099b8);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -490,6 +566,405 @@ tr:hover td{background:var(--gb)}
   <img src="logo.png" alt="رابط">
   <div class="spinner"></div>
   <p>جاري تحميل البيانات...</p>
+</div>
+
+<!-- WAKEEL DASHBOARD -->
+<div id="pgWakeel" class="hidden">
+  <div class="wk-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <img src="logo.png" style="height:54px;width:auto;">
+      <div class="wk-header-info">
+        <h2 id="wkStaffName">لوحة تحكم الوكيل</h2>
+        <p id="wkStaffRole"></p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="wkSchoolName" style="font-size:12px;color:var(--tm);font-weight:600"></span>
+      <button class="btn btn-o btn-sm" onclick="wkLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="wkTabStatus" onclick="wkSwitchTab('status',this)">👥 أحوال الموظفين</button>
+      <button class="nav-tab" id="wkTabFiles" onclick="wkSwitchTab('files',this)">📁 ملفات إنجاز المعلمين</button>
+      <button class="nav-tab" id="wkTabPerm" onclick="wkSwitchTab('perm',this)">📋 استئذان المعلمين</button>
+    </div>
+  </div>
+
+  <div class="wk-body">
+    <!-- أحوال الموظفين -->
+    <div id="wkPaneStatus">
+      <div class="wk-section-title">
+        <span>سجلات أحوال الموظفين</span>
+        <button class="btn btn-g btn-sm" onclick="wkSendAllLinks()">📤 إرسال الروابط للجميع</button>
+      </div>
+      <div id="wkStatusTable"></div>
+    </div>
+
+    <!-- ملفات إنجاز المعلمين -->
+    <div id="wkPaneFiles" class="hidden">
+      <div class="wk-section-title">
+        <span>ملفات إنجاز المعلمين</span>
+        <button class="btn btn-g btn-sm" onclick="document.getElementById('wkFileInput').click()">+ إضافة ملف</button>
+      </div>
+      <input type="file" id="wkFileInput" style="display:none" accept=".pdf,.doc,.docx,.jpg,.png" onchange="wkUploadFile(this)">
+      <div class="wk-form-box hidden" id="wkFileForm">
+        <h3>بيانات الملف</h3>
+        <div class="wk-form-row">
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اسم المعلم</label>
+            <select id="wkFileTeacher" class="wk-input">
+              <option value="">اختر المعلم</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">نوع الملف</label>
+            <select id="wkFileType" class="wk-input">
+              <option>شهادة شكر</option>
+              <option>دورة تدريبية</option>
+              <option>مشاركة في نشاط</option>
+              <option>إنجاز أكاديمي</option>
+              <option>أخرى</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">وصف الملف</label>
+          <input type="text" id="wkFileDesc" class="wk-input" placeholder="وصف مختصر">
+        </div>
+        <div id="wkFilePreview" style="font-size:12px;color:var(--gl);margin-bottom:8px"></div>
+        <button class="btn btn-g btn-sm" onclick="wkSaveFile()">حفظ الملف</button>
+        <button class="btn btn-o btn-sm" onclick="document.getElementById('wkFileForm').classList.add('hidden')">إلغاء</button>
+      </div>
+      <div id="wkFilesList"></div>
+    </div>
+
+    <!-- استئذان المعلمين -->
+    <div id="wkPanePerm" class="hidden">
+      <div class="wk-section-title">
+        <span>سجل الاستئذان</span>
+        <button class="btn btn-g btn-sm" onclick="document.getElementById('wkPermForm').classList.toggle('hidden')">+ إضافة استئذان</button>
+      </div>
+      <div class="wk-form-box hidden" id="wkPermForm">
+        <h3>إضافة طلب استئذان</h3>
+        <div class="wk-form-row">
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اسم المعلم</label>
+            <select id="wkPermTeacher" class="wk-input">
+              <option value="">اختر المعلم</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">نوع الاستئذان</label>
+            <select id="wkPermType" class="wk-input">
+              <option>خروج مبكر</option>
+              <option>تأخر</option>
+              <option>غياب</option>
+              <option>مهمة رسمية</option>
+              <option>إجازة مرضية</option>
+              <option>إجازة اضطرارية</option>
+            </select>
+          </div>
+        </div>
+        <div class="wk-form-row">
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">التاريخ</label>
+            <input type="date" id="wkPermDate" class="wk-input">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">الحالة</label>
+            <select id="wkPermStatus" class="wk-input">
+              <option value="approved">موافق عليه</option>
+              <option value="pending">قيد الدراسة</option>
+              <option value="rejected">مرفوض</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">السبب</label>
+          <input type="text" id="wkPermReason" class="wk-input" placeholder="سبب الاستئذان">
+        </div>
+        <button class="btn btn-g btn-sm" onclick="wkSavePerm()">حفظ</button>
+        <button class="btn btn-o btn-sm" onclick="document.getElementById('wkPermForm').classList.add('hidden')">إلغاء</button>
+      </div>
+      <div id="wkPermList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WAKEEL TEACHER FORM -->
+<div id="pgWkForm" class="hidden">
+  <div class="wkf-header">
+    <h2 id="wkfSchoolName">المدرسة</h2>
+    <p>سجل أحوال الموظفين — يُرجى تعبئة جميع الحقول ثم حفظ النموذج</p>
+  </div>
+  <div class="wkf-container">
+    <!-- Section 1: البيانات الشخصية -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">👤 أولاً: البيانات الشخصية</div>
+      <div class="wkf-section-body">
+        <div class="wkf-grid">
+          <div class="wkf-field">
+            <label>اسم الموظف رباعياً</label>
+            <input type="text" id="wkfName" readonly placeholder="يُعبأ تلقائياً">
+          </div>
+          <div class="wkf-field">
+            <label>الجنسية</label>
+            <select id="wkfNat">
+              <option value="سعودي">سعودي</option>
+              <option value="غير سعودي">غير سعودي</option>
+            </select>
+          </div>
+          <div class="wkf-field">
+            <label>رقم بطاقة الأحوال</label>
+            <input type="text" id="wkfIdNum" placeholder="0000000000">
+          </div>
+          <div class="wkf-field">
+            <label>تاريخ الميلاد</label>
+            <input type="date" id="wkfBirthDate">
+          </div>
+          <div class="wkf-field">
+            <label>مكان الميلاد</label>
+            <input type="text" id="wkfBirthPlace" placeholder="المدينة">
+          </div>
+          <div class="wkf-field">
+            <label>الحالة الاجتماعية</label>
+            <select id="wkfMarital">
+              <option value="أعزب">أعزب</option>
+              <option value="متزوج">متزوج</option>
+              <option value="مطلق">مطلق</option>
+              <option value="أرمل">أرمل</option>
+            </select>
+          </div>
+          <div class="wkf-field">
+            <label>الوظيفة</label>
+            <input type="text" id="wkfJobTitle" placeholder="معلم / إداري...">
+          </div>
+          <div class="wkf-field">
+            <label>رقم الوظيفة</label>
+            <input type="text" id="wkfJobNum" placeholder="---">
+          </div>
+          <div class="wkf-field">
+            <label>المستوى الوظيفي</label>
+            <input type="text" id="wkfLevel" placeholder="الأول / الثاني / الثالث...">
+          </div>
+          <div class="wkf-field">
+            <label>الدرجة الوظيفية</label>
+            <input type="text" id="wkfGrade" placeholder="مثل: 10">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: المؤهل والتخصص -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">🎓 ثانياً: المؤهل العلمي والتخصص</div>
+      <div class="wkf-section-body">
+        <div class="wkf-grid">
+          <div class="wkf-field">
+            <label>العمل الحالي</label>
+            <input type="text" id="wkfCurrentWork" placeholder="مسمى المهمة الحالية">
+          </div>
+          <div class="wkf-field">
+            <label>آخر مؤهل علمي</label>
+            <select id="wkfQual">
+              <option value="بكالوريوس">بكالوريوس</option>
+              <option value="دبلوم">دبلوم</option>
+              <option value="ماجستير">ماجستير</option>
+              <option value="دكتوراه">دكتوراه</option>
+            </select>
+          </div>
+          <div class="wkf-field">
+            <label>تاريخ المؤهل (السنة)</label>
+            <input type="text" id="wkfQualYear" placeholder="مثل: 1432هـ">
+          </div>
+          <div class="wkf-field">
+            <label>التخصص الأصلي</label>
+            <input type="text" id="wkfSpec1" placeholder="التخصص الرئيسي">
+          </div>
+          <div class="wkf-field">
+            <label>التخصص الفرعي</label>
+            <input type="text" id="wkfSpec2" placeholder="التخصص الفرعي">
+          </div>
+          <div class="wkf-field">
+            <label>نوع المؤهل</label>
+            <select id="wkfProm">
+              <option value="تربوي">تربوي</option>
+              <option value="غير تربوي">غير تربوي</option>
+            </select>
+          </div>
+          <div class="wkf-field">
+            <label>مصدر المؤهل (الجامعة/المعهد)</label>
+            <input type="text" id="wkfQualSrc" placeholder="اسم الجامعة أو المعهد">
+          </div>
+          <div class="wkf-field">
+            <label>مصدر المؤهل</label>
+            <input type="text" id="wkfQualCountry" value="المملكة العربية السعودية">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: بيانات الاتصال -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">📞 ثالثاً: بيانات الاتصال</div>
+      <div class="wkf-section-body">
+        <div class="wkf-grid">
+          <div class="wkf-field">
+            <label>هاتف العمل المباشر</label>
+            <input type="tel" id="wkfWorkPhone" placeholder="05xxxxxxxx">
+          </div>
+          <div class="wkf-field">
+            <label>هاتف العمل / تحويلة</label>
+            <input type="tel" id="wkfWorkExt" placeholder="---">
+          </div>
+          <div class="wkf-field">
+            <label>هاتف المنزل</label>
+            <input type="tel" id="wkfHomePhone" placeholder="---">
+          </div>
+          <div class="wkf-field">
+            <label>الجوال</label>
+            <input type="tel" id="wkfMobile" placeholder="05xxxxxxxx">
+          </div>
+          <div class="wkf-field">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="wkfEmail" placeholder="example@example.com">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: العنوان -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">🏠 رابعاً: عنوان السكن والعنوان البريدي</div>
+      <div class="wkf-section-body">
+        <div style="font-size:12px;color:var(--tm);font-weight:700;margin-bottom:8px">عنوان السكن الحالي:</div>
+        <div class="wkf-grid" style="margin-bottom:12px">
+          <div class="wkf-field">
+            <label>الحي</label>
+            <input type="text" id="wkfNeighbour" placeholder="اسم الحي">
+          </div>
+          <div class="wkf-field">
+            <label>الشارع</label>
+            <input type="text" id="wkfStreet" placeholder="اسم الشارع">
+          </div>
+          <div class="wkf-field">
+            <label>رقم المنزل</label>
+            <input type="text" id="wkfHouseNum" placeholder="---">
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--tm);font-weight:700;margin-bottom:8px">العنوان البريدي الثابت:</div>
+        <div class="wkf-grid">
+          <div class="wkf-field">
+            <label>المدينة</label>
+            <input type="text" id="wkfCity" placeholder="اسم المدينة">
+          </div>
+          <div class="wkf-field">
+            <label>الرمز البريدي</label>
+            <input type="text" id="wkfZip" placeholder="00000">
+          </div>
+          <div class="wkf-field">
+            <label>صندوق البريد (ص.ب)</label>
+            <input type="text" id="wkfPOBox" placeholder="---">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: الدورات التدريبية -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">📋 خامساً: الدورات التدريبية</div>
+      <div class="wkf-section-body" style="overflow-x:auto">
+        <table class="wkf-htable" id="wkfHistTable">
+          <thead>
+            <tr>
+              <th>الدورات التدريبية التربوية</th>
+              <th>مدتها</th>
+              <th>تاريخها (هجري)</th>
+              <th>مكانها</th>
+              <th>التقدير العام</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="wkfHistBody">
+            <tr>
+              <td><input type="text" placeholder="اسم الدورة أو البرنامج التدريبي"></td>
+              <td><input type="text" placeholder="مثل: 3 أسابيع"></td>
+              <td><input type="text" placeholder="1445/02/10هـ"></td>
+              <td><input type="text" placeholder="المدينة / الجهة"></td>
+              <td><select><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="مقبول">مقبول</option></select></td>
+              <td><button onclick="this.closest('tr').remove()" style="background:#fee;border:none;color:#c00;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:12px">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="wkf-add-row" onclick="wkfAddHistRow()">+ إضافة دورة تدريبية</button>
+      </div>
+    </div>
+
+    <!-- Section 6: التنقلات والتقديرات -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">🔄 سادساً: التنقلات والتقديرات</div>
+      <div class="wkf-section-body" style="overflow-x:auto">
+        <table class="wkf-htable" id="wkfTransferTable" style="min-width:860px">
+          <tbody>
+            <tr id="wkfYearRow">
+              <th style="background:var(--gd);color:#fff;min-width:130px;text-align:right;padding:7px 10px">العام الدراسي</th>
+              <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">اسم المدرسة</th>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">جهة بالمدرسة</th>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">رقم التكليف</th>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+              <td><input type="text"></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ التكليف</th>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ المباشرة</th>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td>
+            </tr>
+            <tr>
+              <th style="background:#1a5276;color:#fff;text-align:right;padding:7px 10px">تاريخ النقل</th>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td><td><input type="text" placeholder="هجري"></td>
+              <td><input type="text" placeholder="هجري"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div id="wkfFormWrap">
+      <div class="wkf-submit-bar">
+        <button class="btn btn-g" onclick="wkfSubmit()" style="padding:10px 40px;font-size:15px">حفظ وإرسال البيانات</button>
+      </div>
+    </div>
+    <div id="wkfSuccess" class="wkf-submitted" style="display:none">
+      <div class="big-icon">✅</div>
+      <h3>تم حفظ بياناتك بنجاح</h3>
+      <p>تم إرسال بياناتك إلى وكيل الشؤون التعليمية بنجاح</p>
+    </div>
+  </div>
 </div>
 
 <!-- SELF ASSESSMENT PAGE -->
@@ -1577,7 +2052,7 @@ var survTargets=[]; // selected survey targets
 
 // ====== PAGES ======
 function showPage(id){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim'].forEach(function(p){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim','pgWakeel','pgWkForm'].forEach(function(p){
     document.getElementById(p).classList.add('hidden');
   });
   document.getElementById(id).classList.remove('hidden');
@@ -1705,7 +2180,8 @@ function doStaffLogin(role){
         if(foundFB){
           cur=foundSchoolFB;
           hideModal(role==='wakeel'?'mdlLoginWakeel':'mdlLoginMowajeh');
-          alert('مرحباً '+foundFB.name+' — سيتم إنشاء لوحة التحكم قريباً');
+          if(role==='wakeel') showWakeelDashboard(foundFB, foundSchoolFB);
+          else alert('مرحباً '+foundFB.name+' — سيتم إنشاء لوحة الموجه قريباً');
         } else {
           err.textContent='اسم المستخدم أو كلمة المرور غير صحيحة';err.style.display='block';
         }
@@ -1715,7 +2191,8 @@ function doStaffLogin(role){
   }
   cur=foundSchool;
   hideModal(role==='wakeel'?'mdlLoginWakeel':'mdlLoginMowajeh');
-  alert('مرحباً '+found.name+' — سيتم إنشاء لوحة التحكم قريباً');
+  if(role==='wakeel') showWakeelDashboard(found, foundSchool);
+  else alert('مرحباً '+found.name+' — سيتم إنشاء لوحة الموجه قريباً');
 }
 
 function doLogin(){
@@ -3011,6 +3488,9 @@ function init(){
   } else if(hash.startsWith('#survey=')){
     var sp=hash.split('#survey=')[1].split('|');
     showSurveyPage(sp[0],parseInt(sp[1]),parseInt(sp[2]));
+  } else if(hash.startsWith('#wkform=')){
+    var wfp=hash.split('#wkform=')[1].split('|');
+    showWkForm(wfp[0], parseInt(wfp[1]));
   } else {
     showPage('pgLanding');
     updateLandingStats();
@@ -3026,6 +3506,701 @@ async function startup(){
   init();
 }
 startup();
+
+// ====== WAKEEL DASHBOARD ======
+var wkStaff=null, wkSchool=null, wkFileUrl='', wkStatusData={};
+
+function showWakeelDashboard(staffMember, school){
+  wkStaff=staffMember;
+  wkSchool=school;
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim'].forEach(function(p){
+    document.getElementById(p).classList.add('hidden');
+  });
+  document.getElementById('pgWakeel').classList.remove('hidden');
+  document.getElementById('wkStaffName').textContent=staffMember.name||'الوكيل';
+  document.getElementById('wkStaffRole').textContent=staffMember.role||'وكيل الشؤون التعليمية';
+  document.getElementById('wkSchoolName').textContent=school.name||'';
+  document.getElementById('wkStatusDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('wkPermDate').value=new Date().toISOString().split('T')[0];
+  wkSwitchTab('status');
+}
+
+function wkLogout(){
+  wkStaff=null; wkSchool=null;
+  document.getElementById('pgWakeel').classList.add('hidden');
+  document.getElementById('pgLanding').classList.remove('hidden');
+}
+
+function wkSwitchTab(tab,btn){
+  ['Status','Files','Perm'].forEach(function(t){
+    document.getElementById('wkPane'+t).classList.add('hidden');
+  });
+  document.getElementById('wkPane'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.remove('hidden');
+  document.querySelectorAll('#pgWakeel .nav-tab').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  if(tab==='status') wkRenderStatus();
+  if(tab==='files') wkRenderFiles();
+  if(tab==='perm') wkRenderPerm();
+}
+
+// --- أحوال الموظفين (نظام السجلات) ---
+var _wkRecordsCache={};
+
+function wkRenderStatus(){
+  if(!wkSchool) return;
+  var d=getSD(wkSchool.code);
+  var teachers=(d&&d.teachers)||[];
+  if(teachers.length===0){
+    document.getElementById('wkStatusTable').innerHTML='<div class="empty-wk"><span>👥</span>لا يوجد معلمون مسجلون في هذه المدرسة</div>';
+    return;
+  }
+  document.getElementById('wkStatusTable').innerHTML='<div style="text-align:center;padding:1rem;color:var(--tl);font-size:13px">جاري تحميل البيانات...</div>';
+  fbRead('wk_records/'+wkSchool.code).then(function(recs){
+    _wkRecordsCache=recs||{};
+    var html='<table class="wk-table"><thead><tr>'+
+      '<th>#</th><th>اسم المعلم</th><th>التخصص</th><th>حالة السجل</th><th>الإجراءات</th>'+
+      '</tr></thead><tbody>'+
+      teachers.map(function(t,i){
+        var rec=_wkRecordsCache[i];
+        var badge=rec
+          ?'<span class="rec-badge rec-submitted">✓ مُعبَّأ</span>'
+          :'<span class="rec-badge rec-pending">⏳ لم يُعبَّأ</span>';
+        var link=location.origin+location.pathname+'#wkform='+wkSchool.code+'|'+i;
+        var actions='<div class="rec-actions">'+
+          '<button class="btn btn-o btn-sm" onclick="wkCopyLink(\''+link+'\',this)">نسخ الرابط</button>'+
+          '<button class="btn btn-g btn-sm" onclick="wkWhatsApp(\''+encodeURIComponent(link)+'\',\''+encodeURIComponent(t.name||'')+'\')">واتساب</button>'+
+          (rec?'<button class="btn" style="background:#e8f4fd;color:#1a5276;font-size:12px;border:1px solid #bee3f8;border-radius:6px;padding:3px 10px;cursor:pointer" onclick="wkViewRecord('+i+')">عرض</button>':'')  +
+          (rec?'<button class="btn" style="background:#f0f8f4;color:#155724;font-size:12px;border:1px solid #c3e6cb;border-radius:6px;padding:3px 10px;cursor:pointer" onclick="wkPrintRecord('+i+',\''+encodeURIComponent(t.name||'')+'\')">طباعة</button>':'')  +
+        '</div>';
+        return '<tr>'+
+          '<td style="color:var(--tl);font-size:12px">'+(i+1)+'</td>'+
+          '<td style="font-weight:600">'+t.name+'</td>'+
+          '<td style="color:var(--tl)">'+(t.subject||'—')+'</td>'+
+          '<td>'+badge+'</td>'+
+          '<td>'+actions+'</td>'+
+        '</tr>';
+      }).join('')+
+      '</tbody></table>';
+    document.getElementById('wkStatusTable').innerHTML=html;
+  }).catch(function(){
+    document.getElementById('wkStatusTable').innerHTML='<div class="empty-wk"><span>⚠️</span>تعذّر تحميل البيانات</div>';
+  });
+}
+
+function wkCopyLink(link, btn){
+  navigator.clipboard.writeText(link).then(function(){
+    var old=btn.textContent; btn.textContent='✓ تم النسخ'; btn.disabled=true;
+    setTimeout(function(){btn.textContent=old;btn.disabled=false;},2000);
+  }).catch(function(){prompt('انسخ الرابط:',link);});
+}
+
+function wkWhatsApp(encodedLink, encodedName){
+  var name=decodeURIComponent(encodedName);
+  var msg='السلام عليكم '+name+'\nيُرجى تعبئة سجل أحوال الموظفين عبر الرابط أدناه:\n'+decodeURIComponent(encodedLink);
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function wkSendAllLinks(){
+  if(!wkSchool) return;
+  var d=getSD(wkSchool.code);
+  var teachers=(d&&d.teachers)||[];
+  if(teachers.length===0){wkShowToast('لا يوجد معلمون');return;}
+  var msgs=teachers.map(function(t,i){
+    var link=location.origin+location.pathname+'#wkform='+wkSchool.code+'|'+i;
+    return 'السلام عليكم '+t.name+'\nسجل أحوال الموظفين:\n'+link;
+  });
+  var combined=msgs.join('\n\n---\n\n');
+  prompt('روابط جميع المعلمين (يمكنك نسخها):', combined);
+}
+
+function wkBuildReportHTML(rec, school){
+  var schoolName=(school&&school.name)||'المدرسة';
+  var region=(school&&school.region)||'الرياض';
+  var cell=function(label,val){
+    return '<td style="border:1px solid #aaa;padding:4px 7px;font-size:11px"><span style="color:#555;font-size:10px;display:block;margin-bottom:1px">'+label+'</span><strong style="font-size:12px">'+(val||'—')+'</strong></td>';
+  };
+  var th=function(label,span){
+    return '<th colspan="'+(span||1)+'" style="background:#cce8ed;color:#0a3a4a;border:1px solid #8fc4cc;padding:5px 8px;font-size:11px;text-align:right;font-weight:700">'+label+'</th>';
+  };
+  var sectionTitle=function(num,title){
+    return '<tr><td colspan="6" style="background:#0d5e72;border:1px solid #0a4a5a;padding:6px 10px;font-size:12px;font-weight:700;color:#fff">'+num+' — '+title+'</td></tr>';
+  };
+
+  var hijriDate='';
+  try{hijriDate=new Date().toLocaleDateString('ar-SA-u-ca-islamic',{year:'numeric',month:'long',day:'numeric'});}catch(e){hijriDate=new Date().toLocaleDateString('ar-SA');}
+
+  var html='<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">';
+  html+='<title>سجل أحوال الموظفين — '+(rec.name||'')+'</title>';
+  html+='<style>';
+  html+='@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap");';
+  html+='*{box-sizing:border-box;margin:0;padding:0}';
+  html+='body{font-family:Tajawal,Arial,sans-serif;direction:rtl;background:#e8e8e8;padding:20px;color:#222}';
+  html+='.page{background:#fff;max-width:820px;margin:0 auto;box-shadow:0 3px 16px rgba(0,0,0,.2);overflow:hidden}';
+  /* top gradient bar */
+  html+='.kl-bar-top{height:14px;background:linear-gradient(to left,#0db5a0 0%,#0a7b8a 40%,#0a5a82 70%,#0d3d6e 100%)}';
+  /* header */
+  html+='.kl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px 10px;border-bottom:1px solid #ddd}';
+  html+='.kl-region{flex:1;font-size:16px;font-weight:800;color:#0d5e72;line-height:1.5;text-align:right}';
+  html+='.kl-region span{display:block;font-size:13px;font-weight:700;color:#0d5e72;margin-bottom:2px}';
+  /* school name box */
+  html+='.kl-school-box{text-align:center;padding:8px 20px 14px}';
+  html+='.kl-school-name{display:inline-block;border:2px solid #0a4a7a;padding:7px 40px;font-size:17px;font-weight:800;color:#0a4a7a;border-radius:2px;min-width:280px}';
+  html+='.kl-doc-title{font-size:13px;font-weight:700;color:#555;margin-top:4px}';
+  /* content */
+  html+='.kl-content{padding:10px 18px 16px}';
+  html+='table{width:100%;border-collapse:collapse;margin-bottom:12px}';
+  html+='td,th{vertical-align:middle}';
+  /* bottom bar */
+  html+='.kl-bar-bottom{height:14px;background:linear-gradient(to right,#0db5a0 0%,#0a7b8a 40%,#0a5a82 70%,#0d3d6e 100%);margin-top:10px}';
+  html+='.no-print{text-align:center;padding:12px;background:#f5f5f5;border-top:1px solid #ddd}';
+  html+='@media print{body{background:#fff;padding:0}.no-print{display:none}.page{box-shadow:none}table{page-break-inside:avoid}}';
+  html+='</style></head><body><div class="page">';
+
+  /* ===== LETTERHEAD ===== */
+  html+='<div class="kl-bar-top"></div>';
+  html+='<div class="kl-head">';
+  /* Region text - right */
+  html+='<div class="kl-region"><span>وزارة التعليم</span>الإدارة العامة للتعليم بمنطقة '+region+'</div>';
+  html+='</div>';
+  /* School name box */
+  html+='<div class="kl-school-box">';
+  html+='<div class="kl-school-name">'+schoolName+'</div>';
+  html+='<div class="kl-doc-title">سجل أحوال الموظفين &nbsp;|&nbsp; التاريخ: '+hijriDate+'</div>';
+  html+='</div>';
+  html+='<div class="kl-content">';
+  // docx-content wraps everything exported to Word
+  html+='<div id="docx-content">';
+
+  // Main table
+  html+='<table>';
+
+  // Section 1: البيانات الشخصية
+  html+='<tbody>';
+  html+=sectionTitle('أولاً','البيانات الشخصية');
+  html+='<tr>'+th('اسم الموظف رباعياً',2)+th('الجنسية')+th('رقم بطاقة الأحوال')+th('تاريخ الميلاد')+th('مكان الميلاد')+'</tr>';
+  html+='<tr>';
+  html+='<td colspan="2" style="border:1px solid #aaa;padding:5px 8px;font-size:13px;font-weight:700">'+(rec.name||'—')+'</td>';
+  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.nat||'—')+'</td>';
+  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.idNum||'—')+'</td>';
+  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthDate||'—')+'</td>';
+  html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.birthPlace||'—')+'</td>';
+  html+='</tr>';
+  html+='<tr>'+th('الحالة الاجتماعية')+th('الوظيفة')+th('رقم الوظيفة')+th('المستوى الوظيفي')+th('الدرجة الوظيفية')+th('العمل الحالي')+'</tr>';
+  html+='<tr>';
+  [rec.marital,rec.jobTitle,rec.jobNum,rec.level,rec.grade,rec.currentWork].forEach(function(v){
+    html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+  });
+  html+='</tr>';
+
+  // Section 2: المؤهل العلمي
+  html+=sectionTitle('ثانياً','المؤهل العلمي والتخصص');
+  html+='<tr>'+th('آخر مؤهل علمي')+th('تاريخ المؤهل')+th('التخصص الأصلي')+th('التخصص الفرعي')+th('نوع المؤهل')+th('مصدر المؤهل')+'</tr>';
+  html+='<tr>';
+  [rec.qual,rec.qualYear,rec.spec1,rec.spec2,rec.prom,rec.qualSrc].forEach(function(v){
+    html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+  });
+  html+='</tr>';
+
+  // Section 3: بيانات الاتصال
+  html+=sectionTitle('ثالثاً','بيانات الاتصال');
+  html+='<tr>'+th('هاتف العمل المباشر')+th('هاتف العمل/تحويلة')+th('هاتف المنزل')+th('الجوال')+th('البريد الإلكتروني',2)+'</tr>';
+  html+='<tr>';
+  [rec.workPhone,rec.workExt,rec.homePhone,rec.mobile].forEach(function(v){
+    html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+  });
+  html+='<td colspan="2" style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(rec.email||'—')+'</td>';
+  html+='</tr>';
+
+  // Section 4: العنوان
+  html+=sectionTitle('رابعاً','عنوان السكن والعنوان البريدي');
+  html+='<tr>'+th('الحي')+th('الشارع')+th('رقم المنزل')+th('المدينة')+th('الرمز البريدي')+th('ص.ب')+'</tr>';
+  html+='<tr>';
+  [rec.neighbour,rec.street,rec.houseNum,rec.city,rec.zip,rec.poBox].forEach(function(v){
+    html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(v||'—')+'</td>';
+  });
+  html+='</tr>';
+
+  html+='</tbody></table>';
+
+  // Section 5: الدورات التدريبية
+  if(rec.history&&rec.history.length){
+    html+='<table><tbody>';
+    html+=sectionTitle('خامساً','الدورات التدريبية');
+    html+='<tr>'+th('الدورات التدريبية التربوية',2)+th('مدتها')+th('تاريخها (هجري)')+th('مكانها')+th('التقدير العام')+'</tr>';
+    rec.history.forEach(function(row,ri){
+      var bg=ri%2?'#f9f9f9':'#fff';
+      html+='<tr style="background:'+bg+'">';
+      html+='<td colspan="2" style="border:1px solid #aaa;padding:5px 8px;font-size:12px">'+(row.training||'—')+'</td>';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.weeks||'—')+'</td>';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.date||'—')+'</td>';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.place||'—')+'</td>';
+      html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:12px;text-align:center">'+(row.rating||'—')+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+  }
+
+  // Section 6: التنقلات
+  if(rec.transfers&&rec.transfers.years){
+    var trs=rec.transfers;
+    var activeCols=[];
+    for(var ci=0;ci<7;ci++){if(trs.years[ci]) activeCols.push(ci);}
+    if(activeCols.length){
+      html+='<table><tbody>';
+      html+=sectionTitle('سادساً','التنقلات والتقديرات');
+      var rowLabels=['العام الدراسي','اسم المدرسة','جهة بالمدرسة','رقم التكليف','تاريخ التكليف','تاريخ المباشرة','تاريخ النقل'];
+      var rowKeys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
+      // Header row
+      html+='<tr><th style="background:#0d5e72;color:#fff;border:1px solid #0a4a5a;padding:5px 8px;font-size:11px">البيانات \\ العام</th>';
+      activeCols.forEach(function(ci){
+        html+='<th style="background:#cce8ed;color:#0a3a4a;border:1px solid #8fc4cc;padding:5px 8px;font-size:11px;text-align:center;font-weight:700">'+(trs.years[ci]||'—')+'</th>';
+      });
+      html+='</tr>';
+      rowLabels.slice(1).forEach(function(lbl,li){
+        html+='<tr><th style="background:#cce8ed;color:#0a3a4a;border:1px solid #8fc4cc;padding:5px 8px;font-size:11px;text-align:right;font-weight:700">'+lbl+'</th>';
+        activeCols.forEach(function(ci){
+          var val=trs[rowKeys[li+1]]&&trs[rowKeys[li+1]][ci]?trs[rowKeys[li+1]][ci]:'—';
+          html+='<td style="border:1px solid #aaa;padding:5px 8px;font-size:11px;text-align:center">'+val+'</td>';
+        });
+        html+='</tr>';
+      });
+      html+='</tbody></table>';
+    }
+  }
+
+  // Footer signatures
+  html+='<table style="width:100%;border-collapse:collapse;margin-top:16px;border:1px solid #8fc4cc"><tbody>';
+  html+='<tr>';
+  ['الموظف','وكيل الشؤون التعليمية','مدير المدرسة'].forEach(function(title){
+    html+='<th style="background:#0d5e72;color:#fff;border:1px solid #0a4a5a;padding:7px 10px;font-size:12px;text-align:center;width:33%">'+title+'</th>';
+  });
+  html+='</tr>';
+  html+='<tr>';
+  ['الموظف','وكيل الشؤون التعليمية','مدير المدرسة'].forEach(function(){
+    html+='<td style="border:1px solid #8fc4cc;padding:10px 12px;vertical-align:top;width:33%">'+
+      '<div style="font-size:11px;font-weight:700;color:#0a3a4a;margin-bottom:4px;text-align:right">الاسم:</div>'+
+      '<div style="border-bottom:1px solid #555;height:20px;margin-bottom:12px"></div>'+
+      '<div style="font-size:11px;font-weight:700;color:#0a3a4a;margin-bottom:4px;text-align:right">التوقيع:</div>'+
+      '<div style="border-bottom:1px solid #555;height:32px;margin-bottom:12px"></div>'+
+      '<div style="font-size:11px;font-weight:700;color:#0a3a4a;margin-bottom:4px;text-align:right">التاريخ:</div>'+
+      '<div style="border-bottom:1px solid #555;height:20px"></div>'+
+    '</td>';
+  });
+  html+='</tr>';
+  html+='</tbody></table>';
+
+  html+='</div>'; /* end docx-content */
+  html+='</div>'; /* end kl-content */
+  html+='<div class="kl-bar-bottom"></div>';
+
+  html+='<div class="no-print">';
+  html+='<button onclick="window.print()" style="padding:10px 28px;background:#0a4a7a;color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;margin-left:8px">🖨️ طباعة / PDF</button>';
+  html+='<button onclick="saveAsDocx()" style="padding:10px 28px;background:#1a5276;color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;margin-left:8px">📄 حفظ Word .docx</button>';
+  html+='<button onclick="window.close()" style="padding:10px 18px;background:#eee;color:#333;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:14px">إغلاق</button>';
+  html+='</div>';
+
+  html+='<script src="https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js"><\/script>';
+  html+='<script>';
+  html+='function saveAsDocx(){';
+  html+='  var body=document.getElementById("docx-content").innerHTML;';
+  html+='  body=body.replace(/<\\/table>(\\s*)<table/g,"</table><p style=\'margin:12pt 0\'>&nbsp;</p><table");';
+  html+='  var content=\'<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">\'+';
+  html+='  \'<style>body{font-family:"Times New Roman",Arial,sans-serif;direction:rtl;margin:2cm;font-size:11pt}\'+';
+  html+='  \'table{width:100%;border-collapse:collapse}\'+';
+  html+='  \'td,th{border:1pt solid #999;padding:4pt 7pt;text-align:right;vertical-align:middle}\'+';
+  html+='  \'th{background:#cce8ed;color:#0a3a4a;font-weight:bold}\'+';
+  html+='  \'h3{text-align:center;margin:0 0 14pt}\'+';
+  html+='  \'h3 small{display:block;font-size:10pt;font-weight:normal;color:#555}\'+';
+  html+='  \'p{margin:0}\'+';
+  html+='  \'</style></head><body>\'+body+\'</body></html>\';';
+  html+='  try{';
+  html+='    var blob=window.htmlDocx.asBlob(content,{orientation:"portrait",margins:{top:720,right:720,bottom:720,left:720}});';
+  html+='    var url=URL.createObjectURL(blob);';
+  html+='    var a=document.createElement("a");';
+  html+='    a.href=url; a.download="سجل_أحوال_الموظف.docx";';
+  html+='    document.body.appendChild(a); a.click();';
+  html+='    document.body.removeChild(a); URL.revokeObjectURL(url);';
+  html+='  }catch(e){alert("تعذّر الحفظ: "+e.message);}';
+  html+='}';
+  html+='<\/script>';
+
+  html+='</div></body></html>';
+  return html;
+}
+
+function wkViewRecord(idx){
+  var rec=_wkRecordsCache[idx];
+  if(!rec){wkShowToast('لا توجد بيانات بعد');return;}
+  var school=wkSchool||{name:'المدرسة',code:''};
+  var fullSchool=schools.find(function(s){return s.code===school.code;})||school;
+  var w=window.open('','_blank','width=900,height=750');
+  w.document.write(wkBuildReportHTML(rec, fullSchool));
+  w.document.close();
+}
+
+function wkPrintRecord(idx){
+  wkViewRecord(idx);
+}
+
+function wkPreviewTestReport(){
+  var testRec={
+    name:'خالد أحمد محمد المجرشي',
+    nat:'سعودي',
+    idNum:'1023456789',
+    birthDate:'1400/05/15',
+    birthPlace:'الرياض',
+    marital:'متزوج',
+    jobTitle:'معلم',
+    jobNum:'44512',
+    level:'الثاني',
+    grade:'10',
+    currentWork:'تدريس مادة الرياضيات',
+    qual:'بكالوريوس',
+    qualYear:'1423هـ',
+    spec1:'رياضيات',
+    spec2:'إحصاء تطبيقي',
+    prom:'تربوي',
+    qualSrc:'جامعة الملك سعود',
+    qualCountry:'المملكة العربية السعودية',
+    workPhone:'0114567890',
+    workExt:'214',
+    homePhone:'0114321000',
+    mobile:'0551234567',
+    email:'khalid.m@school.edu.sa',
+    neighbour:'حي النزهة',
+    street:'شارع الأمير فيصل',
+    houseNum:'42',
+    city:'الرياض',
+    zip:'12345',
+    poBox:'5566',
+    history:[
+      {training:'التقويم الدراسي وأساليبه',weeks:'3 أسابيع',date:'1440/03/10هـ',place:'الرياض',rating:'ممتاز'},
+      {training:'تطوير مهارات التدريس الفعّال',weeks:'2 أسابيع',date:'1442/08/05هـ',place:'جدة',rating:'جيد جداً'},
+      {training:'التعليم الإلكتروني وتقنياته',weeks:'أسبوع',date:'1444/11/20هـ',place:'الرياض',rating:'ممتاز'}
+    ],
+    transfers:{
+      years:  ['1425هـ','1428هـ','1432هـ','1436هـ','1440هـ','1444هـ','1447هـ'],
+      schools:['ابتدائية الفيحاء','متوسطة النور','ثانوية الوطن','متوسطة الأمل','ثانوية الملك فهد','ابتدائية الروضة','ثانوية الفيصل'],
+      depts:  ['معلم صف','معلم رياضيات','معلم رياضيات','وكيل','معلم رياضيات','رئيس قسم','معلم رياضيات'],
+      taskNums:['4421','5530','6612','7745','8891','9934','10012'],
+      taskDates:['1425/07/01','1428/07/01','1432/07/01','1436/07/01','1440/07/01','1444/07/01','1447/07/01'],
+      startDates:['1425/08/15','1428/08/10','1432/08/12','1436/08/11','1440/08/14','1444/08/13','1447/08/16'],
+      endDates:['1427/06/30','1431/06/30','1435/06/30','1439/06/30','1443/06/30','1446/06/30','']
+    },
+    submittedAt:new Date().toISOString()
+  };
+  var testSchool={name:'مدرسة الفيصل الثانوية', region:'الرياض'};
+  var w=window.open('','_blank','width=900,height=750');
+  w.document.write(wkBuildReportHTML(testRec, testSchool));
+  w.document.close();
+}
+
+// --- ملفات الإنجاز ---
+function wkRenderFiles(){
+  if(!wkSchool) return;
+  var d=getSD(wkSchool.code);
+  var teachers=(d&&d.teachers)||[];
+  var sel=document.getElementById('wkFileTeacher');
+  sel.innerHTML='<option value="">اختر المعلم</option>'+
+    teachers.map(function(t){return '<option>'+t.name+'</option>';}).join('');
+
+  fbRead('wk_files/'+wkSchool.code).then(function(data){
+    var el=document.getElementById('wkFilesList');
+    if(!data){el.innerHTML='<div class="empty-wk"><span>📁</span>لا توجد ملفات إنجاز بعد</div>';return;}
+    var items=Array.isArray(data)?data:Object.values(data);
+    items=items.filter(Boolean).reverse();
+    el.innerHTML=items.map(function(f){
+      return '<div class="wk-card">'+
+        '<div class="wk-card-icon">📄</div>'+
+        '<div class="wk-card-info">'+
+          '<div class="wk-card-name">'+f.teacher+'</div>'+
+          '<div class="wk-card-meta">'+f.type+' — '+f.desc+'</div>'+
+          '<div class="wk-card-meta" style="margin-top:2px">'+new Date(f.date).toLocaleDateString('ar-SA')+'</div>'+
+        '</div>'+
+        '<div class="wk-card-actions">'+
+          '<a href="'+f.url+'" target="_blank" class="btn btn-o btn-sm">عرض</a>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }).catch(function(){});
+}
+
+function wkUploadFile(input){
+  var file=input.files[0]; if(!file) return;
+  document.getElementById('wkFileForm').classList.remove('hidden');
+  document.getElementById('wkFilePreview').textContent='جاري الرفع...';
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset','rabittec');
+  fd.append('folder','rabit/wakeel/'+wkSchool.code);
+  fetch('https://api.cloudinary.com/v1_1/dqeaptszq/auto/upload',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      wkFileUrl=data.secure_url||'';
+      document.getElementById('wkFilePreview').textContent='✓ تم رفع الملف: '+file.name;
+    })
+    .catch(function(){document.getElementById('wkFilePreview').textContent='فشل الرفع';});
+}
+
+function wkSaveFile(){
+  var teacher=document.getElementById('wkFileTeacher').value;
+  var type=document.getElementById('wkFileType').value;
+  var desc=document.getElementById('wkFileDesc').value.trim();
+  if(!teacher||!wkFileUrl){wkShowToast('يرجى اختيار المعلم ورفع الملف');return;}
+  var record={teacher:teacher,type:type,desc:desc,url:wkFileUrl,date:new Date().toISOString(),addedBy:wkStaff.name};
+  fbPush('wk_files/'+wkSchool.code, record).then(function(){
+    wkShowToast('تم حفظ الملف ✓');
+    wkFileUrl='';
+    document.getElementById('wkFileForm').classList.add('hidden');
+    document.getElementById('wkFileDesc').value='';
+    document.getElementById('wkFilePreview').textContent='';
+    wkRenderFiles();
+  }).catch(function(){wkShowToast('فشل الحفظ');});
+}
+
+// --- الاستئذان ---
+function wkRenderPerm(){
+  if(!wkSchool) return;
+  var d=getSD(wkSchool.code);
+  var teachers=(d&&d.teachers)||[];
+  var sel=document.getElementById('wkPermTeacher');
+  sel.innerHTML='<option value="">اختر المعلم</option>'+
+    teachers.map(function(t){return '<option>'+t.name+'</option>';}).join('');
+
+  fbRead('wk_permissions/'+wkSchool.code).then(function(data){
+    var el=document.getElementById('wkPermList');
+    if(!data){el.innerHTML='<div class="empty-wk"><span>📋</span>لا توجد سجلات استئذان بعد</div>';return;}
+    var items=Array.isArray(data)?data:Object.values(data);
+    items=items.filter(Boolean).reverse();
+    var pillMap={approved:'perm-approved',pending:'perm-pending',rejected:'perm-rejected'};
+    var lblMap={approved:'موافق عليه',pending:'قيد الدراسة',rejected:'مرفوض'};
+    el.innerHTML='<table class="wk-table"><thead><tr>'+
+      '<th>المعلم</th><th>نوع الاستئذان</th><th>التاريخ</th><th>السبب</th><th>الحالة</th>'+
+      '</tr></thead><tbody>'+
+      items.map(function(p){
+        return '<tr>'+
+          '<td style="font-weight:600">'+p.teacher+'</td>'+
+          '<td>'+p.type+'</td>'+
+          '<td style="color:var(--tl);font-size:12px">'+p.date+'</td>'+
+          '<td style="color:var(--tl)">'+( p.reason||'—')+'</td>'+
+          '<td><span class="perm-pill '+( pillMap[p.status]||'perm-pending')+'">'+( lblMap[p.status]||p.status)+'</span></td>'+
+        '</tr>';
+      }).join('')+
+      '</tbody></table>';
+  }).catch(function(){});
+}
+
+function wkSavePerm(){
+  var teacher=document.getElementById('wkPermTeacher').value;
+  var type=document.getElementById('wkPermType').value;
+  var date=document.getElementById('wkPermDate').value;
+  var status=document.getElementById('wkPermStatus').value;
+  var reason=document.getElementById('wkPermReason').value.trim();
+  if(!teacher||!date){wkShowToast('يرجى اختيار المعلم والتاريخ');return;}
+  var record={teacher:teacher,type:type,date:date,status:status,reason:reason,addedBy:wkStaff.name,createdAt:new Date().toISOString()};
+  fbPush('wk_permissions/'+wkSchool.code, record).then(function(){
+    wkShowToast('تم حفظ سجل الاستئذان ✓');
+    document.getElementById('wkPermForm').classList.add('hidden');
+    document.getElementById('wkPermReason').value='';
+    wkRenderPerm();
+  }).catch(function(){wkShowToast('فشل الحفظ');});
+}
+
+function wkShowToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--gd);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;direction:rtl';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},2500);
+}
+
+function fbPush(path, value){
+  return fbDB.ref(path).push(value);
+}
+
+// ====== WAKEEL TEACHER FORM ======
+var _wkfSchoolCode='', _wkfTeacherIdx=-1;
+
+function showWkForm(code, idx){
+  _wkfSchoolCode=code;
+  _wkfTeacherIdx=idx;
+  showPage('pgWkForm');
+  // find school name
+  var school=schools.find(function(s){return s.code===code;});
+  document.getElementById('wkfSchoolName').textContent=(school?school.name:'المدرسة')+' — سجل أحوال الموظفين';
+  // pre-fill teacher name if available
+  var d=school?getSD(code):null;
+  var teachers=(d&&d.teachers)||[];
+  var t=teachers[idx];
+  document.getElementById('wkfName').value=(t&&t.name)||'';
+  wkfInitYearSelects();
+  // check if already submitted
+  fbRead('wk_records/'+code+'/'+idx).then(function(rec){
+    if(rec){
+      // pre-fill all fields
+      wkfFillForm(rec);
+    }
+  }).catch(function(){});
+}
+
+function wkfFillForm(rec){
+  var map={
+    wkfName:rec.name, wkfNat:rec.nat, wkfIdNum:rec.idNum, wkfBirthDate:rec.birthDate,
+    wkfBirthPlace:rec.birthPlace, wkfMarital:rec.marital, wkfJobTitle:rec.jobTitle,
+    wkfJobNum:rec.jobNum, wkfLevel:rec.level, wkfGrade:rec.grade, wkfCurrentWork:rec.currentWork,
+    wkfQual:rec.qual, wkfQualYear:rec.qualYear, wkfSpec1:rec.spec1, wkfSpec2:rec.spec2,
+    wkfProm:rec.prom, wkfQualSrc:rec.qualSrc, wkfQualCountry:rec.qualCountry,
+    wkfWorkPhone:rec.workPhone, wkfWorkExt:rec.workExt, wkfFax:rec.fax,
+    wkfHomePhone:rec.homePhone, wkfMobile:rec.mobile, wkfEmail:rec.email,
+    wkfVacPhone:rec.vacPhone, wkfNeighbour:rec.neighbour, wkfStreet:rec.street,
+    wkfHouseNum:rec.houseNum, wkfCity:rec.city, wkfZip:rec.zip,
+    wkfPOBox:rec.poBox
+  };
+  Object.keys(map).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&map[id]) el.value=map[id];
+  });
+  if(rec.history&&rec.history.length){
+    var tbody=document.getElementById('wkfHistBody');
+    tbody.innerHTML='';
+    rec.history.forEach(function(row){
+      wkfAddHistRowData(row);
+    });
+  }
+  if(rec.transfers) wkfFillTransfers(rec.transfers);
+}
+
+function wkfAddHistRow(){
+  wkfAddHistRowData({});
+}
+
+function wkfAddHistRowData(row){
+  var tbody=document.getElementById('wkfHistBody');
+  var tr=document.createElement('tr');
+  var ratingOpts=['ممتاز','جيد جداً','جيد','مقبول'].map(function(v){
+    return '<option value="'+v+'"'+(row.rating===v?' selected':'')+'>'+v+'</option>';
+  }).join('');
+  tr.innerHTML=
+    '<td><input type="text" value="'+(row.training||'')+'" placeholder="اسم الدورة أو البرنامج التدريبي"></td>'+
+    '<td><input type="text" value="'+(row.weeks||'')+'" placeholder="مثل: 3 أسابيع"></td>'+
+    '<td><input type="text" value="'+(row.date||'')+'" placeholder="1445/02/10هـ"></td>'+
+    '<td><input type="text" value="'+(row.place||'')+'" placeholder="المدينة / الجهة"></td>'+
+    '<td><select>'+ratingOpts+'</select></td>'+
+    '<td><button onclick="this.closest(\'tr\').remove()" style="background:#fee;border:none;color:#c00;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:12px">✕</button></td>';
+  tbody.appendChild(tr);
+}
+
+function wkfCollectHistory(){
+  var rows=document.getElementById('wkfHistBody').querySelectorAll('tr');
+  var result=[];
+  rows.forEach(function(tr){
+    var cells=tr.querySelectorAll('td');
+    var inp=function(i){return cells[i]?cells[i].querySelector('input,select'):null;};
+    var row={
+      training: inp(0)?inp(0).value.trim():'',
+      weeks:    inp(1)?inp(1).value.trim():'',
+      date:     inp(2)?inp(2).value.trim():'',
+      place:    inp(3)?inp(3).value.trim():'',
+      rating:   inp(4)?inp(4).value:''
+    };
+    if(row.training) result.push(row);
+  });
+  return result;
+}
+
+function wkfInitYearSelects(){
+  var curHijri=Math.floor((new Date().getFullYear()-622)*(33/32));
+  var opts='<option value="">— اختر العام —</option>';
+  for(var y=curHijri;y>=1400;y--){
+    opts+='<option value="'+y+'هـ">'+y+'هـ</option>';
+  }
+  var selStyle='width:100%;min-width:90px;border:1px solid #ddd;border-radius:5px;padding:4px 6px;font-family:inherit;font-size:12px;background:#fafbfc;direction:rtl';
+  document.getElementById('wkfYearRow').querySelectorAll('td').forEach(function(td){
+    td.innerHTML='<select style="'+selStyle+'">'+opts+'</select>';
+  });
+}
+
+function wkfCollectTransfers(){
+  var table=document.getElementById('wkfTransferTable');
+  if(!table) return null;
+  var rows=table.querySelectorAll('tbody tr');
+  var result={years:[],schools:[],depts:[],taskNums:[],taskDates:[],startDates:[],endDates:[]};
+  var keys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
+  rows.forEach(function(tr,ri){
+    var inputs=tr.querySelectorAll('td input, td select');
+    inputs.forEach(function(inp,ci){
+      if(result[keys[ri]]) result[keys[ri]][ci]=inp.value.trim();
+    });
+  });
+  return result;
+}
+
+function wkfFillTransfers(tr){
+  if(!tr) return;
+  var table=document.getElementById('wkfTransferTable');
+  if(!table) return;
+  var rows=table.querySelectorAll('tbody tr');
+  var keys=['years','schools','depts','taskNums','taskDates','startDates','endDates'];
+  rows.forEach(function(row,ri){
+    var inputs=row.querySelectorAll('td input, td select');
+    var arr=tr[keys[ri]]||[];
+    inputs.forEach(function(inp,ci){
+      if(arr[ci]) inp.value=arr[ci];
+    });
+  });
+}
+
+function wkfSubmit(){
+  var name=document.getElementById('wkfName').value.trim();
+  if(!name){wkShowToast('لم يتم التعرف على الموظف');return;}
+  var record={
+    name:name,
+    nat:document.getElementById('wkfNat').value,
+    idNum:document.getElementById('wkfIdNum').value.trim(),
+    birthDate:document.getElementById('wkfBirthDate').value,
+    birthPlace:document.getElementById('wkfBirthPlace').value.trim(),
+    marital:document.getElementById('wkfMarital').value,
+    jobTitle:document.getElementById('wkfJobTitle').value.trim(),
+    jobNum:document.getElementById('wkfJobNum').value.trim(),
+    level:document.getElementById('wkfLevel').value.trim(),
+    grade:document.getElementById('wkfGrade').value.trim(),
+    currentWork:document.getElementById('wkfCurrentWork').value.trim(),
+    qual:document.getElementById('wkfQual').value,
+    qualYear:document.getElementById('wkfQualYear').value.trim(),
+    spec1:document.getElementById('wkfSpec1').value.trim(),
+    spec2:document.getElementById('wkfSpec2').value.trim(),
+    prom:document.getElementById('wkfProm').value.trim(),
+    qualSrc:document.getElementById('wkfQualSrc').value.trim(),
+    qualCountry:document.getElementById('wkfQualCountry').value.trim(),
+    workPhone:document.getElementById('wkfWorkPhone').value.trim(),
+    workExt:document.getElementById('wkfWorkExt').value.trim(),
+    fax:document.getElementById('wkfFax').value.trim(),
+    homePhone:document.getElementById('wkfHomePhone').value.trim(),
+    mobile:document.getElementById('wkfMobile').value.trim(),
+    email:document.getElementById('wkfEmail').value.trim(),
+    vacPhone:document.getElementById('wkfVacPhone').value.trim(),
+    neighbour:document.getElementById('wkfNeighbour').value.trim(),
+    street:document.getElementById('wkfStreet').value.trim(),
+    houseNum:document.getElementById('wkfHouseNum').value.trim(),
+    city:document.getElementById('wkfCity').value.trim(),
+    zip:document.getElementById('wkfZip').value.trim(),
+    poBox:document.getElementById('wkfPOBox').value.trim(),
+    history:wkfCollectHistory(),
+    transfers:wkfCollectTransfers(),
+    submittedAt:new Date().toISOString()
+  };
+  var btn=document.querySelector('#wkfFormWrap button');
+  if(btn){btn.disabled=true;btn.textContent='جاري الحفظ...';}
+  fbWrite('wk_records/'+_wkfSchoolCode+'/'+_wkfTeacherIdx, record)
+    .then(function(){
+      document.getElementById('wkfFormWrap').style.display='none';
+      document.getElementById('wkfSuccess').style.display='block';
+    })
+    .catch(function(){
+      if(btn){btn.disabled=false;btn.textContent='حفظ وإرسال البيانات';}
+      wkShowToast('فشل الحفظ، تحقق من الاتصال');
+    });
+}
 </script>
 </body>
 </html>
