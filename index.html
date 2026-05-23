@@ -2005,6 +2005,7 @@ try{
 
 function fbWrite(path,data){if(fbDB)return fbDB.ref(path).set(data).catch(function(e){console.warn('FB write error',e);});return Promise.resolve();}
 function fbRead(path){if(fbDB)return fbDB.ref(path).get().then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});return Promise.resolve(null);}
+function fbDelete(path){if(fbDB)return fbDB.ref(path).remove().catch(function(e){console.warn('FB delete error',e);});return Promise.resolve();}
 
 // تحويل كائنات Firebase مجدداً إلى مصفوفات
 function toArr(v){if(!v)return[];if(Array.isArray(v))return v;return Object.values(v);}
@@ -3610,6 +3611,7 @@ function wkRenderStatus(){
           '<button class="btn btn-g btn-sm" onclick="wkWhatsApp(\''+encodeURIComponent(link)+'\',\''+encodeURIComponent(t.name||'')+'\')">واتساب</button>'+
           (rec?'<button class="btn" style="background:#e8f4fd;color:#1a5276;font-size:12px;border:1px solid #bee3f8;border-radius:6px;padding:3px 10px;cursor:pointer" onclick="wkViewRecord('+i+')">عرض</button>':'')  +
           (rec?'<button class="btn" style="background:#f0f8f4;color:#155724;font-size:12px;border:1px solid #c3e6cb;border-radius:6px;padding:3px 10px;cursor:pointer" onclick="wkPrintRecord('+i+',\''+encodeURIComponent(t.name||'')+'\')">طباعة</button>':'')  +
+          (rec?'<button class="btn" style="background:#fdf0f0;color:#a93226;font-size:12px;border:1px solid #f5c6cb;border-radius:6px;padding:3px 10px;cursor:pointer" onclick="wkDeleteRecord('+i+',\''+encodeURIComponent(t.name||'')+'\')">حذف</button>':'')  +
         '</div>';
         return '<tr>'+
           '<td style="color:var(--tl);font-size:12px">'+(i+1)+'</td>'+
@@ -3631,6 +3633,19 @@ function wkCopyLink(link, btn){
     var old=btn.textContent; btn.textContent='✓ تم النسخ'; btn.disabled=true;
     setTimeout(function(){btn.textContent=old;btn.disabled=false;},2000);
   }).catch(function(){prompt('انسخ الرابط:',link);});
+}
+
+function wkDeleteRecord(idx, encodedName){
+  var name=decodeURIComponent(encodedName);
+  if(!confirm('هل أنت متأكد من حذف بيانات "'+name+'"؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
+  var path='wk_records/'+wkSchool.code+'/'+idx;
+  fbDelete(path).then(function(){
+    delete _wkRecordsCache[idx];
+    wkRenderStatus();
+    wkShowToast('تم حذف بيانات '+name+' بنجاح');
+  }).catch(function(){
+    wkShowToast('فشل الحذف، تحقق من الاتصال');
+  });
 }
 
 function wkWhatsApp(encodedLink, encodedName){
