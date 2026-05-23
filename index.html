@@ -461,10 +461,12 @@ tr:hover td{background:var(--gb)}
 .wkf-add-row{font-size:12px;color:var(--gl);background:none;border:1px dashed var(--gl);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;font-weight:600;margin-top:8px;width:100%;transition:all .15s}
 .wkf-add-row:hover{background:var(--gp)}
 .wkf-submit-bar{text-align:center;padding-top:.5rem}
-.wkf-submitted{text-align:center;padding:2rem;background:#fff;border-radius:12px;border:1.5px solid #c3e6cb}
-.wkf-submitted .big-icon{font-size:3rem;margin-bottom:.5rem}
-.wkf-submitted h3{color:#155724;font-size:1.1rem;margin:0 0 8px}
-.wkf-submitted p{color:var(--tm);font-size:13px;margin:0}
+.wkf-success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.wkf-success-card{background:#fff;border-radius:16px;padding:2.5rem 2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25);animation:wkfPop .3s ease}
+@keyframes wkfPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.wkf-success-card .big-icon{font-size:3.5rem;margin-bottom:1rem}
+.wkf-success-card h3{color:#155724;font-size:1.2rem;font-weight:700;margin:0 0 10px}
+.wkf-success-card p{color:var(--tm);font-size:13px;margin:0 0 1.5rem;line-height:1.7}
 .rec-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700}
 .rec-submitted{background:#d4edda;color:#155724}
 .rec-pending{background:#fff3cd;color:#856404}
@@ -982,11 +984,16 @@ tr:hover td{background:var(--gb)}
         <button class="btn btn-g" onclick="wkfSubmit()" style="padding:10px 40px;font-size:15px">حفظ وإرسال البيانات</button>
       </div>
     </div>
-    <div id="wkfSuccess" class="wkf-submitted" style="display:none">
-      <div class="big-icon">✅</div>
-      <h3 id="wkfSuccessTitle">تم إرسال البيانات بنجاح</h3>
-      <p id="wkfSuccessMsg">شكراً جزيلاً، تم استلام بياناتك وحفظها في سجل أحوال الموظفين بنجاح.<br>نقدّر تعاونك ونتمنى لك التوفيق.</p>
-    </div>
+  </div>
+</div>
+
+<!-- Success overlay (shown after form submit) -->
+<div id="wkfSuccess" class="wkf-success-overlay" style="display:none">
+  <div class="wkf-success-card">
+    <div class="big-icon">✅</div>
+    <h3 id="wkfSuccessTitle">تم إرسال البيانات بنجاح</h3>
+    <p id="wkfSuccessMsg">شكراً جزيلاً، تم استلام بياناتك وحفظها في سجل أحوال الموظفين بنجاح.<br>نقدّر تعاونك ونتمنى لك التوفيق.</p>
+    <button class="btn btn-g" onclick="window.close()" style="padding:10px 32px;font-size:14px">إغلاق النافذة</button>
   </div>
 </div>
 
@@ -4307,9 +4314,7 @@ function wkfSubmit(){
   fbWrite('wk_records/'+_wkfSchoolCode+'/'+_wkfTeacherIdx, record)
     .then(function(){
       document.getElementById('wkfSuccessTitle').textContent='تم إرسال البيانات بنجاح، '+name;
-      document.getElementById('wkfFormWrap').style.display='none';
-      document.getElementById('wkfSuccess').style.display='block';
-      window.scrollTo({top:0,behavior:'smooth'});
+      document.getElementById('wkfSuccess').style.display='flex';
     })
     .catch(function(){
       if(btn){btn.disabled=false;btn.textContent='حفظ وإرسال البيانات';}
