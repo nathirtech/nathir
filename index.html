@@ -515,6 +515,17 @@ tr:hover td{background:var(--gb)}
 .perm-rejected{background:#f8d7da;color:#721c24}
 .empty-wk{text-align:center;padding:2.5rem;color:var(--tl);font-size:13px}
 .empty-wk span{display:block;font-size:2.5rem;margin-bottom:0.5rem}
+.wk-home-banner{background:linear-gradient(135deg,var(--gd) 0%,var(--gl) 100%);border-radius:14px;padding:1.8rem 2rem;color:#fff;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.wk-home-banner h2{font-size:1.3rem;font-weight:800;margin:0 0 4px}
+.wk-home-banner p{font-size:13px;opacity:.85;margin:0}
+.wk-home-banner .wk-date{font-size:12px;opacity:.75;margin-top:6px}
+.wk-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.2rem}
+.wk-stat-card{background:#fff;border-radius:12px;border:1.5px solid var(--bd);padding:1.2rem;text-align:center}
+.wk-stat-card .stat-num{font-size:2rem;font-weight:800;color:var(--gd);line-height:1}
+.wk-stat-card .stat-lbl{font-size:12px;color:var(--tl);margin-top:5px}
+.wk-quick-actions{background:#fff;border-radius:12px;border:1.5px solid var(--bd);padding:1.2rem}
+.wk-quick-actions h4{font-size:13px;font-weight:700;color:var(--gd);margin:0 0 .8rem}
+.wk-quick-btns{display:flex;gap:8px;flex-wrap:wrap}
 /* ====== SELF ASSESSMENT PAGE ====== */
 #pgQawwim{min-height:100vh;background:#f5f7fa;direction:rtl}
 .qw-header{background:linear-gradient(135deg,#1a3a6b,#0099b8);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -617,15 +628,51 @@ tr:hover td{background:var(--gb)}
 
   <div class="nav">
     <div class="nav-tabs">
-      <button class="nav-tab active" id="wkTabStatus" onclick="wkSwitchTab('status',this)">👥 أحوال الموظفين</button>
+      <button class="nav-tab active" id="wkTabHome" onclick="wkSwitchTab('home',this)">🏠 الرئيسية</button>
+      <button class="nav-tab" id="wkTabStatus" onclick="wkSwitchTab('status',this)">👥 أحوال الموظفين</button>
       <button class="nav-tab" id="wkTabFiles" onclick="wkSwitchTab('files',this)">📁 ملفات إنجاز المعلمين</button>
       <button class="nav-tab" id="wkTabPerm" onclick="wkSwitchTab('perm',this)">📋 استئذان المعلمين</button>
     </div>
   </div>
 
   <div class="wk-body">
+    <!-- الرئيسية -->
+    <div id="wkPaneHome">
+      <div class="wk-home-banner">
+        <div>
+          <h2>مرحباً، <span id="wkHomeName"></span></h2>
+          <p id="wkHomeRole"></p>
+          <div class="wk-date" id="wkHomeDate"></div>
+        </div>
+        <div style="font-size:3rem;opacity:.3">🏫</div>
+      </div>
+      <div class="wk-stats">
+        <div class="wk-stat-card">
+          <div class="stat-num" id="wkStatTotal">—</div>
+          <div class="stat-lbl">إجمالي المعلمين</div>
+        </div>
+        <div class="wk-stat-card">
+          <div class="stat-num" style="color:#155724" id="wkStatDone">—</div>
+          <div class="stat-lbl">سجلات مُعبَّأة</div>
+        </div>
+        <div class="wk-stat-card">
+          <div class="stat-num" style="color:#856404" id="wkStatPending">—</div>
+          <div class="stat-lbl">سجلات معلّقة</div>
+        </div>
+      </div>
+      <div class="wk-quick-actions">
+        <h4>إجراءات سريعة</h4>
+        <div class="wk-quick-btns">
+          <button class="btn btn-g btn-sm" onclick="wkSwitchTab('status',document.getElementById('wkTabStatus'))">👥 أحوال الموظفين</button>
+          <button class="btn btn-o btn-sm" onclick="wkSendAllLinks()">📤 إرسال الروابط للجميع</button>
+          <button class="btn btn-o btn-sm" onclick="wkSwitchTab('files',document.getElementById('wkTabFiles'))">📁 ملفات الإنجاز</button>
+          <button class="btn btn-o btn-sm" onclick="wkSwitchTab('perm',document.getElementById('wkTabPerm'))">📋 الاستئذانات</button>
+        </div>
+      </div>
+    </div>
+
     <!-- أحوال الموظفين -->
-    <div id="wkPaneStatus">
+    <div id="wkPaneStatus" class="hidden">
       <div class="wk-section-title">
         <span>سجلات أحوال الموظفين</span>
         <button class="btn btn-g btn-sm" onclick="wkSendAllLinks()">📤 إرسال الروابط للجميع</button>
@@ -3581,7 +3628,15 @@ function showWakeelDashboard(staffMember, school){
   document.getElementById('wkSchoolName').textContent=school.name||'';
   document.getElementById('wkStatusDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('wkPermDate').value=new Date().toISOString().split('T')[0];
-  wkSwitchTab('status');
+  // preload school data from Firebase if not in localStorage
+  var cached=getSD(school.code);
+  if(!cached||!cached.teachers){
+    fbRead('pt_'+school.code).then(function(raw){
+      var nd=normalizeSD(raw);
+      if(nd){try{localStorage.setItem('pt_'+school.code,JSON.stringify(nd));}catch(e){}}
+    });
+  }
+  wkSwitchTab('home', document.getElementById('wkTabHome'));
   if(staffMember.firstLogin){
     document.getElementById('wkSettingsDesc').textContent='مرحباً بك! يُرجى تغيير اسم المستخدم وكلمة المرور قبل المتابعة.';
     showModal('mdlWkSettings');
@@ -3637,6 +3692,39 @@ function wkSaveCredentials(){
   wkShowToast('تم حفظ بيانات الحساب بنجاح ✓');
 }
 
+function wkRenderHome(){
+  if(!wkStaff||!wkSchool) return;
+  document.getElementById('wkHomeName').textContent=wkStaff.name||'';
+  document.getElementById('wkHomeRole').textContent=wkStaff.role||'';
+  document.getElementById('wkHomeDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  // load stats
+  var d=getSD(wkSchool.code);
+  var total=(d&&d.teachers&&d.teachers.length)||0;
+  var loadStats=function(recs){
+    var done=Object.keys(recs||{}).filter(function(k){return recs[k];}).length;
+    document.getElementById('wkStatTotal').textContent=total||'—';
+    document.getElementById('wkStatDone').textContent=done||'0';
+    document.getElementById('wkStatPending').textContent=total?total-done:'—';
+  };
+  fbRead('wk_records/'+wkSchool.code).then(function(recs){
+    _wkRecordsCache=recs||{};
+    // also update total if not cached
+    if(!total){
+      fbRead('pt_'+wkSchool.code).then(function(raw){
+        var nd=normalizeSD(raw);
+        if(nd){try{localStorage.setItem('pt_'+wkSchool.code,JSON.stringify(nd));}catch(e){}}
+        var t2=(nd&&nd.teachers&&nd.teachers.length)||0;
+        var done=Object.keys(_wkRecordsCache).filter(function(k){return _wkRecordsCache[k];}).length;
+        document.getElementById('wkStatTotal').textContent=t2||'0';
+        document.getElementById('wkStatDone').textContent=done||'0';
+        document.getElementById('wkStatPending').textContent=t2?t2-done:'0';
+      });
+    } else {
+      loadStats(recs);
+    }
+  });
+}
+
 function wkRefresh(btn){
   var orig=btn.textContent;
   btn.textContent='⏳';
@@ -3647,15 +3735,16 @@ function wkRefresh(btn){
 }
 
 function wkSwitchTab(tab,btn){
-  ['Status','Files','Perm'].forEach(function(t){
+  ['Home','Status','Files','Perm'].forEach(function(t){
     document.getElementById('wkPane'+t).classList.add('hidden');
   });
   document.getElementById('wkPane'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.remove('hidden');
   document.querySelectorAll('#pgWakeel .nav-tab').forEach(function(b){b.classList.remove('active');});
   if(btn) btn.classList.add('active');
+  if(tab==='home')   wkRenderHome();
   if(tab==='status') wkRenderStatus();
-  if(tab==='files') wkRenderFiles();
-  if(tab==='perm') wkRenderPerm();
+  if(tab==='files')  wkRenderFiles();
+  if(tab==='perm')   wkRenderPerm();
 }
 
 // --- أحوال الموظفين (نظام السجلات) ---
@@ -3666,7 +3755,16 @@ function wkRenderStatus(){
   var d=getSD(wkSchool.code);
   var teachers=(d&&d.teachers)||[];
   if(teachers.length===0){
-    document.getElementById('wkStatusTable').innerHTML='<div class="empty-wk"><span>👥</span>لا يوجد معلمون مسجلون في هذه المدرسة</div>';
+    document.getElementById('wkStatusTable').innerHTML='<div style="text-align:center;padding:1rem;color:var(--tl);font-size:13px">جاري تحميل البيانات...</div>';
+    fbRead('pt_'+wkSchool.code).then(function(raw){
+      var nd=normalizeSD(raw);
+      if(nd&&nd.teachers&&nd.teachers.length){
+        try{localStorage.setItem('pt_'+wkSchool.code,JSON.stringify(nd));}catch(e){}
+        wkRenderStatus();
+      } else {
+        document.getElementById('wkStatusTable').innerHTML='<div class="empty-wk"><span>👥</span>لا يوجد معلمون مسجلون في هذه المدرسة</div>';
+      }
+    });
     return;
   }
   document.getElementById('wkStatusTable').innerHTML='<div style="text-align:center;padding:1rem;color:var(--tl);font-size:13px">جاري تحميل البيانات...</div>';
