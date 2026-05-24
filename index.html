@@ -570,6 +570,33 @@ tr:hover td{background:var(--gb)}
   <p>جاري تحميل البيانات...</p>
 </div>
 
+<!-- MODAL: تغيير بيانات حساب الوكيل/الموجه -->
+<div class="modal-bg hidden" id="mdlWkSettings">
+  <div class="modal">
+    <button class="modal-close" onclick="hideModal('mdlWkSettings')">✕</button>
+    <h2>إعدادات الحساب</h2>
+    <p class="modal-desc" id="wkSettingsDesc">يمكنك تغيير اسم المستخدم وكلمة المرور</p>
+    <div class="form-g">
+      <label>كلمة المرور الحالية</label>
+      <input type="password" id="wkSetOldPass" placeholder="••••••">
+    </div>
+    <div class="form-g">
+      <label>اسم المستخدم الجديد</label>
+      <input type="text" id="wkSetNewUser" placeholder="اسم المستخدم الجديد">
+    </div>
+    <div class="form-g">
+      <label>كلمة المرور الجديدة</label>
+      <input type="password" id="wkSetNewPass" placeholder="••••••">
+    </div>
+    <div class="form-g">
+      <label>تأكيد كلمة المرور</label>
+      <input type="password" id="wkSetConfPass" placeholder="••••••">
+    </div>
+    <div class="err" id="wkSetErr" style="display:none"></div>
+    <button class="btn btn-g btn-full" onclick="wkSaveCredentials()">حفظ التغييرات</button>
+  </div>
+</div>
+
 <!-- WAKEEL DASHBOARD -->
 <div id="pgWakeel" class="hidden">
   <div class="wk-header">
@@ -583,6 +610,7 @@ tr:hover td{background:var(--gb)}
     <div style="display:flex;gap:8px;align-items:center">
       <span id="wkSchoolName" style="font-size:12px;color:var(--tm);font-weight:600"></span>
       <button class="btn btn-o btn-sm" onclick="wkRefresh(this)">🔄 تحديث</button>
+      <button class="btn btn-o btn-sm" onclick="wkOpenSettings()">⚙️ حسابي</button>
       <button class="btn btn-o btn-sm" onclick="wkLogout()">خروج</button>
     </div>
   </div>
@@ -3554,12 +3582,59 @@ function showWakeelDashboard(staffMember, school){
   document.getElementById('wkStatusDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('wkPermDate').value=new Date().toISOString().split('T')[0];
   wkSwitchTab('status');
+  if(staffMember.firstLogin){
+    document.getElementById('wkSettingsDesc').textContent='مرحباً بك! يُرجى تغيير اسم المستخدم وكلمة المرور قبل المتابعة.';
+    showModal('mdlWkSettings');
+  }
 }
 
 function wkLogout(){
   wkStaff=null; wkSchool=null;
   document.getElementById('pgWakeel').classList.add('hidden');
   document.getElementById('pgLanding').classList.remove('hidden');
+}
+
+function wkOpenSettings(){
+  document.getElementById('wkSettingsDesc').textContent='يمكنك تغيير اسم المستخدم وكلمة المرور';
+  document.getElementById('wkSetOldPass').value='';
+  document.getElementById('wkSetNewUser').value=wkStaff.user||'';
+  document.getElementById('wkSetNewPass').value='';
+  document.getElementById('wkSetConfPass').value='';
+  document.getElementById('wkSetErr').style.display='none';
+  showModal('mdlWkSettings');
+}
+
+function wkSaveCredentials(){
+  var oldPass=document.getElementById('wkSetOldPass').value.trim();
+  var newUser=document.getElementById('wkSetNewUser').value.trim();
+  var newPass=document.getElementById('wkSetNewPass').value.trim();
+  var confPass=document.getElementById('wkSetConfPass').value.trim();
+  var err=document.getElementById('wkSetErr');
+  err.style.display='none';
+
+  if(!oldPass||!newUser||!newPass||!confPass){err.textContent='يرجى تعبئة جميع الحقول';err.style.display='block';return;}
+  if(oldPass!==wkStaff.pass){err.textContent='كلمة المرور الحالية غير صحيحة';err.style.display='block';return;}
+  if(newPass!==confPass){err.textContent='كلمة المرور الجديدة وتأكيدها غير متطابقتين';err.style.display='block';return;}
+  if(newPass.length<6){err.textContent='كلمة المرور يجب أن تكون 6 أحرف على الأقل';err.style.display='block';return;}
+
+  var d=getSD(wkSchool.code)||{};
+  if(!d.staff){err.textContent='خطأ في بيانات المدرسة';err.style.display='block';return;}
+  // check username not taken by another staff member
+  var taken=d.staff.find(function(s){return s.user===newUser&&s.user!==wkStaff.user;});
+  if(taken){err.textContent='اسم المستخدم مستخدم من قِبل موظف آخر';err.style.display='block';return;}
+
+  var idx=d.staff.findIndex(function(s){return s.user===wkStaff.user;});
+  if(idx===-1){err.textContent='لم يتم العثور على بيانات الموظف';err.style.display='block';return;}
+
+  d.staff[idx].user=newUser;
+  d.staff[idx].pass=newPass;
+  delete d.staff[idx].firstLogin;
+  setSD(wkSchool.code,d);
+  fbWrite('pt_'+wkSchool.code, d);
+
+  wkStaff=d.staff[idx];
+  hideModal('mdlWkSettings');
+  wkShowToast('تم حفظ بيانات الحساب بنجاح ✓');
 }
 
 function wkRefresh(btn){
