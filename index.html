@@ -270,51 +270,31 @@ tr:hover td{background:var(--gb)}
 /* ── HERO ──────────────────────────────────────────────────────── */
 #pgLanding .hero{padding:48px 40px 24px;background:#fff;border-bottom:none}
 #pgLanding .hero-card{position:relative;background:linear-gradient(135deg,var(--navy-d) 0%, var(--navy) 55%, #22467d 100%);
-  border-radius:28px;padding:64px 56px;overflow:hidden;
+  border-radius:28px;padding:80px 40px;overflow:hidden;
   box-shadow:0 24px 60px -20px rgba(20,40,80,0.45);
-  min-height:420px;display:flex;flex-direction:row;align-items:center;gap:48px}
+  min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 #pgLanding .hero-card::before{content:"";position:absolute;left:-180px;top:-60px;width:520px;height:140%;
   background:radial-gradient(circle at 70% 50%, rgba(30,201,193,0.18) 0%, transparent 50%);pointer-events:none}
 #pgLanding .hero-card::after{content:"";position:absolute;right:-220px;bottom:-160px;width:520px;height:520px;border-radius:50%;
   background:radial-gradient(circle, rgba(212,167,58,0.12) 0%, transparent 60%);pointer-events:none}
-/* hero text side */
-#pgLanding .hero-content{position:relative;z-index:2;flex:1;text-align:right}
-#pgLanding .hero-tag{display:inline-flex;align-items:center;gap:8px;
+#pgLanding .hero-tag{position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px;
   background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
   color:#cfdaf0;padding:7px 16px;border-radius:999px;font-size:12px;font-weight:600;margin-bottom:24px;
   backdrop-filter:blur(6px)}
 #pgLanding .hero-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);
   box-shadow:0 0 12px var(--cyan)}
-#pgLanding .hero-icon{width:64px;height:64px;border-radius:16px;
+#pgLanding .hero-icon{position:relative;z-index:2;width:64px;height:64px;border-radius:16px;
   background:linear-gradient(135deg,var(--cyan),var(--cyan-d));
-  display:flex;align-items:center;justify-content:center;margin:0 0 22px;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;
   box-shadow:0 12px 28px rgba(30,201,193,0.4)}
 #pgLanding .hero-icon svg{width:30px;height:30px;color:#fff}
-#pgLanding .hero-card h1{font-size:48px;font-weight:800;color:#fff;line-height:1.25;
-  margin-bottom:18px;letter-spacing:-0.01em;font-family:'Cairo',sans-serif}
+#pgLanding .hero-card h1{position:relative;z-index:2;font-size:54px;font-weight:800;color:#fff;line-height:1.2;
+  margin-bottom:18px;letter-spacing:-0.01em;max-width:780px;font-family:'Cairo',sans-serif}
 #pgLanding .hero-card h1 .accent{background:linear-gradient(90deg,var(--cyan),#7ee2dc);-webkit-background-clip:text;
   background-clip:text;color:transparent}
-#pgLanding .hero-card p{font-size:15px;color:#cfdaf0;line-height:1.9;max-width:520px;margin:0 0 32px}
-#pgLanding .hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-start}
-/* ── HERO VISUAL IMAGES ──────────────────────────────────────── */
-#pgLanding .hero-visual{position:relative;z-index:2;flex:0 0 460px;display:flex;align-items:center;justify-content:center}
-#pgLanding .hv-img-wrap{position:relative;width:100%;height:440px}
-#pgLanding .hv-img-bg{position:absolute;
-  width:56%;height:50%;bottom:0;right:0;
-  object-fit:contain;object-position:center center;
-  opacity:0.42;
-  -webkit-mask-image:radial-gradient(ellipse 74% 72% at 62% 65%,
-    black 20%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.15) 58%, transparent 76%);
-  mask-image:radial-gradient(ellipse 74% 72% at 62% 65%,
-    black 20%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.15) 58%, transparent 76%)}
-#pgLanding .hv-img-main{position:absolute;
-  width:68%;height:62%;top:0;left:0;
-  object-fit:contain;object-position:left top;
-  opacity:0.72;
-  -webkit-mask-image:radial-gradient(ellipse 74% 72% at 38% 36%,
-    black 22%, rgba(0,0,0,.72) 40%, rgba(0,0,0,.25) 56%, transparent 74%);
-  mask-image:radial-gradient(ellipse 74% 72% at 38% 36%,
-    black 22%, rgba(0,0,0,.72) 40%, rgba(0,0,0,.25) 56%, transparent 74%)}
+#pgLanding .hero-card p{position:relative;z-index:2;font-size:16px;color:#cfdaf0;line-height:1.9;max-width:620px;
+  margin:0 auto 32px}
+#pgLanding .hero-cta{position:relative;z-index:2;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 #pgLanding .pill-cta{background:linear-gradient(90deg,var(--cyan),var(--cyan-d));color:#fff;border:none;
   padding:14px 32px;border-radius:999px;font-size:15px;font-weight:700;cursor:pointer;
   font-family:inherit;display:inline-flex;align-items:center;gap:8px;
@@ -406,12 +386,6 @@ tr:hover td{background:var(--gb)}
   #pgLanding .feat-grid{grid-template-columns:repeat(2,1fr)}
   #pgLanding .stats{grid-template-columns:repeat(2,1fr);margin:0 16px 40px;padding:28px}
   #pgLanding .foot-grid{grid-template-columns:1fr 1fr;gap:28px}
-  #pgLanding .hero-card{flex-direction:column;gap:32px;padding:48px 32px}
-  #pgLanding .hero-content{text-align:center}
-  #pgLanding .hero-icon{margin:0 auto 22px}
-  #pgLanding .hero-card p{max-width:100%;margin:0 auto 32px}
-  #pgLanding .hero-cta{justify-content:center}
-  #pgLanding .hero-visual{flex:none;width:100%;max-width:380px}
   #pgLanding .hero-card h1{font-size:36px}
   #pgLanding .exp-head h2{font-size:28px}
 }
@@ -431,7 +405,6 @@ tr:hover td{background:var(--gb)}
   #pgLanding .hero-card{padding:40px 20px;border-radius:20px;min-height:0}
   #pgLanding .hero-card h1{font-size:28px;line-height:1.35}
   #pgLanding .hero-card p{font-size:13.5px;line-height:1.85}
-  #pgLanding .hero-visual{display:none}
   #pgLanding .pill-cta{padding:12px 22px;font-size:13.5px}
   #pgLanding .pill-light{padding:12px 20px;font-size:13px}
   #pgLanding .features{padding:14px 16px 36px}
@@ -1150,26 +1123,16 @@ tr:hover td{background:var(--gb)}
   <!-- HERO -->
   <section class="hero">
     <div class="hero-card">
-      <!-- text content (right) -->
-      <div class="hero-content">
-        <div class="hero-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg>
-        </div>
-        <h1>منصتك الذكية <span class="accent">لإدارة مدرستك</span><br>بكفاءة واحترافية</h1>
-        <p>منصة متكاملة تتيح لمديري المدارس متابعة خطط الدروس الأسبوعية، والتعاميم، والاستبانات، وإدارة الأعمال الإدارية بكل سهولة عبر واتساب — بدون تطبيقات إضافية.</p>
-        <div class="hero-cta">
-          <button class="pill-cta" onclick="showModal('mdlRegister')">ابدأ مدرستك مجاناً
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          </button>
-          <button class="pill-light" onclick="showModal('mdlLogin')">دخول المدير</button>
-        </div>
+      <div class="hero-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg>
       </div>
-      <!-- visual images (left) -->
-      <div class="hero-visual">
-        <div class="hv-img-wrap">
-          <img class="hv-img-bg" src="hero-img3.png" alt="">
-          <img class="hv-img-main" src="hero-img1.png" alt="منصة رابط للإدارة المدرسية">
-        </div>
+      <h1>منصتك الذكية <span class="accent">لإدارة مدرستك</span><br>بكفاءة واحترافية</h1>
+      <p>منصة متكاملة تتيح لمديري المدارس متابعة خطط الدروس الأسبوعية، والتعاميم، والاستبانات، وإدارة الأعمال الإدارية بكل سهولة عبر واتساب — بدون تطبيقات إضافية.</p>
+      <div class="hero-cta">
+        <button class="pill-cta" onclick="showModal('mdlRegister')">ابدأ مدرستك مجاناً
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <button class="pill-light" onclick="showModal('mdlLogin')">دخول المدير</button>
       </div>
     </div>
   </section>
@@ -2339,7 +2302,7 @@ function doStaffLogin(role){
 }
 
 function doLogin(){
-  var code=document.getElementById('lCode').value.trim();
+  var code=document.getElementById('lCode').value.trim().toLowerCase();
   var pass=document.getElementById('lPass').value.trim();
   var err=document.getElementById('loginErr');
   err.style.display='none';
@@ -2351,28 +2314,28 @@ function doLogin(){
   }
 
   function findSchool(list){
-    return list.find(function(s){return (s.user||s.code).toLowerCase()===code.toLowerCase()&&s.pass===pass;});
+    return (list||[]).find(function(s){
+      var key=(s.user||s.code||'').toLowerCase();
+      return key===code && s.pass===pass;
+    });
   }
 
-  function loginFromFB(){
-    fbRead('pt_schools').then(function(raw){
-      var fbSchools=toArr(raw);
-      if(fbSchools.length>0){
-        schools=fbSchools;
-        try{localStorage.setItem('pt_schools',JSON.stringify(fbSchools));}catch(e){}
-      }
-      var found=findSchool(schools);
-      if(found){applyLogin(found);}else{err.style.display='block';}
-    }).catch(function(){err.style.display='block';});
-  }
-
-  // جرّب محلياً أولاً، وإن فشل اجلب من Firebase دائماً
-  if(schools.length>0){
+  // دائماً اجلب من Firebase لضمان أحدث البيانات
+  fbRead('pt_schools').then(function(raw){
+    var fbList=toArr(raw);
+    if(fbList.length>0){
+      schools=fbList;
+      try{localStorage.setItem('pt_schools',JSON.stringify(fbList));}catch(e){}
+    }
     var found=findSchool(schools);
-    if(found){applyLogin(found);}else{loginFromFB();}
-  } else {
-    loginFromFB();
-  }
+    if(found){applyLogin(found);}
+    else{err.style.display='block';}
+  }).catch(function(){
+    // Firebase فشل — جرّب من الذاكرة المحلية
+    var found=findSchool(schools);
+    if(found){applyLogin(found);}
+    else{err.style.display='block';}
+  });
 }
 document.getElementById('lPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
