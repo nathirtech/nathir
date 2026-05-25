@@ -3063,9 +3063,9 @@ function readExcel(e){
       var d=initSD(cur.code);var added=0;
       rows.forEach(function(row){
         var keys=Object.keys(row);
-        var name=String(row['الاسم']||row['اسم المعلم']||row[keys[0]]||'').trim();
-        var phone=String(row['رقم الجوال']||row['الجوال']||row['رقم الواتساب']||row[keys[1]]||'').trim();
-        var subject=String(row['التخصص']||row['المادة']||row[keys[2]]||'').trim();
+        var name=String(row['الاسم']||row['اسم المعلم']||row['الاسم الكامل']||row['اسم الموظف']||row[keys[0]]||'').trim();
+        var phone=String(row['رقم الجوال']||row['الجوال']||row['رقم الواتساب']||row['الجوال']||'').trim();
+        var subject=String(row['التخصص']||row['المادة']||row['المادة الدراسية']||row['الاختصاص']||row['تخصص']||'').trim();
         if(!name||d.teachers.find(function(t){return t.name===name;})) return;
         var w=name.replace(/^أ\.\s*/,'').split(' ');
         var ini=(w[0]?w[0][0]:'')+(w[w.length-1]?w[w.length-1][0]:'');
@@ -4035,7 +4035,7 @@ function wkRenderStatus(){
         return '<tr>'+
           '<td style="color:var(--tl);font-size:12px">'+(i+1)+'</td>'+
           '<td style="font-weight:600">'+t.name+'</td>'+
-          '<td style="color:var(--tl)">'+(t.subject||'—')+'</td>'+
+          '<td style="color:var(--tl)">'+((t.subject&&t.subject!==t.name)?t.subject:'—')+'</td>'+
           '<td>'+badge+'</td>'+
           '<td>'+actions+'</td>'+
         '</tr>';
