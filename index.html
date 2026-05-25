@@ -2265,7 +2265,7 @@ function doStaffLogin(role){
   schools.forEach(function(s){
     var d=getSD(s.code);
     if(!d||!d.staff) return;
-    var m=d.staff.find(function(st){return st.user===user&&st.pass===pass;});
+    var m=d.staff.find(function(st){return st.user===user&&String(st.pass)===String(pass);});
     if(m){found=m;foundSchool=s;}
   });
   if(!found){
@@ -2277,7 +2277,7 @@ function doStaffLogin(role){
         return fbRead('pt_'+s.code).then(function(d){
           var nd=normalizeSD(d);
           if(nd&&nd.staff){
-            var m=nd.staff.find(function(st){return st.user===user&&st.pass===pass;});
+            var m=nd.staff.find(function(st){return st.user===user&&String(st.pass)===String(pass);});
             if(m){foundFB=m;foundSchoolFB=s;}
           }
         });
@@ -2316,7 +2316,7 @@ function doLogin(){
   function findSchool(list){
     return (list||[]).find(function(s){
       var key=(s.user||s.code||'').toLowerCase();
-      return key===code && s.pass===pass;
+      return key===code && String(s.pass)===String(pass);
     });
   }
 
