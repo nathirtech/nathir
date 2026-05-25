@@ -3850,7 +3850,6 @@ function showWakeelDashboard(staffMember, school){
   document.getElementById('wkSchoolName').textContent=school.name||'—';
   document.getElementById('wkStaffName').textContent=staffMember.name||'الوكيل';
   document.getElementById('wkStaffRole').textContent=staffMember.role||'وكيل الشؤون التعليمية';
-  document.getElementById('wkStatusDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('wkPermDate').value=new Date().toISOString().split('T')[0];
   // preload school data from Firebase if not in localStorage
   var cached=getSD(school.code);
@@ -3861,10 +3860,6 @@ function showWakeelDashboard(staffMember, school){
     });
   }
   wkSwitchTab('home', document.getElementById('wkTabHome'));
-  // defer re-render to next tick so Firebase callbacks fire cleanly, with retries
-  setTimeout(wkRenderHome, 0);
-  setTimeout(wkRenderHome, 1500);
-  setTimeout(wkRenderHome, 4000);
   if(staffMember.firstLogin){
     document.getElementById('wkSettingsDesc').textContent='مرحباً بك! يُرجى تغيير اسم المستخدم وكلمة المرور قبل المتابعة.';
     showModal('mdlWkSettings');
