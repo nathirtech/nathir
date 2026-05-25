@@ -3861,8 +3861,10 @@ function showWakeelDashboard(staffMember, school){
     });
   }
   wkSwitchTab('home', document.getElementById('wkTabHome'));
-  // reload home stats after Firebase settles
-  setTimeout(wkRenderHome, 600);
+  // defer re-render to next tick so Firebase callbacks fire cleanly, with retries
+  setTimeout(wkRenderHome, 0);
+  setTimeout(wkRenderHome, 1500);
+  setTimeout(wkRenderHome, 4000);
   if(staffMember.firstLogin){
     document.getElementById('wkSettingsDesc').textContent='مرحباً بك! يُرجى تغيير اسم المستخدم وكلمة المرور قبل المتابعة.';
     showModal('mdlWkSettings');
@@ -3923,43 +3925,54 @@ function wkRenderHome(){
   document.getElementById('wkHomeName').textContent=wkStaff.name||'';
   document.getElementById('wkHomeRole').textContent=wkStaff.role||'';
   document.getElementById('wkHomeDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  var d=getSD(wkSchool.code);
-  var total=(d&&d.teachers&&d.teachers.length)||0;
-
-  // أحوال الموظفين stats
-  var setStatus=function(t,recs){
-    var done=Object.keys(recs||{}).filter(function(k){return recs[k];}).length;
-    document.getElementById('wkDashTotal').textContent=t||'0';
-    document.getElementById('wkDashDone').textContent=done||'0';
-    document.getElementById('wkDashPending').textContent=t?(t-done):'0';
-  };
-  fbRead('wk_records/'+wkSchool.code).then(function(recs){
-    _wkRecordsCache=recs||{};
-    if(!total){
-      fbRead('pt_'+wkSchool.code).then(function(raw){
-        var nd=normalizeSD(raw);
-        if(nd){try{localStorage.setItem('pt_'+wkSchool.code,JSON.stringify(nd));}catch(e){}}
-        setStatus((nd&&nd.teachers&&nd.teachers.length)||0, _wkRecordsCache);
-      });
-    } else { setStatus(total, recs); }
-  });
-
-  // استئذان stats
+  var code=wkSchool.code;
   var now=new Date();
   var thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  fbRead('wk_permissions/'+wkSchool.code).then(function(data){
-    var items=data?Object.values(data).filter(Boolean):[];
-    var monthCount=items.filter(function(p){return (p.date||'').startsWith(thisMonth);}).length;
-    document.getElementById('wkDashPermTotal').textContent=items.length||'0';
-    document.getElementById('wkDashPermToday').textContent=monthCount||'0';
-  });
+  var d=getSD(code);
+  var total=(d&&d.teachers&&d.teachers.length)||0;
 
-  // ملف إنجاز stats
-  fbRead('wk_files/'+wkSchool.code).then(function(data){
-    var items=data?Object.values(data).filter(Boolean):[];
-    var teachers=new Set(items.map(function(f){return f.teacher;}));
-    document.getElementById('wkDashFilesTotal').textContent=items.length||'0';
-    document.getElementById('wkDashFilesTeachers').textContent=teachers.size||'0';
+  Promise.all([
+    fbRead('wk_records/'+code),
+    fbRead('wk_permissions/'+code),
+    fbRead('wk_files/'+code)
+  ]).then(function(res){
+    var recs=res[0]||{};
+    var permData=res[1];
+    var filesData=res[2];
+    _wkRecordsCache=recs;
+
+    requestAnimationFrame(function(){
+      // استئذان
+      var permItems=permData?Object.values(permData).filter(Boolean):[];
+      var monthCount=permItems.filter(function(p){return (p.date||'').startsWith(thisMonth);}).length;
+      document.getElementById('wkDashPermTotal').textContent=permItems.length||'0';
+      document.getElementById('wkDashPermToday').textContent=monthCount||'0';
+
+      // ملف إنجاز
+      var fileItems=filesData?Object.values(filesData).filter(Boolean):[];
+      var fileTeachers=new Set(fileItems.map(function(f){return f.teacher;}));
+      document.getElementById('wkDashFilesTotal').textContent=fileItems.length||'0';
+      document.getElementById('wkDashFilesTeachers').textContent=fileTeachers.size||'0';
+
+      // أحوال الموظفين
+      var done=Object.keys(recs).filter(function(k){return recs[k];}).length;
+      if(!total){
+        fbRead('pt_'+code).then(function(raw){
+          var nd=normalizeSD(raw);
+          if(nd){try{localStorage.setItem('pt_'+code,JSON.stringify(nd));}catch(e){}}
+          var t=(nd&&nd.teachers&&nd.teachers.length)||0;
+          requestAnimationFrame(function(){
+            document.getElementById('wkDashTotal').textContent=t||'0';
+            document.getElementById('wkDashDone').textContent=done||'0';
+            document.getElementById('wkDashPending').textContent=t?(t-done):'0';
+          });
+        });
+      } else {
+        document.getElementById('wkDashTotal').textContent=total||'0';
+        document.getElementById('wkDashDone').textContent=done||'0';
+        document.getElementById('wkDashPending').textContent=total?(total-done):'0';
+      }
+    });
   });
 }
 
