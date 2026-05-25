@@ -816,6 +816,14 @@ tr:hover td{background:var(--gb)}
         <button class="btn btn-o btn-sm" onclick="document.getElementById('wkPermForm').classList.add('hidden')">إلغاء</button>
       </div>
 
+      <!-- شريط البحث -->
+      <div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px;padding:10px 14px;background:#f8faff;border:1.5px solid var(--bd);border-radius:10px">
+        <span style="font-size:13px;color:var(--tm);font-weight:700;white-space:nowrap">🔍 بحث:</span>
+        <input type="text" id="wkPermSearch" class="wk-input" placeholder="اكتب اسم المعلم للبحث..." oninput="wkFilterPerm()" style="flex:1;max-width:320px">
+        <button class="btn btn-sm" onclick="document.getElementById('wkPermSearch').value='';wkFilterPerm()" style="background:var(--gp);color:var(--tm);border:1.5px solid var(--bd);border-radius:7px;font-size:12px;padding:4px 10px;cursor:pointer;font-family:inherit">مسح</button>
+        <span id="wkPermCount" style="font-size:11px;color:var(--tl)"></span>
+      </div>
+
       <div id="wkPermList"></div>
     </div>
   </div>
@@ -4327,6 +4335,7 @@ function wkSaveFile(){
 }
 
 // --- الاستئذان ---
+var _wkPermAll=[];
 function wkRenderPerm(){
   if(!wkSchool) return;
   var d=getSD(wkSchool.code);
@@ -4339,39 +4348,59 @@ function wkRenderPerm(){
 
   fbRead('wk_permissions/'+wkSchool.code).then(function(data){
     var el=document.getElementById('wkPermList');
-    if(!data){el.innerHTML='<div class="empty-wk"><span>📋</span>لا توجد سجلات استئذان بعد</div>';return;}
-    var raw=data;
-    var keys=Object.keys(raw);
-    var items=keys.map(function(k){var v=raw[k];return v?Object.assign({},v,{_key:k}):null;}).filter(Boolean).reverse();
-    el.innerHTML='<table class="wk-table"><thead><tr>'+
-      '<th>المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th><th>زمن الخروج</th><th>زمن العودة</th><th>المبررات</th><th>ملاحظات</th><th>المصدر</th><th></th>'+
-      '</tr></thead><tbody>'+
-      items.map(function(p){
-        var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
-        var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
-        var exitT=p.exitHour?(p.exitHour+':'+em):'—';
-        var retT=p.returnHour?(p.returnHour+':'+rm):'—';
-        var src=p.submittedBy==='teacher'?'<span style="color:var(--gl);font-size:11px;font-weight:600">المعلم</span>':'<span style="color:var(--tm);font-size:11px">الوكيل</span>';
-        var esc=JSON.stringify(p).replace(/'/g,"\\'");
-        return '<tr>'+
-          '<td style="font-weight:600">'+(p.teacher||'—')+'</td>'+
-          '<td style="font-size:12px;color:var(--tl)">'+(p.civilId||'—')+'</td>'+
-          '<td style="font-size:12px">'+(p.day||'—')+'</td>'+
-          '<td style="color:var(--tl);font-size:12px">'+(p.date||'—')+'</td>'+
-          '<td style="font-size:12px;text-align:center">'+exitT+'</td>'+
-          '<td style="font-size:12px;text-align:center">'+retT+'</td>'+
-          '<td style="color:var(--tl)">'+(p.reason||'—')+'</td>'+
-          '<td style="color:var(--tl);font-size:12px">'+(p.notes||'—')+'</td>'+
-          '<td>'+src+'</td>'+
-          '<td style="white-space:nowrap">'+
-            '<button class="perm-view-btn" onclick="wkViewPerm(\''+p._key+'\')">عرض</button> '+
-            '<button class="perm-dl-btn" onclick="wkDlPerm(\''+p._key+'\')">تحميل</button> '+
-            '<button class="perm-del" onclick="wkDelPerm(\''+p._key+'\')">حذف</button>'+
-          '</td>'+
-        '</tr>';
-      }).join('')+
-      '</tbody></table>';
+    if(!data){el.innerHTML='<div class="empty-wk"><span>📋</span>لا توجد سجلات استئذان بعد</div>';_wkPermAll=[];wkUpdatePermCount(0,0);return;}
+    var keys=Object.keys(data);
+    var items=keys.map(function(k){var v=data[k];return v?Object.assign({},v,{_key:k}):null;}).filter(Boolean).reverse();
+    _wkPermAll=items;
+    var q=(document.getElementById('wkPermSearch')||{}).value||'';
+    var filtered=q.trim()?items.filter(function(p){return (p.teacher||'').includes(q.trim());}):items;
+    el.innerHTML=wkPermTableHtml(filtered);
+    wkUpdatePermCount(items.length, filtered.length);
   }).catch(function(){});
+}
+
+function wkPermTableHtml(items){
+  if(!items.length) return '<div class="empty-wk"><span>🔍</span>لا توجد نتائج مطابقة</div>';
+  return '<table class="wk-table"><thead><tr>'+
+    '<th>المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th><th>زمن الخروج</th><th>زمن العودة</th><th>المبررات</th><th>ملاحظات</th><th>المصدر</th><th></th>'+
+    '</tr></thead><tbody>'+
+    items.map(function(p){
+      var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+      var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+      var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+      var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+      var src=p.submittedBy==='teacher'?'<span style="color:var(--gl);font-size:11px;font-weight:600">المعلم</span>':'<span style="color:var(--tm);font-size:11px">الوكيل</span>';
+      return '<tr>'+
+        '<td style="font-weight:600">'+(p.teacher||'—')+'</td>'+
+        '<td style="font-size:12px;color:var(--tl)">'+(p.civilId||'—')+'</td>'+
+        '<td style="font-size:12px">'+(p.day||'—')+'</td>'+
+        '<td style="color:var(--tl);font-size:12px">'+(p.date||'—')+'</td>'+
+        '<td style="font-size:12px;text-align:center">'+exitT+'</td>'+
+        '<td style="font-size:12px;text-align:center">'+retT+'</td>'+
+        '<td style="color:var(--tl)">'+(p.reason||'—')+'</td>'+
+        '<td style="color:var(--tl);font-size:12px">'+(p.notes||'—')+'</td>'+
+        '<td>'+src+'</td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="perm-view-btn" onclick="wkViewPerm(\''+p._key+'\')">عرض</button> '+
+          '<button class="perm-dl-btn" onclick="wkDlPerm(\''+p._key+'\')">تحميل</button> '+
+          '<button class="perm-del" onclick="wkDelPerm(\''+p._key+'\')">حذف</button>'+
+        '</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table>';
+}
+
+function wkUpdatePermCount(total, shown){
+  var el=document.getElementById('wkPermCount');
+  if(!el) return;
+  el.textContent=shown<total?('عرض '+shown+' من '+total+' سجل'):('إجمالي '+total+' سجل');
+}
+
+function wkFilterPerm(){
+  var q=(document.getElementById('wkPermSearch').value||'').trim();
+  var filtered=q?_wkPermAll.filter(function(p){return (p.teacher||'').includes(q);}):_wkPermAll;
+  document.getElementById('wkPermList').innerHTML=wkPermTableHtml(filtered);
+  wkUpdatePermCount(_wkPermAll.length, filtered.length);
 }
 
 function wkSavePerm(){
