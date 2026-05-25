@@ -3861,6 +3861,8 @@ function showWakeelDashboard(staffMember, school){
     });
   }
   wkSwitchTab('home', document.getElementById('wkTabHome'));
+  // reload home stats after Firebase settles
+  setTimeout(wkRenderHome, 600);
   if(staffMember.firstLogin){
     document.getElementById('wkSettingsDesc').textContent='مرحباً بك! يُرجى تغيير اسم المستخدم وكلمة المرور قبل المتابعة.';
     showModal('mdlWkSettings');
