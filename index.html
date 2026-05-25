@@ -2327,17 +2327,13 @@ function doLogin(){
       schools=fbList;
       try{localStorage.setItem('pt_schools',JSON.stringify(fbList));}catch(e){}
     }
-    // DEBUG: أظهر ما وجدناه
-    var codes=schools.map(function(s){return (s.user||s.code||'?')+'/'+s.pass;}).join(' | ');
-    err.textContent='[DEBUG] عدد المدارس: '+schools.length+' | '+codes;
-    err.style.display='block';
-    err.style.color='#aef';
     var found=findSchool(schools);
     if(found){applyLogin(found);}
-  }).catch(function(e){
-    err.textContent='[DEBUG] خطأ Firebase: '+e;
-    err.style.display='block';
-    err.style.color='#f88';
+    else{err.style.display='block';}
+  }).catch(function(){
+    var found=findSchool(schools);
+    if(found){applyLogin(found);}
+    else{err.style.display='block';}
   });
 }
 document.getElementById('lPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
