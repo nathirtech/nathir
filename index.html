@@ -4456,6 +4456,23 @@ function wkPermRecordHtml(p,schoolName){
     '<tr><td>'+(p.day||'—')+'</td><td>'+(p.date||'—')+'</td><td style="text-align:center">'+exitT+'</td>'+
     '<td>'+(p.reason||'—')+'</td><td style="text-align:center">'+retT+'</td><td>'+(p.notes||'—')+'</td></tr>'+
     '</tbody></table>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:32px">'+
+      '<div style="border:1px solid #d0d8e8;border-radius:8px;padding:14px;text-align:center">'+
+        '<div style="font-size:11px;font-weight:700;color:#1a3a6b;margin-bottom:4px">المعلم</div>'+
+        '<div style="font-size:12px;font-weight:600;color:#1a1a2e;margin-bottom:28px">'+(p.teacher||'')+'</div>'+
+        '<div style="border-top:1px solid #aaa;padding-top:6px;font-size:10px;color:#999">التوقيع</div>'+
+      '</div>'+
+      '<div style="border:1px solid #d0d8e8;border-radius:8px;padding:14px;text-align:center">'+
+        '<div style="font-size:11px;font-weight:700;color:#1a3a6b;margin-bottom:4px">الوكيل</div>'+
+        '<div style="font-size:12px;color:#aaa;margin-bottom:28px"> </div>'+
+        '<div style="border-top:1px solid #aaa;padding-top:6px;font-size:10px;color:#999">التوقيع</div>'+
+      '</div>'+
+      '<div style="border:1px solid #d0d8e8;border-radius:8px;padding:14px;text-align:center">'+
+        '<div style="font-size:11px;font-weight:700;color:#1a3a6b;margin-bottom:4px">المدير</div>'+
+        '<div style="font-size:12px;color:#aaa;margin-bottom:28px"> </div>'+
+        '<div style="border-top:1px solid #aaa;padding-top:6px;font-size:10px;color:#999">التوقيع</div>'+
+      '</div>'+
+    '</div>'+
     '<button class="print-btn" onclick="window.print()">🖨️ طباعة / تحميل</button>'+
     '</body></html>';
 }
