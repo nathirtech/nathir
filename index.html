@@ -515,6 +515,10 @@ tr:hover td{background:var(--gb)}
 .perm-rejected{background:#f8d7da;color:#721c24}
 .perm-del{font-size:10px;color:#dc3545;background:none;border:1px solid #dc3545;border-radius:5px;padding:2px 6px;cursor:pointer;font-family:inherit}
 .perm-del:hover{background:#f8d7da}
+.perm-view-btn{font-size:10px;color:var(--gm);background:none;border:1px solid var(--gm);border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;font-weight:600}
+.perm-view-btn:hover{background:var(--gp)}
+.perm-dl-btn{font-size:10px;color:#155724;background:none;border:1px solid #28a745;border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;font-weight:600}
+.perm-dl-btn:hover{background:#d4edda}
 #pgPermForm{min-height:100vh;background:#f0f4f8;direction:rtl;padding-bottom:3rem}
 .pf-entry-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
 .pf-entry-table th{background:var(--gd);color:#fff;padding:7px 6px;text-align:center;font-weight:700;font-size:11px;border:1px solid #b0bdd8}
@@ -747,8 +751,13 @@ tr:hover td{background:var(--gb)}
             <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اختر المعلم</label>
             <select id="wkPermLinkTeacher" class="wk-input"><option value="">اختر المعلم</option></select>
           </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-g btn-sm" onclick="wkSendPermLink()">نسخ الرابط</button>
+          <div style="display:flex;align-items:flex-end;gap:6px">
+            <button class="btn btn-g btn-sm" onclick="wkSendPermLink()" style="background:#25D366;border-color:#25D366">
+              <span style="margin-left:4px">📲</span> إرسال عبر واتساب
+            </button>
+            <button class="btn btn-sm" onclick="wkCopyPermLink()" style="background:var(--gp);color:var(--gd);border:1.5px solid var(--bd);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px">
+              نسخ الرابط
+            </button>
           </div>
         </div>
         <p style="font-size:11px;color:var(--tl);margin:4px 0 0">يستطيع المعلم فتح الرابط وتعبئة نموذج الاستئذان وإرساله إليك مباشرةً</p>
@@ -4343,6 +4352,7 @@ function wkRenderPerm(){
         var exitT=p.exitHour?(p.exitHour+':'+em):'—';
         var retT=p.returnHour?(p.returnHour+':'+rm):'—';
         var src=p.submittedBy==='teacher'?'<span style="color:var(--gl);font-size:11px;font-weight:600">المعلم</span>':'<span style="color:var(--tm);font-size:11px">الوكيل</span>';
+        var esc=JSON.stringify(p).replace(/'/g,"\\'");
         return '<tr>'+
           '<td style="font-weight:600">'+(p.teacher||'—')+'</td>'+
           '<td style="font-size:12px;color:var(--tl)">'+(p.civilId||'—')+'</td>'+
@@ -4353,7 +4363,11 @@ function wkRenderPerm(){
           '<td style="color:var(--tl)">'+(p.reason||'—')+'</td>'+
           '<td style="color:var(--tl);font-size:12px">'+(p.notes||'—')+'</td>'+
           '<td>'+src+'</td>'+
-          '<td><button class="perm-del" onclick="wkDelPerm(\''+p._key+'\')">حذف</button></td>'+
+          '<td style="white-space:nowrap">'+
+            '<button class="perm-view-btn" onclick="wkViewPerm(\''+p._key+'\')">عرض</button> '+
+            '<button class="perm-dl-btn" onclick="wkDlPerm(\''+p._key+'\')">تحميل</button> '+
+            '<button class="perm-del" onclick="wkDelPerm(\''+p._key+'\')">حذف</button>'+
+          '</td>'+
         '</tr>';
       }).join('')+
       '</tbody></table>';
@@ -4399,7 +4413,75 @@ function wkSendPermLink(){
   var idx=document.getElementById('wkPermLinkTeacher').value;
   if(idx===''){wkShowToast('اختر المعلم أولاً');return;}
   var link=location.href.split('#')[0]+'#perm='+wkSchool.code+'|'+idx;
-  prompt('رابط نموذج الاستئذان — أرسله للمعلم:', link);
+  var msg='مرحباً، يرجى تعبئة نموذج الاستئذان من خلال الرابط التالي:\n'+link;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function wkCopyPermLink(){
+  var idx=document.getElementById('wkPermLinkTeacher').value;
+  if(idx===''){wkShowToast('اختر المعلم أولاً');return;}
+  var link=location.href.split('#')[0]+'#perm='+wkSchool.code+'|'+idx;
+  if(navigator.clipboard){navigator.clipboard.writeText(link).then(function(){wkShowToast('تم نسخ الرابط ✓');});}
+  else{prompt('رابط نموذج الاستئذان:',link);}
+}
+
+function wkPermRecordHtml(p,schoolName){
+  var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+  var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+  var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+  var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+  return '<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8">'+
+    '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'+
+    '<style>*{font-family:Cairo,sans-serif;margin:0;padding:0;box-sizing:border-box}body{padding:24px;background:#fff;color:#1a1a2e}'+
+    'h2{color:#1a3a6b;font-size:18px;margin-bottom:2px}p.sub{font-size:12px;color:#666;margin-bottom:16px}'+
+    '.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;border:1px solid #d0d8e8;border-radius:8px;padding:12px;background:#f8faff}'+
+    '.info-item label{font-size:10px;color:#7a8aab;font-weight:700;display:block;margin-bottom:2px}'+
+    '.info-item span{font-size:13px;font-weight:600;color:#1a1a2e}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}'+
+    'th{background:#1a3a6b;color:#fff;padding:8px;text-align:right;border:1px solid #b0bdd8;font-size:11px}'+
+    'td{padding:8px;border:1px solid #d0d8e8;vertical-align:middle}'+
+    '.print-btn{margin-top:16px;padding:8px 24px;background:#1a3a6b;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:Cairo,sans-serif;cursor:pointer;font-weight:700}'+
+    '@media print{.print-btn{display:none}}</style></head><body>'+
+    '<div style="text-align:center;margin-bottom:16px">'+
+      '<h2>نموذج استئذان موظف</h2>'+
+      '<p class="sub">'+schoolName+'</p>'+
+    '</div>'+
+    '<div class="info-grid">'+
+      '<div class="info-item"><label>اسم المعلم</label><span>'+(p.teacher||'—')+'</span></div>'+
+      '<div class="info-item"><label>رقم السجل المدني</label><span>'+(p.civilId||'—')+'</span></div>'+
+      '<div class="info-item"><label>التخصص</label><span>'+(p.teacherSpec||'—')+'</span></div>'+
+    '</div>'+
+    '<table><thead><tr>'+
+      '<th>اليوم</th><th>التاريخ</th><th>زمن الخروج</th><th>مبررات الخروج</th><th>زمن العودة</th><th>ملاحظات</th>'+
+    '</tr></thead><tbody>'+
+    '<tr><td>'+(p.day||'—')+'</td><td>'+(p.date||'—')+'</td><td style="text-align:center">'+exitT+'</td>'+
+    '<td>'+(p.reason||'—')+'</td><td style="text-align:center">'+retT+'</td><td>'+(p.notes||'—')+'</td></tr>'+
+    '</tbody></table>'+
+    '<button class="print-btn" onclick="window.print()">🖨️ طباعة / تحميل</button>'+
+    '</body></html>';
+}
+
+function wkViewPerm(key){
+  if(!wkSchool) return;
+  fbRead('wk_permissions/'+wkSchool.code+'/'+key).then(function(p){
+    if(!p){wkShowToast('لم يُعثر على السجل');return;}
+    var w=window.open('','_blank','width=860,height=560');
+    if(w){w.document.write(wkPermRecordHtml(p,wkSchool.name));w.document.close();}
+  }).catch(function(){wkShowToast('فشل التحميل');});
+}
+
+function wkDlPerm(key){
+  if(!wkSchool) return;
+  fbRead('wk_permissions/'+wkSchool.code+'/'+key).then(function(p){
+    if(!p){wkShowToast('لم يُعثر على السجل');return;}
+    var html=wkPermRecordHtml(p,wkSchool.name);
+    var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='استئذان_'+(p.teacher||'موظف')+'_'+(p.date||'').replace(/\//g,'-')+'.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    wkShowToast('جاري التحميل...');
+  }).catch(function(){wkShowToast('فشل التحميل');});
 }
 
 function wkDelPerm(key){
