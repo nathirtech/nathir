@@ -515,6 +515,17 @@ tr:hover td{background:var(--gb)}
 .perm-rejected{background:#f8d7da;color:#721c24}
 .perm-del{font-size:10px;color:#dc3545;background:none;border:1px solid #dc3545;border-radius:5px;padding:2px 6px;cursor:pointer;font-family:inherit}
 .perm-del:hover{background:#f8d7da}
+.sv-staff-card{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#fff;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:8px;transition:box-shadow .15s}
+.sv-staff-card:hover{box-shadow:0 2px 10px rgba(26,58,107,.1)}
+.sv-role-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;background:var(--gp);color:var(--gd);border:1px solid var(--bd)}
+.sv-back-btn{font-size:12px;color:var(--gl);background:none;border:1px solid var(--gl);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:12px}
+.sv-report-tab{padding:6px 16px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff;color:var(--tm);transition:all .15s}
+.sv-report-tab.active{background:var(--gd);color:#fff;border-color:var(--gd)}
+.sv-dl-btn{font-size:11px;background:var(--gd);color:#fff;border:none;border-radius:6px;padding:5px 14px;cursor:pointer;font-family:inherit;font-weight:700}
+.sv-table{width:100%;border-collapse:collapse;font-size:12px}
+.sv-table th{background:#1a3a6b;color:#fff;padding:7px 8px;text-align:right;border:1px solid #b0bdd8;font-size:11px}
+.sv-table td{padding:6px 8px;border:1px solid #e0e8f0;vertical-align:middle}
+.sv-table td.nc{text-align:center;color:var(--tl);font-size:11px}
 .perm-view-btn{font-size:10px;color:var(--gm);background:none;border:1px solid var(--gm);border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;font-weight:600}
 .perm-view-btn:hover{background:var(--gp)}
 .perm-dl-btn{font-size:10px;color:#155724;background:none;border:1px solid #28a745;border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;font-weight:600}
@@ -1501,6 +1512,29 @@ tr:hover td{background:var(--gb)}
   </div>
 </div>
 
+<div class="modal-bg hidden" id="mdlStaffView">
+  <div class="modal" style="max-width:820px;padding:20px 24px">
+    <button class="modal-close" onclick="hideModal('mdlStaffView')">✕</button>
+    <h2>👁️ حسابات الإداريين والوكلاء</h2>
+    <p class="modal-desc">اختر حساباً للاطلاع على تقاريره</p>
+    <!-- قائمة الحسابات -->
+    <div id="svList"></div>
+    <!-- تفاصيل الحساب -->
+    <div id="svDetail" class="hidden">
+      <button class="sv-back-btn" onclick="svShowList()">← رجوع للقائمة</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:12px 14px;background:var(--gp);border-radius:10px;border:1.5px solid var(--bd)">
+        <div style="font-size:28px" id="svDetailIcon">🏫</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--gd)" id="svDetailName"></div>
+          <div style="font-size:12px;color:var(--tl);margin-top:2px" id="svDetailRole"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="svReportTabs"></div>
+      <div id="svReportContent" style="max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg hidden" id="mdlChangePass">
   <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="hideModal('mdlChangePass')">✕</button>
@@ -1558,6 +1592,7 @@ tr:hover td{background:var(--gb)}
       <button class="btn btn-o btn-sm" onclick="refreshDashboard(this)">🔄 تحديث</button>
       <button class="btn btn-o btn-sm" onclick="openSettingsModal()">⚙️ الإعدادات</button>
       <button class="btn btn-o btn-sm" onclick="openStaffModal()">👥 لوحة تحكم المدير</button>
+      <button class="btn btn-o btn-sm" onclick="openStaffViewModal()" style="background:var(--gd);color:#fff;border-color:var(--gd)">👁️ حسابات الإداريين</button>
       <button class="btn btn-o btn-sm" onclick="doLogout()">خروج</button>
     </div>
   </div>
@@ -4644,6 +4679,208 @@ function permSaveForm(){
   Promise.all(proms).then(function(){
     document.getElementById('pfSuccess').style.display='flex';
   }).catch(function(){wkShowToast('فشل الإرسال، تحقق من الاتصال');});
+}
+
+// ====== DIRECTOR STAFF VIEW ======
+function openStaffViewModal(){
+  svShowList();
+  showModal('mdlStaffView');
+}
+
+function svShowList(){
+  document.getElementById('svList').classList.remove('hidden');
+  document.getElementById('svDetail').classList.add('hidden');
+  var d=getSD(cur.code)||{};
+  var staff=d.staff||[];
+  var el=document.getElementById('svList');
+  if(!staff.length){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tl)"><span style="font-size:2.5rem;display:block;margin-bottom:10px">👥</span>لا توجد حسابات مضافة بعد<br><small style="font-size:11px">أضف حسابات من "لوحة تحكم المدير"</small></div>';
+    return;
+  }
+  el.innerHTML=staff.map(function(s,i){
+    var isWakeel=s.role&&s.role.includes('وكيل');
+    var icon=isWakeel?'🏫':(s.role&&s.role.includes('موجه'))?'🎯':'👤';
+    return '<div class="sv-staff-card">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+        '<span style="font-size:26px">'+icon+'</span>'+
+        '<div>'+
+          '<div style="font-weight:700;font-size:14px;color:var(--tx)">'+s.name+'</div>'+
+          '<div style="margin-top:3px;display:flex;gap:6px;align-items:center">'+
+            '<span class="sv-role-badge">'+s.role+'</span>'+
+            '<span style="font-size:11px;color:var(--tl);direction:ltr">'+s.user+'</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<button class="btn btn-g btn-sm" onclick="svViewAccount('+i+')">📊 عرض التقارير</button>'+
+    '</div>';
+  }).join('');
+}
+
+function svViewAccount(idx){
+  var d=getSD(cur.code)||{};
+  var staff=d.staff||[];
+  var s=staff[idx];
+  if(!s) return;
+  document.getElementById('svList').classList.add('hidden');
+  document.getElementById('svDetail').classList.remove('hidden');
+  var isWakeel=s.role&&s.role.includes('وكيل');
+  var icon=isWakeel?'🏫':(s.role&&s.role.includes('موجه'))?'🎯':'👤';
+  document.getElementById('svDetailIcon').textContent=icon;
+  document.getElementById('svDetailName').textContent=s.name;
+  document.getElementById('svDetailRole').textContent=s.role;
+  var tabsEl=document.getElementById('svReportTabs');
+  if(isWakeel){
+    tabsEl.innerHTML=
+      '<button class="sv-report-tab active" id="svTabPerm" onclick="svLoadReport(\'perm\',this)">📋 الاستئذان</button>'+
+      '<button class="sv-report-tab" id="svTabStatus" onclick="svLoadReport(\'status\',this)">👥 أحوال الموظفين</button>'+
+      '<button class="sv-report-tab" id="svTabFiles" onclick="svLoadReport(\'files\',this)">📁 ملفات الإنجاز</button>';
+    svLoadReport('perm', document.getElementById('svTabPerm'));
+  } else {
+    tabsEl.innerHTML='';
+    document.getElementById('svReportContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--tl)"><span style="font-size:2.5rem;display:block;margin-bottom:10px">'+icon+'</span>لا توجد تقارير إلكترونية مرتبطة بهذا الحساب حالياً</div>';
+  }
+}
+
+function svLoadReport(type, btn){
+  document.querySelectorAll('.sv-report-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var el=document.getElementById('svReportContent');
+  el.innerHTML='<div style="text-align:center;padding:24px;color:var(--tl)">⏳ جاري التحميل...</div>';
+  if(type==='perm') svLoadPerm(el);
+  else if(type==='status') svLoadStatus(el);
+  else if(type==='files') svLoadFiles(el);
+}
+
+function svLoadPerm(el){
+  fbRead('wk_permissions/'+cur.code).then(function(data){
+    if(!data){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--tl)">📋 لا توجد سجلات استئذان</div>';return;}
+    var items=Object.values(data).filter(Boolean);
+    var rows=items.map(function(p,i){
+      var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+      var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+      var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+      var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+      return '<tr style="'+(i%2?'background:#f8faff':'')+'">'+
+        '<td class="nc">'+(i+1)+'</td>'+
+        '<td style="font-weight:600">'+(p.teacher||'—')+'</td>'+
+        '<td>'+(p.civilId||'—')+'</td>'+
+        '<td>'+(p.day||'—')+'</td>'+
+        '<td style="color:var(--tl)">'+(p.date||'—')+'</td>'+
+        '<td class="nc">'+exitT+'</td>'+
+        '<td>'+(p.reason||'—')+'</td>'+
+        '<td class="nc">'+retT+'</td>'+
+        '<td style="color:var(--tl);font-size:11px">'+(p.notes||'—')+'</td>'+
+      '</tr>';
+    }).join('');
+    el.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<span style="font-size:12px;color:var(--tl)">إجمالي <b>'+items.length+'</b> سجل</span>'+
+        '<button class="sv-dl-btn" onclick="svDownloadPerm()">⬇ تحميل التقرير</button>'+
+      '</div>'+
+      '<div style="overflow-x:auto"><table class="sv-table"><thead><tr>'+
+        '<th>م</th><th>المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th>'+
+        '<th>زمن الخروج</th><th>المبررات</th><th>زمن العودة</th><th>ملاحظات</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }).catch(function(){el.innerHTML='<div style="color:#dc3545;text-align:center;padding:20px">فشل تحميل البيانات</div>';});
+}
+
+function svLoadStatus(el){
+  fbRead('wk_records/'+cur.code).then(function(data){
+    if(!data){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--tl)">👥 لا توجد سجلات أحوال موظفين</div>';return;}
+    var d=getSD(cur.code)||{};
+    var teachers=d.teachers||[];
+    var items=Object.keys(data).map(function(k){
+      var rec=data[k];
+      if(!rec) return null;
+      var t=teachers[parseInt(k)];
+      return {idx:parseInt(k),name:rec.name||(t&&t.name)||'—',jobTitle:rec.jobTitle||'—',submittedAt:rec.submittedAt||''};
+    }).filter(Boolean);
+    if(!items.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--tl)">لا توجد سجلات</div>';return;}
+    var rows=items.map(function(r,i){
+      var dt=r.submittedAt?new Date(r.submittedAt).toLocaleDateString('ar-SA'):'—';
+      return '<tr style="'+(i%2?'background:#f8faff':'')+'">'+
+        '<td class="nc">'+(i+1)+'</td>'+
+        '<td style="font-weight:600">'+r.name+'</td>'+
+        '<td>'+r.jobTitle+'</td>'+
+        '<td style="color:var(--tl);font-size:11px">'+dt+'</td>'+
+        '<td><button class="perm-view-btn" onclick="svOpenWkRecord('+r.idx+')">عرض الملف</button></td>'+
+      '</tr>';
+    }).join('');
+    el.innerHTML=
+      '<div style="margin-bottom:8px"><span style="font-size:12px;color:var(--tl)"><b>'+items.length+'</b> سجل مُقدَّم</span></div>'+
+      '<div style="overflow-x:auto"><table class="sv-table"><thead><tr>'+
+        '<th>م</th><th>الاسم</th><th>المسمى الوظيفي</th><th>تاريخ الإرسال</th><th>الملف</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }).catch(function(){el.innerHTML='<div style="color:#dc3545;text-align:center;padding:20px">فشل تحميل البيانات</div>';});
+}
+
+function svLoadFiles(el){
+  fbRead('wk_files/'+cur.code).then(function(data){
+    if(!data){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--tl)">📁 لا توجد ملفات إنجاز</div>';return;}
+    var items=Object.values(data).filter(Boolean);
+    var rows=items.map(function(f,i){
+      return '<tr style="'+(i%2?'background:#f8faff':'')+'">'+
+        '<td class="nc">'+(i+1)+'</td>'+
+        '<td style="font-weight:600">'+(f.teacher||'—')+'</td>'+
+        '<td>'+(f.type||'—')+'</td>'+
+        '<td>'+(f.desc||'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--tl)">'+(f.date?new Date(f.date).toLocaleDateString('ar-SA'):'—')+'</td>'+
+        '<td>'+(f.url?'<a href="'+f.url+'" target="_blank" style="color:var(--gl);font-weight:700">فتح ⬆</a>':'—')+'</td>'+
+      '</tr>';
+    }).join('');
+    el.innerHTML=
+      '<div style="margin-bottom:8px"><span style="font-size:12px;color:var(--tl)"><b>'+items.length+'</b> ملف</span></div>'+
+      '<div style="overflow-x:auto"><table class="sv-table"><thead><tr>'+
+        '<th>م</th><th>المعلم</th><th>النوع</th><th>الوصف</th><th>التاريخ</th><th>الملف</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }).catch(function(){el.innerHTML='<div style="color:#dc3545;text-align:center;padding:20px">فشل تحميل البيانات</div>';});
+}
+
+function svOpenWkRecord(teacherIdx){
+  window.open(location.href.split('#')[0]+'#wkform='+cur.code+'|'+teacherIdx,'_blank');
+}
+
+function svDownloadPerm(){
+  fbRead('wk_permissions/'+cur.code).then(function(data){
+    if(!data){alert('لا توجد سجلات استئذان');return;}
+    var items=Object.values(data).filter(Boolean);
+    var rows=items.map(function(p,i){
+      var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+      var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+      var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+      var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+      return '<tr style="'+(i%2?'background:#f4f8ff':'')+'">'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+(i+1)+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;font-weight:600">'+(p.teacher||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;font-size:11px">'+(p.civilId||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.day||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.date||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+exitT+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.reason||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+retT+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.notes||'—')+'</td>'+
+      '</tr>';
+    }).join('');
+    var html='<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8">'+
+      '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'+
+      '<style>*{font-family:Cairo,sans-serif;margin:0;padding:0;box-sizing:border-box}body{padding:20px;background:#fff}'+
+      'h2{color:#1a3a6b;font-size:20px;margin-bottom:4px}p{font-size:12px;color:#555;margin-bottom:16px}'+
+      'table{width:100%;border-collapse:collapse;font-size:12px}'+
+      'th{background:#1a3a6b;color:#fff;padding:8px;text-align:right;border:1px solid #b0bdd8;font-size:11px}'+
+      '.pb{margin-top:16px;padding:8px 24px;background:#1a3a6b;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:Cairo,sans-serif;cursor:pointer;font-weight:700}'+
+      '@media print{.pb{display:none}}</style></head><body>'+
+      '<div style="text-align:center;margin-bottom:20px">'+
+        '<h2>سجل استئذان الموظفين</h2>'+
+        '<p>'+cur.name+' — '+new Date().toLocaleDateString('ar-SA')+'</p>'+
+      '</div>'+
+      '<table><thead><tr>'+
+        '<th>م</th><th>اسم المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th>'+
+        '<th>زمن الخروج</th><th>مبررات الخروج</th><th>زمن العودة</th><th>ملاحظات</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<button class="pb" onclick="window.print()">🖨️ طباعة / تحميل</button></body></html>';
+    var w=window.open('','_blank','width=960,height=640');
+    if(w){w.document.write(html);w.document.close();}
+  }).catch(function(){alert('فشل تحميل البيانات');});
 }
 
 function wkShowToast(msg){
