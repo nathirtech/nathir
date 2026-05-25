@@ -513,6 +513,16 @@ tr:hover td{background:var(--gb)}
 .perm-pending{background:#fff3cd;color:#856404}
 .perm-approved{background:#d4edda;color:#155724}
 .perm-rejected{background:#f8d7da;color:#721c24}
+.perm-del{font-size:10px;color:#dc3545;background:none;border:1px solid #dc3545;border-radius:5px;padding:2px 6px;cursor:pointer;font-family:inherit}
+.perm-del:hover{background:#f8d7da}
+#pgPermForm{min-height:100vh;background:#f0f4f8;direction:rtl;padding-bottom:3rem}
+.pf-entry-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+.pf-entry-table th{background:var(--gd);color:#fff;padding:7px 6px;text-align:center;font-weight:700;font-size:11px;border:1px solid #b0bdd8}
+.pf-entry-table th.sub-th{background:#2a5a9b;font-size:10px;padding:4px 6px}
+.pf-entry-table td{padding:3px 4px;border:1px solid #d0d8e8;vertical-align:middle}
+.pf-entry-table td input,.pf-entry-table td select{border:1px solid #ccc;border-radius:5px;padding:3px 5px;font-family:inherit;font-size:11px;background:#fafbfc;direction:rtl;width:100%;box-sizing:border-box}
+.pf-entry-table .num-col{width:28px;text-align:center;font-weight:700;color:var(--tm)}
+.pf-entry-table .time-inp{width:44px !important;text-align:center}
 .empty-wk{text-align:center;padding:2.5rem;color:var(--tl);font-size:13px}
 .empty-wk span{display:block;font-size:2.5rem;margin-bottom:0.5rem}
 .wk-home-banner{background:linear-gradient(135deg,var(--gd) 0%,var(--gl) 100%);border-radius:14px;padding:1.8rem 2rem;color:#fff;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
@@ -722,51 +732,149 @@ tr:hover td{background:var(--gb)}
     <div id="wkPanePerm" class="hidden">
       <div class="wk-section-title">
         <span>سجل الاستئذان</span>
-        <button class="btn btn-g btn-sm" onclick="document.getElementById('wkPermForm').classList.toggle('hidden')">+ إضافة استئذان</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="document.getElementById('wkPermForm').classList.toggle('hidden');document.getElementById('wkPermLinkBox').classList.add('hidden')">+ إضافة مباشر</button>
+          <button class="btn btn-o btn-sm" onclick="document.getElementById('wkPermLinkBox').classList.toggle('hidden');document.getElementById('wkPermForm').classList.add('hidden')">🔗 إرسال رابط للمعلم</button>
+          <button class="btn btn-sm" style="background:var(--gp);color:var(--gd);border:1.5px solid var(--bd);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 12px" onclick="wkPermReport()">📊 التقرير العام</button>
+        </div>
       </div>
+
+      <!-- رابط للمعلم -->
+      <div class="wk-form-box hidden" id="wkPermLinkBox" style="background:#f0f8ff;border-color:var(--gl)">
+        <h3 style="color:var(--gl);margin:0 0 10px">📤 إرسال رابط الاستئذان للمعلم</h3>
+        <div class="wk-form-row">
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اختر المعلم</label>
+            <select id="wkPermLinkTeacher" class="wk-input"><option value="">اختر المعلم</option></select>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-g btn-sm" onclick="wkSendPermLink()">نسخ الرابط</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--tl);margin:4px 0 0">يستطيع المعلم فتح الرابط وتعبئة نموذج الاستئذان وإرساله إليك مباشرةً</p>
+      </div>
+
+      <!-- إضافة مباشر من الوكيل -->
       <div class="wk-form-box hidden" id="wkPermForm">
-        <h3>إضافة طلب استئذان</h3>
+        <h3 style="margin:0 0 10px">إضافة استئذان مباشر</h3>
         <div class="wk-form-row">
           <div>
             <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اسم المعلم</label>
-            <select id="wkPermTeacher" class="wk-input">
-              <option value="">اختر المعلم</option>
-            </select>
+            <select id="wkPermTeacher" class="wk-input"><option value="">اختر المعلم</option></select>
           </div>
-          <div>
-            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">نوع الاستئذان</label>
-            <select id="wkPermType" class="wk-input">
-              <option>خروج مبكر</option>
-              <option>تأخر</option>
-              <option>غياب</option>
-              <option>مهمة رسمية</option>
-              <option>إجازة مرضية</option>
-              <option>إجازة اضطرارية</option>
-            </select>
-          </div>
-        </div>
-        <div class="wk-form-row">
           <div>
             <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">التاريخ</label>
             <input type="date" id="wkPermDate" class="wk-input">
           </div>
+        </div>
+        <div class="wk-form-row3">
           <div>
-            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">الحالة</label>
-            <select id="wkPermStatus" class="wk-input">
-              <option value="approved">موافق عليه</option>
-              <option value="pending">قيد الدراسة</option>
-              <option value="rejected">مرفوض</option>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">اليوم</label>
+            <select id="wkPermDay" class="wk-input">
+              <option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option>
             </select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">زمن الخروج (ساعة : دقيقة)</label>
+            <div style="display:flex;gap:4px">
+              <input type="number" id="wkPermExitH" class="wk-input" placeholder="ساعة" min="6" max="23" style="width:50%">
+              <input type="number" id="wkPermExitM" class="wk-input" placeholder="دقيقة" min="0" max="59" style="width:50%">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">زمن العودة (ساعة : دقيقة)</label>
+            <div style="display:flex;gap:4px">
+              <input type="number" id="wkPermRetH" class="wk-input" placeholder="ساعة" min="6" max="23" style="width:50%">
+              <input type="number" id="wkPermRetM" class="wk-input" placeholder="دقيقة" min="0" max="59" style="width:50%">
+            </div>
+          </div>
+        </div>
+        <div class="wk-form-row">
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">مبررات الخروج</label>
+            <input type="text" id="wkPermReason" class="wk-input" placeholder="سبب الاستئذان">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">رقم السجل المدني</label>
+            <input type="text" id="wkPermCivilId" class="wk-input" placeholder="0000000000">
           </div>
         </div>
         <div style="margin-bottom:8px">
-          <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">السبب</label>
-          <input type="text" id="wkPermReason" class="wk-input" placeholder="سبب الاستئذان">
+          <label style="font-size:12px;color:var(--tm);font-weight:600;display:block;margin-bottom:4px">ملاحظات</label>
+          <input type="text" id="wkPermNotes" class="wk-input" placeholder="ملاحظات إضافية">
         </div>
         <button class="btn btn-g btn-sm" onclick="wkSavePerm()">حفظ</button>
         <button class="btn btn-o btn-sm" onclick="document.getElementById('wkPermForm').classList.add('hidden')">إلغاء</button>
       </div>
+
       <div id="wkPermList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERMISSION FORM (teacher-facing) -->
+<div id="pgPermForm" class="hidden">
+  <div class="wkf-header">
+    <h2 id="pfSchoolName">المدرسة</h2>
+    <p>سجل استئذان الموظفين — يُرجى تعبئة البيانات المطلوبة ثم إرسال النموذج</p>
+  </div>
+  <div class="wkf-container">
+    <!-- بيانات المعلم -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">👤 بيانات المعلم</div>
+      <div class="wkf-section-body">
+        <div class="wkf-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="wkf-field">
+            <label>اسم المعلم رباعياً</label>
+            <input type="text" id="pfTeacherName" placeholder="الاسم الكامل">
+          </div>
+          <div class="wkf-field">
+            <label>التخصص</label>
+            <input type="text" id="pfSpec" placeholder="التخصص">
+          </div>
+          <div class="wkf-field">
+            <label>رقم السجل المدني</label>
+            <input type="text" id="pfCivilId" placeholder="0000000000">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- جدول الاستئذان -->
+    <div class="wkf-section">
+      <div class="wkf-section-title">📋 سجلات الاستئذان</div>
+      <div class="wkf-section-body" style="overflow-x:auto">
+        <table class="pf-entry-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:28px">م</th>
+              <th rowspan="2">اليوم</th>
+              <th rowspan="2">التاريخ</th>
+              <th colspan="2">زمن الخروج</th>
+              <th rowspan="2" style="min-width:140px">مبررات الخروج</th>
+              <th colspan="2">زمن العودة</th>
+              <th rowspan="2" style="min-width:120px">ملاحظات</th>
+            </tr>
+            <tr>
+              <th class="sub-th">ساعة</th>
+              <th class="sub-th">دقيقة</th>
+              <th class="sub-th">ساعة</th>
+              <th class="sub-th">دقيقة</th>
+            </tr>
+          </thead>
+          <tbody id="pfEntryBody"></tbody>
+        </table>
+        <button class="wkf-add-row" onclick="pfAddRow()">+ إضافة صف</button>
+      </div>
+    </div>
+    <div class="wkf-submit-bar" style="padding:1rem 0;text-align:center">
+      <button class="btn btn-g" onclick="permSaveForm()" style="font-size:14px;padding:10px 32px;font-family:inherit">📤 إرسال النموذج</button>
+    </div>
+  </div>
+  <div id="pfSuccess" class="wkf-success-overlay" style="display:none">
+    <div class="wkf-success-card">
+      <div class="big-icon">✅</div>
+      <h3>تم إرسال النموذج بنجاح</h3>
+      <p>تم حفظ بيانات استئذانك وإرسالها إلى الوكيل</p>
     </div>
   </div>
 </div>
@@ -2158,7 +2266,7 @@ var survTargets=[]; // selected survey targets
 
 // ====== PAGES ======
 function showPage(id){
-  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim','pgWakeel','pgWkForm'].forEach(function(p){
+  ['pgLanding','pgDashboard','pgUpload','pgCircular','pgSurvey','pgAdmin','pgQawwim','pgWakeel','pgWkForm','pgPermForm'].forEach(function(p){
     document.getElementById(p).classList.add('hidden');
   });
   document.getElementById(id).classList.remove('hidden');
@@ -3601,6 +3709,9 @@ function init(){
   } else if(hash.startsWith('#wkform=')){
     var wfp=hash.split('#wkform=')[1].split('|');
     showWkForm(wfp[0], parseInt(wfp[1]));
+  } else if(hash.startsWith('#perm=')){
+    var pp=hash.split('#perm=')[1].split('|');
+    showPermForm(pp[0], parseInt(pp[1]));
   } else {
     showPage('pgLanding');
     updateLandingStats();
@@ -4211,27 +4322,38 @@ function wkRenderPerm(){
   if(!wkSchool) return;
   var d=getSD(wkSchool.code);
   var teachers=(d&&d.teachers)||[];
+  var opts='<option value="">اختر المعلم</option>'+teachers.map(function(t,i){return '<option value="'+i+'">'+t.name+'</option>';}).join('');
   var sel=document.getElementById('wkPermTeacher');
-  sel.innerHTML='<option value="">اختر المعلم</option>'+
-    teachers.map(function(t){return '<option>'+t.name+'</option>';}).join('');
+  if(sel) sel.innerHTML=opts;
+  var lsel=document.getElementById('wkPermLinkTeacher');
+  if(lsel) lsel.innerHTML=opts;
 
   fbRead('wk_permissions/'+wkSchool.code).then(function(data){
     var el=document.getElementById('wkPermList');
     if(!data){el.innerHTML='<div class="empty-wk"><span>📋</span>لا توجد سجلات استئذان بعد</div>';return;}
-    var items=Array.isArray(data)?data:Object.values(data);
-    items=items.filter(Boolean).reverse();
-    var pillMap={approved:'perm-approved',pending:'perm-pending',rejected:'perm-rejected'};
-    var lblMap={approved:'موافق عليه',pending:'قيد الدراسة',rejected:'مرفوض'};
+    var raw=data;
+    var keys=Object.keys(raw);
+    var items=keys.map(function(k){var v=raw[k];return v?Object.assign({},v,{_key:k}):null;}).filter(Boolean).reverse();
     el.innerHTML='<table class="wk-table"><thead><tr>'+
-      '<th>المعلم</th><th>نوع الاستئذان</th><th>التاريخ</th><th>السبب</th><th>الحالة</th>'+
+      '<th>المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th><th>زمن الخروج</th><th>زمن العودة</th><th>المبررات</th><th>ملاحظات</th><th>المصدر</th><th></th>'+
       '</tr></thead><tbody>'+
       items.map(function(p){
+        var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+        var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+        var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+        var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+        var src=p.submittedBy==='teacher'?'<span style="color:var(--gl);font-size:11px;font-weight:600">المعلم</span>':'<span style="color:var(--tm);font-size:11px">الوكيل</span>';
         return '<tr>'+
-          '<td style="font-weight:600">'+p.teacher+'</td>'+
-          '<td>'+p.type+'</td>'+
-          '<td style="color:var(--tl);font-size:12px">'+p.date+'</td>'+
-          '<td style="color:var(--tl)">'+( p.reason||'—')+'</td>'+
-          '<td><span class="perm-pill '+( pillMap[p.status]||'perm-pending')+'">'+( lblMap[p.status]||p.status)+'</span></td>'+
+          '<td style="font-weight:600">'+(p.teacher||'—')+'</td>'+
+          '<td style="font-size:12px;color:var(--tl)">'+(p.civilId||'—')+'</td>'+
+          '<td style="font-size:12px">'+(p.day||'—')+'</td>'+
+          '<td style="color:var(--tl);font-size:12px">'+(p.date||'—')+'</td>'+
+          '<td style="font-size:12px;text-align:center">'+exitT+'</td>'+
+          '<td style="font-size:12px;text-align:center">'+retT+'</td>'+
+          '<td style="color:var(--tl)">'+(p.reason||'—')+'</td>'+
+          '<td style="color:var(--tl);font-size:12px">'+(p.notes||'—')+'</td>'+
+          '<td>'+src+'</td>'+
+          '<td><button class="perm-del" onclick="wkDelPerm(\''+p._key+'\')">حذف</button></td>'+
         '</tr>';
       }).join('')+
       '</tbody></table>';
@@ -4239,19 +4361,161 @@ function wkRenderPerm(){
 }
 
 function wkSavePerm(){
-  var teacher=document.getElementById('wkPermTeacher').value;
-  var type=document.getElementById('wkPermType').value;
+  var teacherIdx=document.getElementById('wkPermTeacher').value;
+  if(teacherIdx===''){wkShowToast('يرجى اختيار المعلم');return;}
+  var d=getSD(wkSchool.code);
+  var teachers=(d&&d.teachers)||[];
+  var teacher=teachers[parseInt(teacherIdx)];
+  if(!teacher){wkShowToast('المعلم غير موجود');return;}
   var date=document.getElementById('wkPermDate').value;
-  var status=document.getElementById('wkPermStatus').value;
-  var reason=document.getElementById('wkPermReason').value.trim();
-  if(!teacher||!date){wkShowToast('يرجى اختيار المعلم والتاريخ');return;}
-  var record={teacher:teacher,type:type,date:date,status:status,reason:reason,addedBy:wkStaff.name,createdAt:new Date().toISOString()};
+  if(!date){wkShowToast('يرجى تحديد التاريخ');return;}
+  var record={
+    teacher:teacher.name,
+    teacherIdx:parseInt(teacherIdx),
+    date:date,
+    day:document.getElementById('wkPermDay').value,
+    exitHour:document.getElementById('wkPermExitH').value,
+    exitMinute:document.getElementById('wkPermExitM').value,
+    returnHour:document.getElementById('wkPermRetH').value,
+    returnMinute:document.getElementById('wkPermRetM').value,
+    reason:document.getElementById('wkPermReason').value.trim(),
+    civilId:document.getElementById('wkPermCivilId').value.trim(),
+    notes:document.getElementById('wkPermNotes').value.trim(),
+    submittedBy:'wakeel',
+    addedBy:wkStaff?wkStaff.name:'',
+    createdAt:new Date().toISOString()
+  };
   fbPush('wk_permissions/'+wkSchool.code, record).then(function(){
     wkShowToast('تم حفظ سجل الاستئذان ✓');
     document.getElementById('wkPermForm').classList.add('hidden');
     document.getElementById('wkPermReason').value='';
+    document.getElementById('wkPermCivilId').value='';
+    document.getElementById('wkPermNotes').value='';
     wkRenderPerm();
   }).catch(function(){wkShowToast('فشل الحفظ');});
+}
+
+function wkSendPermLink(){
+  var idx=document.getElementById('wkPermLinkTeacher').value;
+  if(idx===''){wkShowToast('اختر المعلم أولاً');return;}
+  var link=location.href.split('#')[0]+'#perm='+wkSchool.code+'|'+idx;
+  prompt('رابط نموذج الاستئذان — أرسله للمعلم:', link);
+}
+
+function wkDelPerm(key){
+  if(!confirm('حذف هذا السجل؟')) return;
+  fbDelete('wk_permissions/'+wkSchool.code+'/'+key).then(function(){
+    wkShowToast('تم الحذف');
+    wkRenderPerm();
+  }).catch(function(){wkShowToast('فشل الحذف');});
+}
+
+function wkPermReport(){
+  if(!wkSchool){wkShowToast('يرجى تسجيل الدخول');return;}
+  fbRead('wk_permissions/'+wkSchool.code).then(function(data){
+    if(!data){wkShowToast('لا توجد سجلات استئذان');return;}
+    var items=Object.values(data).filter(Boolean);
+    var rows=items.map(function(p,i){
+      var em=p.exitMinute!=null&&p.exitMinute!==''?String(p.exitMinute).padStart(2,'0'):'00';
+      var rm=p.returnMinute!=null&&p.returnMinute!==''?String(p.returnMinute).padStart(2,'0'):'00';
+      var exitT=p.exitHour?(p.exitHour+':'+em):'—';
+      var retT=p.returnHour?(p.returnHour+':'+rm):'—';
+      var bg=i%2===1?'background:#f4f8ff':'';
+      return '<tr style="'+bg+'">'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+(i+1)+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;font-weight:600">'+(p.teacher||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;font-size:11px">'+(p.civilId||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.day||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.date||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+exitT+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.reason||'—')+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8;text-align:center">'+retT+'</td>'+
+        '<td style="padding:6px 8px;border:1px solid #d0d8e8">'+(p.notes||'—')+'</td>'+
+      '</tr>';
+    }).join('');
+    var html='<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8">'+
+      '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'+
+      '<style>*{font-family:Cairo,sans-serif;margin:0;padding:0;box-sizing:border-box}'+
+      'body{padding:20px;background:#fff;color:#1a1a2e}'+
+      'h2{color:#1a3a6b;font-size:20px;margin-bottom:4px}'+
+      'p.sub{font-size:13px;color:#555;margin-bottom:16px}'+
+      'table{width:100%;border-collapse:collapse;font-size:12px}'+
+      'th{background:#1a3a6b;color:#fff;padding:8px 8px;text-align:right;border:1px solid #b0bdd8;font-size:11px}'+
+      '.print-btn{margin-top:16px;padding:8px 24px;background:#1a3a6b;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:Cairo,sans-serif;cursor:pointer}'+
+      '@media print{.print-btn{display:none}}'+
+      '</style></head><body>'+
+      '<div style="text-align:center;margin-bottom:20px">'+
+        '<h2>سجل استئذان الموظفين</h2>'+
+        '<p class="sub">'+wkSchool.name+' — التاريخ: '+new Date().toLocaleDateString('ar-SA')+'</p>'+
+      '</div>'+
+      '<table><thead><tr>'+
+        '<th>م</th><th>اسم المعلم</th><th>السجل المدني</th><th>اليوم</th><th>التاريخ</th>'+
+        '<th>زمن الخروج</th><th>مبررات الخروج</th><th>زمن العودة</th><th>ملاحظات</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<button class="print-btn" onclick="window.print()">🖨️ طباعة التقرير</button>'+
+      '</body></html>';
+    var w=window.open('','_blank','width=960,height=640');
+    if(w){w.document.write(html);w.document.close();}
+  }).catch(function(){wkShowToast('فشل تحميل البيانات');});
+}
+
+var _pfSchoolCode='', _pfTeacherIdx=-1;
+function showPermForm(code, idx){
+  _pfSchoolCode=code;
+  _pfTeacherIdx=idx;
+  showPage('pgPermForm');
+  var school=schools.find(function(s){return s.code===code;});
+  document.getElementById('pfSchoolName').textContent=(school?school.name:'المدرسة')+' — سجل الاستئذان';
+  var d=school?getSD(code):null;
+  var teachers=(d&&d.teachers)||[];
+  var t=teachers[idx];
+  document.getElementById('pfTeacherName').value=(t&&t.name)||'';
+  document.getElementById('pfSpec').value='';
+  document.getElementById('pfCivilId').value='';
+  document.getElementById('pfSuccess').style.display='none';
+  var tbody=document.getElementById('pfEntryBody');
+  tbody.innerHTML='';
+  for(var i=0;i<5;i++) pfAddRow();
+}
+
+function pfAddRow(){
+  var tbody=document.getElementById('pfEntryBody');
+  var n=tbody.children.length+1;
+  var days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+  var tr=document.createElement('tr');
+  tr.innerHTML=
+    '<td class="num-col">'+n+'</td>'+
+    '<td><select style="border:1px solid #ccc;border-radius:5px;padding:3px 4px;font-family:inherit;font-size:11px;direction:rtl;width:100%">'+days.map(function(d){return '<option>'+d+'</option>';}).join('')+'</select></td>'+
+    '<td><input type="date" style="border:1px solid #ccc;border-radius:5px;padding:3px 5px;font-family:inherit;font-size:11px;width:100%"></td>'+
+    '<td><input type="number" min="6" max="23" placeholder="س" class="time-inp" style="border:1px solid #ccc;border-radius:5px;padding:3px;font-family:inherit;font-size:11px;width:44px;text-align:center"></td>'+
+    '<td><input type="number" min="0" max="59" placeholder="د" class="time-inp" style="border:1px solid #ccc;border-radius:5px;padding:3px;font-family:inherit;font-size:11px;width:44px;text-align:center"></td>'+
+    '<td><input type="text" placeholder="السبب" style="border:1px solid #ccc;border-radius:5px;padding:3px 6px;font-family:inherit;font-size:11px;width:100%"></td>'+
+    '<td><input type="number" min="6" max="23" placeholder="س" class="time-inp" style="border:1px solid #ccc;border-radius:5px;padding:3px;font-family:inherit;font-size:11px;width:44px;text-align:center"></td>'+
+    '<td><input type="number" min="0" max="59" placeholder="د" class="time-inp" style="border:1px solid #ccc;border-radius:5px;padding:3px;font-family:inherit;font-size:11px;width:44px;text-align:center"></td>'+
+    '<td><input type="text" placeholder="ملاحظات" style="border:1px solid #ccc;border-radius:5px;padding:3px 6px;font-family:inherit;font-size:11px;width:100%"></td>';
+  tbody.appendChild(tr);
+}
+
+function permSaveForm(){
+  var name=document.getElementById('pfTeacherName').value.trim();
+  var spec=document.getElementById('pfSpec').value.trim();
+  var civilId=document.getElementById('pfCivilId').value.trim();
+  if(!name){wkShowToast('يرجى إدخال اسم المعلم');return;}
+  var rows=Array.from(document.getElementById('pfEntryBody').children);
+  var entries=[];
+  rows.forEach(function(tr){
+    var inp=tr.querySelectorAll('input,select');
+    var e={day:inp[0]?inp[0].value:'',date:inp[1]?inp[1].value:'',exitHour:inp[2]?inp[2].value:'',exitMinute:inp[3]?inp[3].value:'',reason:inp[4]?inp[4].value.trim():'',returnHour:inp[5]?inp[5].value:'',returnMinute:inp[6]?inp[6].value:'',notes:inp[7]?inp[7].value.trim():''};
+    if(e.date||e.reason) entries.push(e);
+  });
+  if(!entries.length){wkShowToast('يرجى إدخال بيانات على الأقل في صف واحد');return;}
+  var code=_pfSchoolCode;
+  var proms=entries.map(function(e){
+    return fbPush('wk_permissions/'+code,{teacher:name,teacherSpec:spec,civilId:civilId,day:e.day,date:e.date,exitHour:e.exitHour,exitMinute:e.exitMinute,returnHour:e.returnHour,returnMinute:e.returnMinute,reason:e.reason,notes:e.notes,submittedBy:'teacher',createdAt:new Date().toISOString()});
+  });
+  Promise.all(proms).then(function(){
+    document.getElementById('pfSuccess').style.display='flex';
+  }).catch(function(){wkShowToast('فشل الإرسال، تحقق من الاتصال');});
 }
 
 function wkShowToast(msg){
