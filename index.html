@@ -11,6 +11,8 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',sans-serif}
 body{background:#f5f4f0;direction:rtl;min-height:100vh}
 .hidden{display:none!important}
+/* التقويم الذاتي معطّل مؤقتاً — لإعادة تفعيله احذف هذا السطر */
+.qw-off{display:none!important}
 
 /* Colors */
 :root{
@@ -1296,7 +1298,7 @@ tr:hover td{background:var(--gb)}
             </div>
           </span>
           <a href="#" onclick="showModal('mdlLoginMowajeh');return false">الموجه الطلابي</a>
-          <a href="#stories">التقويم الذاتي</a>
+          <a href="#stories" class="qw-off">التقويم الذاتي</a>
         </div>
       </div>
       <div class="brand">
@@ -1369,7 +1371,7 @@ tr:hover td{background:var(--gb)}
   </div>
 
   <!-- SELF-EVALUATION DOMAINS -->
-  <section class="exp" id="stories">
+  <section class="exp qw-off" id="stories">
     <div class="exp-head" style="text-align:center">
       <div class="kicker">التقويم الذاتي</div>
       <h2>مجالات التقويم الذاتي</h2>
@@ -1404,7 +1406,7 @@ tr:hover td{background:var(--gb)}
       <div class="foot-col">
         <h4>المنصة</h4>
         <a href="#features">المميزات</a>
-        <a href="#stories">قصص المدارس</a>
+        <a href="#stories" class="qw-off">قصص المدارس</a>
         <a href="#" onclick="showModal('mdlRegister');return false">تسجيل مدرسة</a>
       </div>
       <div class="foot-col">
