@@ -1,0 +1,19 @@
+{
+  "id": "rabit-attendance",
+  "name": "سجل الغياب والتأخر — منصة رابط",
+  "short_name": "سجل الغياب",
+  "description": "تحضير غياب وتأخر الطلاب في الحصة الأولى والرابعة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "attendance.html",
+  "scope": "attendance.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f4f0",
+  "theme_color": "#1a3a6b",
+  "icons": [
+    { "src": "att-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "att-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "att-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

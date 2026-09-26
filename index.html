@@ -1850,6 +1850,7 @@ tr:hover td{background:var(--gb)}
       <button class="nav-tab active" onclick="adminTab('stats',this)">📊 الإحصائيات</button>
       <button class="nav-tab" onclick="adminTab('schools',this)">🏫 المدارس</button>
       <button class="nav-tab" onclick="adminTab('reports',this)">📈 التقارير</button>
+      <button class="nav-tab" onclick="adminTab('att',this)">📲 تطبيق الغياب</button>
       <button class="nav-tab" onclick="adminTab('settings',this)">⚙️ الإعدادات</button>
     </div>
   </div>
@@ -1895,6 +1896,35 @@ tr:hover td{background:var(--gb)}
             <tbody id="adminReportBody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE APP INVITES -->
+    <div id="adminAtt" class="hidden">
+      <div class="card">
+        <div class="card-header"><h3>📲 دعوة جديدة لتطبيق «سجل الغياب والتأخر»</h3></div>
+        <div style="padding:14px">
+          <p style="font-size:12px;color:var(--tl);margin-bottom:12px">أنشئ دعوة لمدير أو وكيل، وأرسل له الرابط بالواتساب. يفتح الرابط فيثبّت التطبيق على جهازه ويدخل مباشرة دون اسم مستخدم أو كلمة مرور.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end">
+            <div class="form-g" style="margin:0"><label>الاسم</label><input type="text" id="attInvName" placeholder="اسم المدير أو الوكيل"></div>
+            <div class="form-g" style="margin:0"><label>الصفة</label>
+              <select id="attInvRole" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit">
+                <option>مدير المدرسة</option><option>وكيل الشؤون التعليمية</option><option>وكيل الشؤون المدرسية</option><option>وكيل الشؤون الطلابية</option><option>الموجه الطلابي</option>
+              </select></div>
+            <div class="form-g" style="margin:0"><label>المدرسة</label>
+              <select id="attInvSchool" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
+            <div class="form-g" style="margin:0"><label>رقم الجوال (واتساب)</label><input type="text" id="attInvPhone" placeholder="05xxxxxxxx"></div>
+            <button class="btn btn-g" onclick="attCreateInvite()">➕ إنشاء الدعوة</button>
+          </div>
+          <div class="err" id="attInvErr" style="display:none;margin-top:8px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>الدعوات</h3><span style="font-size:12px;color:var(--tl)" id="attInvCount"></span></div>
+        <div class="tbl"><table>
+          <thead><tr><th>الاسم</th><th>الصفة</th><th>المدرسة</th><th>رمز التفعيل</th><th>الحالة</th><th>آخر استخدام</th><th>الإجراءات</th></tr></thead>
+          <tbody id="attInvBody"></tbody>
+        </table></div>
       </div>
     </div>
 
@@ -2584,7 +2614,7 @@ function adminLogout(){
 }
 
 function adminTab(name,btn){
-  ['Stats','Schools','Reports','Settings'].forEach(function(t){
+  ['Stats','Schools','Reports','Settings','Att'].forEach(function(t){
     document.getElementById('admin'+t).classList.add('hidden');
   });
   document.getElementById('admin'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
@@ -2593,6 +2623,81 @@ function adminTab(name,btn){
   if(name==='stats') renderAdminStats();
   if(name==='schools') renderAdminSchools();
   if(name==='reports') renderAdminReport();
+  if(name==='att') attRenderInvites();
+}
+
+// ====== تطبيق سجل الغياب — دعوات المديرين والوكلاء ======
+var _attInvites={};
+function attAppUrl(){return location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/,'')+'attendance.html';}
+function attInviteLink(token){return attAppUrl()+'#i='+token;}
+function attRid(n){var c='abcdefghijkmnpqrstuvwxyz23456789',s='',a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)s+=c[a[i]%c.length];return s;}
+function attUniqueCode(){
+  var c=String(100000+Math.floor(Math.random()*900000));
+  return fbRead('att_codes/'+c).then(function(v){return v?attUniqueCode():c;});
+}
+function attRenderInvites(){
+  var sel=document.getElementById('attInvSchool');
+  sel.innerHTML=schools.length?schools.map(function(s){return '<option value="'+s.code+'">'+s.name+'</option>';}).join(''):'<option value="">لا توجد مدارس مسجّلة</option>';
+  document.getElementById('attInvBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tl)">جاري التحميل...</td></tr>';
+  fbRead('att_invites').then(function(data){
+    _attInvites=data||{};
+    var keys=Object.keys(_attInvites).sort(function(a,b){return (_attInvites[b].createdAt||0)-(_attInvites[a].createdAt||0);});
+    document.getElementById('attInvCount').textContent=keys.length+' دعوة';
+    if(!keys.length){document.getElementById('attInvBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tl);padding:1.5rem">لا توجد دعوات بعد</td></tr>';return;}
+    document.getElementById('attInvBody').innerHTML=keys.map(function(k){
+      var v=_attInvites[k];
+      var st=v.active===false?'<span style="color:#b42318;font-weight:700">⛔ موقوف</span>':(v.activatedAt?'<span style="color:#1a7a4a;font-weight:700">✅ مُفعّل</span>':'<span style="color:var(--tl)">⏳ لم يُفتح</span>');
+      var last=v.lastUsed?new Date(v.lastUsed).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{dateStyle:'short',timeStyle:'short'}):'—';
+      return '<tr><td style="font-weight:600">'+v.name+'</td><td>'+(v.role||'')+'</td><td>'+(v.schoolName||'')+'</td><td style="letter-spacing:2px;font-weight:700">'+(v.code||'')+'</td><td>'+st+'</td><td style="font-size:11px">'+last+'</td>'+
+        '<td style="white-space:nowrap"><button class="btn btn-g btn-sm" onclick="attSendInvite(\''+k+'\')">واتساب</button> '+
+        '<button class="btn btn-o btn-sm" onclick="attCopyInvite(\''+k+'\',this)">نسخ الرابط</button> '+
+        '<button class="btn btn-o btn-sm" onclick="attToggleInvite(\''+k+'\')">'+(v.active===false?'تفعيل':'إيقاف')+'</button> '+
+        '<button class="btn btn-r btn-sm" onclick="attDeleteInvite(\''+k+'\')">حذف</button></td></tr>';
+    }).join('');
+  });
+}
+function attCreateInvite(){
+  var name=document.getElementById('attInvName').value.trim();
+  var role=document.getElementById('attInvRole').value;
+  var code=document.getElementById('attInvSchool').value;
+  var phone=document.getElementById('attInvPhone').value.trim();
+  var err=document.getElementById('attInvErr');err.style.display='none';
+  if(!name||!code){err.textContent='يرجى إدخال الاسم واختيار المدرسة';err.style.display='block';return;}
+  var school=schools.find(function(s){return s.code===code;})||{};
+  attUniqueCode().then(function(c6){
+    var token=attRid(16);
+    var inv={name:name,role:role,schoolCode:code,schoolName:school.name||'',phone:phone,code:c6,active:true,createdAt:Date.now()};
+    return Promise.all([fbWrite('att_invites/'+token,inv),fbWrite('att_codes/'+c6,{kind:'admin',token:token})]).then(function(){
+      document.getElementById('attInvName').value='';document.getElementById('attInvPhone').value='';
+      _attInvites[token]=inv;
+      attRenderInvites();
+      if(phone&&confirm('تم إنشاء الدعوة ✓\nهل تريد إرسالها الآن بالواتساب؟')) attSendInvite(token);
+    });
+  });
+}
+function attInviteMsg(k){
+  var v=_attInvites[k];
+  return 'السلام عليكم '+v.name+'\n\nتمت دعوتك لاستخدام تطبيق «سجل الغياب والتأخر» من منصة رابط لمدرسة '+v.schoolName+'.\n\nافتح الرابط التالي وثبّت التطبيق على جهازك:\n'+attInviteLink(k)+'\n\nرمز التفعيل (عند الحاجة): '+v.code;
+}
+function attSendInvite(k){
+  var v=_attInvites[k];if(!v)return;
+  var ph=String(v.phone||'').replace(/\D/g,'');
+  if(ph.indexOf('05')===0&&ph.length===10)ph='966'+ph.slice(1);
+  window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(attInviteMsg(k)),'_blank');
+}
+function attCopyInvite(k,btn){
+  var link=attInviteLink(k);
+  navigator.clipboard.writeText(link).then(function(){var o=btn.textContent;btn.textContent='✓ تم النسخ';setTimeout(function(){btn.textContent=o;},2000);}).catch(function(){prompt('انسخ الرابط:',link);});
+}
+function attToggleInvite(k){
+  var v=_attInvites[k],on=v.active===false;
+  if(!on&&!confirm('إيقاف وصول «'+v.name+'» إلى التطبيق؟ سيتعطل التطبيق عنده فوراً.'))return;
+  fbWrite('att_invites/'+k+'/active',on).then(attRenderInvites);
+}
+function attDeleteInvite(k){
+  var v=_attInvites[k];
+  if(!confirm('حذف دعوة «'+v.name+'» نهائياً؟ سيتعطل التطبيق عنده ولن يعمل الرابط.'))return;
+  Promise.all([fbDelete('att_invites/'+k),v.code?fbDelete('att_codes/'+v.code):null]).then(attRenderInvites);
 }
 
 function renderAdminStats(){
