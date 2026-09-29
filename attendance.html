@@ -1010,9 +1010,9 @@ function saveSettings(){
 }
 
 // ---------- إرسال الروابط ----------
-var SEND={open:false,mode:'remind',p:null,q:null,i:0,sent:{}};
+var SEND={open:false,mode:'remind',p:null,q:null,i:0,sent:{},viewing:null};
 function openSend(p){
-  SEND.open=true;SEND.mode='remind';SEND.p=p||targetAttPeriod(A.S);SEND.q=null;SEND.i=0;SEND.sent={};
+  SEND.open=true;SEND.mode='remind';SEND.p=p||targetAttPeriod(A.S);SEND.q=null;SEND.i=0;SEND.sent={};SEND.viewing=null;
   openModal('إرسال الروابط','<div class="empty"><div class="spin"></div></div>');
   ensureAllKeys(A.teachers).then(renderSendBody).catch(function(){$('mBody').innerHTML='<div class="empty">تعذّر الاتصال</div>';});
 }
@@ -1020,6 +1020,7 @@ function sendMode(m){SEND.mode=m;SEND.q=null;SEND.i=0;renderSendBody();}
 function sendPeriod(p){SEND.p=p;SEND.q=null;SEND.i=0;renderSendBody();}
 function renderSendBody(){
   if(!SEND.open||$('modal').classList.contains('hidden'))return;
+  if(SEND.viewing) return viewRecord(SEND.viewing.p,SEND.viewing.cid);
   var html='<div class="seg" style="margin-bottom:12px"><button class="'+(SEND.mode==='remind'?'on':'')+'" onclick="sendMode(\'remind\')">تذكير بالتحضير</button>'+
     '<button class="'+(SEND.mode==='all'?'on':'')+'" onclick="sendMode(\'all\')">الروابط الدائمة</button></div>';
   var items;
@@ -1036,7 +1037,7 @@ function renderSendBody(){
       var r=recFor(SEND.p,x.cid);
       return '<div class="row"><div class="main"><div class="nm">'+esc(x.t.name)+'</div><div class="sub">'+esc(clsName(A.classes[x.cid]))+'</div></div>'+
         (r?'<span class="badge ok">✅ '+hm(r.at)+'</span>':(SEND.sent[x.t.id]?'<span class="badge">✓ أُرسل</span>':'<span class="badge warn">⏳ لم يحضّر</span>'))+
-        (r?'':'<button class="ib" title="واتساب" onclick="sendOne(\''+x.t.id+'\',\''+x.cid+'\')">📲</button>')+'</div>';
+        (r?'<button class="btn btn-l btn-sm" onclick="viewRecord('+SEND.p+',\''+x.cid+'\')">عرض</button>':'<button class="ib" title="واتساب" onclick="sendOne(\''+x.t.id+'\',\''+x.cid+'\')">📲</button>')+'</div>';
     }).join('')+'</div>';
     SEND.list=pending.map(function(x){return {tid:String(x.t.id),cid:x.cid};});
   } else {
@@ -1058,6 +1059,26 @@ function renderSendBody(){
   } else if(SEND.list.length){
     $('mFoot').innerHTML='<button class="btn btn-g btn-w" onclick="SEND.q=SEND.list.slice();SEND.i=0;renderSendBody()">📤 '+(SEND.mode==='remind'?'تذكير غير المحضّرين':'إرسال لجميع المعلمين')+' ('+SEND.list.length+')</button>';
   } else $('mFoot').innerHTML='';
+}
+// عرض تحضير فصل كما أرسله المعلم، داخل نافذة الإرسال نفسها
+function viewRecord(p,cid){
+  var r=recFor(p,cid),c=A.classes[cid];
+  if(!r){SEND.viewing=null;return renderSendBody();}
+  SEND.viewing={p:p,cid:cid};
+  var rows=toArr(r.rows),cnt={p:0,l:0,a:0};rows.forEach(function(x){cnt[x.s]++;});
+  $('mTitle').textContent=clsName(c);
+  $('mBody').innerHTML='<div class="note" style="margin-bottom:10px">'+pLabel(p)+' • أ. '+esc(r.teacher)+' • الساعة '+hm(r.at)+'</div>'+
+    '<div class="chips"><span class="chip c-p">حاضر '+cnt.p+'</span><span class="chip c-l">متأخر '+cnt.l+'</span><span class="chip c-a">غائب '+cnt.a+'</span></div>'+
+    '<div class="card">'+rows.map(function(x,i){
+      return '<div class="srow st-'+x.s+'"><span class="i">'+(i+1)+'</span><span class="n">'+esc(x.n)+'</span><b class="chip c-'+x.s+'">'+STN[x.s]+'</b></div>';
+    }).join('')+'</div>';
+  $('mFoot').innerHTML='<button class="btn btn-o" onclick="backToSend()">→ رجوع</button>'+
+    '<button class="btn" onclick="printRecordClass(\''+cid+'\')">📄 تصدير PDF</button>';
+}
+function backToSend(){SEND.viewing=null;$('mTitle').textContent='إرسال الروابط';renderSendBody();}
+function printRecordClass(cid){
+  var c=A.classes[cid];
+  printDoc('كشف تحضير - '+clsName(c)+' - '+dateKey(),pageClass(Object.assign({id:cid},c),A.rec,new Date()));
 }
 function sendOne(tid,cid){
   var t=findT(tid);if(!t)return;
