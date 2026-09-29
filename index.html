@@ -2289,25 +2289,25 @@ function qwToggleIndicator(el){
 }
 
 const WEEKS=[
-  'الأسبوع الأول — 29/7/1447 | 18/1/2026 إلى 22/1/2026',
-  'الأسبوع الثاني — 6/8/1447 | 25/1/2026 إلى 29/1/2026',
-  'الأسبوع الثالث — 13/8/1447 | 1/2/2026 إلى 5/2/2026',
-  'الأسبوع الرابع — 20/8/1447 | 8/2/2026 إلى 12/2/2026',
-  'الأسبوع الخامس — 27/8/1447 | 15/2/2026 إلى 19/2/2026',
-  'الأسبوع السادس — 9/9/1447 | 22/2/2026 إلى 26/2/2026',
-  'الأسبوع السابع — 13/9/1447 | 1/3/2026 إلى 5/3/2026',
-  'الأسبوع الثامن — 10/10/1447 | 29/3/2026 إلى 2/4/2026',
-  'الأسبوع التاسع — 17/10/1447 | 5/4/2026 إلى 9/4/2026',
-  'الأسبوع العاشر — 24/10/1447 | 12/4/2026 إلى 16/4/2026',
-  'الأسبوع الحادي عشر — 2/11/1447 | 19/4/2026 إلى 23/4/2026',
-  'الأسبوع الثاني عشر — 9/11/1447 | 26/4/2026 إلى 30/4/2026',
-  'الأسبوع الثالث عشر — 16/11/1447 | 3/5/2026 إلى 7/5/2026',
-  'الأسبوع الرابع عشر — 23/11/1447 | 10/5/2026 إلى 14/5/2026',
-  'الأسبوع الخامس عشر — 30/11/1447 | 17/5/2026 إلى 21/5/2026',
-  'الأسبوع السادس عشر — 16/12/1447 | 2/6/2026 إلى 4/6/2026',
-  'الأسبوع السابع عشر — 21/12/1447 | 7/6/2026 إلى 11/6/2026',
-  'الأسبوع الثامن عشر — 28/12/1447 | 14/6/2026 إلى 18/6/2026',
-  'الأسبوع التاسع عشر — 6/1/1448 | 21/6/2026 إلى 25/6/2026',
+  'الأسبوع الأول — 10/3/1448 | 23/8/2026 إلى 27/8/2026',
+  'الأسبوع الثاني — 17/3/1448 | 30/8/2026 إلى 3/9/2026',
+  'الأسبوع الثالث — 24/3/1448 | 6/9/2026 إلى 10/9/2026',
+  'الأسبوع الرابع — 2/4/1448 | 13/9/2026 إلى 17/9/2026',
+  'الأسبوع الخامس — 9/4/1448 | 20/9/2026 إلى 24/9/2026',
+  'الأسبوع السادس — 16/4/1448 | 27/9/2026 إلى 1/10/2026',
+  'الأسبوع السابع — 23/4/1448 | 4/10/2026 إلى 8/10/2026',
+  'الأسبوع الثامن — 30/4/1448 | 11/10/2026 إلى 15/10/2026',
+  'الأسبوع التاسع — 7/5/1448 | 18/10/2026 إلى 22/10/2026',
+  'الأسبوع العاشر — 14/5/1448 | 25/10/2026 إلى 29/10/2026',
+  'الأسبوع الحادي عشر — 21/5/1448 | 1/11/2026 إلى 5/11/2026',
+  'الأسبوع الثاني عشر — 28/5/1448 | 8/11/2026 إلى 12/11/2026',
+  'الأسبوع الثالث عشر — 5/6/1448 | 15/11/2026 إلى 19/11/2026',
+  'الأسبوع الرابع عشر — 19/6/1448 | 29/11/2026 إلى 3/12/2026',
+  'الأسبوع الخامس عشر — 26/6/1448 | 6/12/2026 إلى 10/12/2026',
+  'الأسبوع السادس عشر — 4/7/1448 | 13/12/2026 إلى 17/12/2026',
+  'الأسبوع السابع عشر — 11/7/1448 | 20/12/2026 إلى 24/12/2026',
+  'الأسبوع الثامن عشر — 18/7/1448 | 27/12/2026 إلى 31/12/2026',
+  'الأسبوع التاسع عشر — 25/7/1448 | 3/1/2027 إلى 7/1/2027',
 ];
 
 // ====== STORAGE ======
@@ -2944,19 +2944,28 @@ function goTab(name,btn){
 function buildWeekSel(id){
   var sel=document.getElementById(id);
   if(!sel) return;
-  var prev=sel.value;
+  var prev=sel.value,cw=currentWeekIdx();
   sel.innerHTML=WEEKS.map(function(w,i){
-    return '<option value="'+w+'"'+(i===0?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
+    return '<option value="'+w+'"'+(i===cw?' selected':'')+'>'+w.split('|')[0].trim()+'</option>';
   }).join('');
   if(prev) sel.value=prev;
 }
 
 function getWKey(w){return w.split('—')[0].trim();}
+// الأسبوع الحالي: آخر أسبوع بدأ قبل اليوم (تاريخ البداية الميلادي بعد «|» في نص الأسبوع)
+function currentWeekIdx(){
+  var now=new Date(),idx=0;
+  WEEKS.forEach(function(w,i){
+    var p=w.split('|')[1].trim().split(' ')[0].split('/');
+    if(new Date(+p[2],+p[1]-1,+p[0])<=now) idx=i;
+  });
+  return idx;
+}
 
 // ====== STATS ======
 function renderStats(){
   var d=getSD(cur.code)||{teachers:[],submissions:[]};
-  var w=document.getElementById('weekSel')?document.getElementById('weekSel').value:WEEKS[0];
+  var w=document.getElementById('weekSel')?document.getElementById('weekSel').value:WEEKS[currentWeekIdx()];
   var wk=getWKey(w);
   var sent=d.submissions.filter(function(s){return s.week===wk;}).length;
   document.getElementById('statsGrid').innerHTML=
@@ -3140,7 +3149,7 @@ function delTeacher(id){
 
 function copyLink(id){
   var sel=document.getElementById('weekSel');
-  var week=sel?sel.value:WEEKS[0];
+  var week=sel?sel.value:WEEKS[currentWeekIdx()];
   var link=location.href.split('#')[0]+'#upload='+cur.code+'&week='+encodeURIComponent(week);
   prompt('رابط الرفع:',link);
 }
@@ -3764,7 +3773,7 @@ function showUploadPage(sCode,week){
   var school=schools.find(function(s){return s.code===sCode;});
   showPage('pgUpload');
   document.getElementById('upSchoolName').textContent=school?school.name:'المدرسة';
-  document.getElementById('upWeek').textContent=getWKey(week||WEEKS[0]);
+  document.getElementById('upWeek').textContent=getWKey(week||WEEKS[currentWeekIdx()]);
 }
 
 function confirmUpload(){
@@ -3777,7 +3786,7 @@ function confirmUpload(){
   if(file.size>10*1024*1024){alert('حجم الملف يتجاوز 10MB، يرجى اختيار ملف أصغر');return;}
   var hash=location.hash;
   var sCode=hash.split('#upload=')[1].split('&')[0];
-  var weekParam=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
+  var weekParam=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[currentWeekIdx()];
   var wk=getWKey(weekParam);
   var btn=document.querySelector('button[onclick="confirmUpload()"]');
   var origTxt=btn?btn.textContent:'';
@@ -3914,7 +3923,7 @@ function init(){
   var hash=location.hash;
   if(hash.startsWith('#upload=')){
     var sc=hash.split('#upload=')[1].split('&')[0];
-    var wp=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[0];
+    var wp=hash.includes('week=')?decodeURIComponent(hash.split('week=')[1]):WEEKS[currentWeekIdx()];
     showUploadPage(sc,wp);
   } else if(hash.startsWith('#circ=')){
     var cp=hash.split('#circ=')[1].split('|');
