@@ -191,7 +191,8 @@ table.grid td.attc{background:#f3fbf6}
   <div class="wcard">
     <img class="logo" src="logo.png" alt="رابط">
     <h2>سجل الغياب والتأخر</h2>
-    <p>أدخل رمز التفعيل المكوّن من 6 أرقام الموجود في رسالة الدعوة التي وصلتك.</p>
+    <p><b>المعلم:</b> افتح رابط التحضير من رسالة الواتساب مباشرة، ولا تحتاج أي رمز.</p>
+    <p style="margin-top:6px"><b>الإدارة:</b> أدخل رمز التفعيل المكوّن من 6 أرقام الموجود في رسالة الدعوة.</p>
     <input type="text" id="actCode" class="code-in" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" onkeydown="if(event.key==='Enter')activate()">
     <div class="err" id="actErr"></div>
     <button class="btn btn-lg btn-w" id="actBtn" onclick="activate()">تفعيل</button>
@@ -271,7 +272,6 @@ table.grid td.attc{background:#f3fbf6}
         </div>
       </div>
       <div class="hdr-actions">
-        <button class="btn btn-g btn-sm hidden" id="tInstall" onclick="doInstall()">📲 <span>تثبيت</span></button>
         <button class="btn btn-o btn-sm" onclick="teacherRefresh()">🔄</button>
       </div>
     </div>
@@ -433,10 +433,13 @@ function resetSession(){LS.del('att_session');history.replaceState(null,'',appBa
 function clearHash(){history.replaceState(null,'',appBase());}
 
 function boot(){
-  var h=location.hash;
-  if(h.indexOf('#i=')===0) return openInviteLink(decodeURIComponent(h.slice(3)));
-  if(h.indexOf('#t=')===0){
-    var p=h.slice(3).split('.').map(decodeURIComponent);
+  // الروابط الجديدة تستخدم ?t= لأنها تصمد أكثر عند فتحها من الواتساب، والقديمة #t= ما زالت تعمل
+  var h=location.hash,q=new URLSearchParams(location.search);
+  var inv=q.get('i')||(h.indexOf('#i=')===0?decodeURIComponent(h.slice(3)):'');
+  var tl=q.get('t')||(h.indexOf('#t=')===0?h.slice(3):'');
+  if(inv) return openInviteLink(inv);
+  if(tl){
+    var p=tl.split('.').map(decodeURIComponent);
     return openTeacherLink(p[0],p[1],p[2]);
   }
   var s=LS.get('att_session');
@@ -469,8 +472,7 @@ function openTeacherLink(school,tid,key){
     clearHash();
     if(!k||k.key!==key) return blocked('الرابط لم يعد صالحاً','اطلب من إدارة المدرسة إرسال رابط جديد.');
     LS.set('att_session',{kind:'teacher',school:school,tid:tid,key:key});
-    if(isStandalone()) return startTeacher(school,tid,key);
-    welcome('سجل الغياب والتأخر','رابط التحضير الخاص بك — '+(k.schoolName||'')+'. افتحه في الحصة الأولى والرابعة وسيظهر لك فصلك تلقائياً.',k.code);
+    startTeacher(school,tid,key);
   }).catch(netErr);
 }
 
@@ -517,7 +519,7 @@ function installSteps(){
 function renderInstall(forceSteps){
   var box=$('wInstall');
   var canBtn=!!deferredPrompt&&!isStandalone();
-  ['aInstall','tInstall'].forEach(function(id){$(id).classList.toggle('hidden',!(canBtn||(!isStandalone()&&isIOS())));});
+  ['aInstall'].forEach(function(id){$(id).classList.toggle('hidden',!(canBtn||(!isStandalone()&&isIOS())));});
   if(isStandalone()){box.innerHTML='';$('wContinue').textContent='فتح التطبيق';return;}
   if(justInstalled){
     box.innerHTML='<div class="note" style="margin:12px 0;background:var(--okb);border-color:#bfe5cd;color:var(--ok)">✅ تم تثبيت التطبيق. افتحه الآن من سطح المكتب أو الشاشة الرئيسية.</div>';
@@ -689,11 +691,10 @@ function ensureKey(t){
   });
 }
 function ensureAllKeys(list){return Promise.all(list.map(ensureKey));}
-function teacherLink(tid){var k=A.keys[tid];return appBase()+'#t='+[A.code,tid,k.key].map(encodeURIComponent).join('.');}
+function teacherLink(tid){var k=A.keys[tid];return appBase()+'?t='+[A.code,tid,k.key].map(encodeURIComponent).join('.');}
 function msgPermanent(t){
-  var k=A.keys[t.id];
   return 'السلام عليكم أ. '+t.name+'\n\nهذا رابطك الدائم لتحضير الطلاب في «سجل الغياب والتأخر» — '+A.schoolName+':\n'+teacherLink(t.id)+
-    '\n\nافتحه في الحصة الأولى والحصة الرابعة وسيظهر لك فصلك تلقائياً، ويمكنك تثبيته على جوالك كتطبيق.\nرمز التفعيل عند الحاجة: '+k.code;
+    '\n\nافتحه في الحصة الأولى والحصة الرابعة وسيظهر لك فصلك تلقائياً.';
 }
 function msgReminder(t,cid,p){
   return 'السلام عليكم أ. '+t.name+'\nنأمل تحضير طلاب '+clsName(A.classes[cid])+' في '+pLabel(p)+' من خلال الرابط:\n'+teacherLink(t.id);
@@ -703,8 +704,7 @@ function teacherLinkModal(tid){
   openModal('رابط التحضير — '+t.name,'<div class="empty"><div class="spin"></div></div>');
   ensureKey(t).then(function(k){
     $('mBody').innerHTML='<div class="note">هذا الرابط <b>دائم وخاص</b> بالمعلم، يُرسل له مرة واحدة فقط. يفتحه في الحصة الأولى والرابعة فيظهر له فصله تلقائياً حسب جدول الحصص.</div>'+
-      '<div class="linkbox">'+esc(teacherLink(t.id))+'</div>'+
-      '<div class="muted">رمز التفعيل: <b style="font-size:16px;color:var(--gd);letter-spacing:3px">'+k.code+'</b></div>';
+      '<div class="linkbox">'+esc(teacherLink(t.id))+'</div>';
     $('mFoot').innerHTML='<button class="btn btn-g" onclick="waOpen(findT(\''+t.id+'\').phone,msgPermanent(findT(\''+t.id+'\')))">📲 إرسال بالواتساب</button>'+
       '<button class="btn btn-o" onclick="copyText(teacherLink(\''+t.id+'\'))">📋 نسخ الرابط</button>'+
       '<button class="btn btn-r btn-sm" style="margin-inline-start:auto" onclick="regenKey(\''+t.id+'\')">إنشاء رابط جديد</button>';
@@ -1275,13 +1275,18 @@ function submitAttendance(){
 }
 function renderSubmitted(){
   T.editing=false;T.view='done';
-  var c={p:0,l:0,a:0};toArr(T.existing.rows).forEach(function(x){c[x.s]++;});
-  var list=toArr(T.existing.rows).filter(function(x){return x.s!=='p';});
-  $('tBody').innerHTML='<div class="card" style="text-align:center;padding:26px 16px;margin-bottom:12px"><div style="font-size:50px">✅</div>'+
-    '<h2 style="color:var(--ok);font-size:19px">تم إرسال التحضير</h2><p class="muted">'+esc(clsName(T.cls))+' • '+pLabel(T.p)+' • الساعة '+hm(T.existing.at)+'</p>'+
-    '<div class="chips" style="justify-content:center;margin-top:10px"><span class="chip c-p">حاضر '+c.p+'</span><span class="chip c-l">متأخر '+c.l+'</span><span class="chip c-a">غائب '+c.a+'</span></div></div>'+
-    (list.length?'<div class="card">'+list.map(function(x){return '<div class="srow st-'+x.s+'"><span class="n">'+esc(x.n)+'</span><b class="chip c-'+x.s+'">'+STN[x.s]+'</b></div>';}).join('')+'</div>':'')+
-    '<button class="btn btn-o btn-w" style="margin-top:12px" onclick="renderAttendanceForm()">✏️ تعديل التحضير</button>';
+  $('tBody').innerHTML='<div class="card" style="text-align:center;padding:34px 18px;margin-top:10px">'+
+    '<div style="font-size:54px">✅</div>'+
+    '<h2 style="color:var(--ok);font-size:21px;margin-top:6px">شكراً لك أ. '+esc(T.teacher.name)+'</h2>'+
+    '<p style="font-size:14px;color:var(--tm);margin-top:6px">تم إرسال تحضير '+esc(clsName(T.cls))+' — '+pLabel(T.p)+' بنجاح.</p>'+
+    '<button class="btn btn-lg btn-w" style="margin-top:22px" onclick="closeApp()">إغلاق</button>'+
+    '<div id="tClosedNote" class="muted hidden" style="margin-top:12px">يمكنك الآن إغلاق هذه الصفحة والعودة إلى الواتساب.</div>'+
+    '<a href="#" onclick="renderAttendanceForm();return false" class="muted" style="display:inline-block;margin-top:14px;text-decoration:underline">تعديل التحضير</a></div>';
+}
+// بعض المتصفحات تمنع الصفحة من إغلاق نفسها، فنعرض عندها تنبيهاً بالإغلاق يدوياً
+function closeApp(){
+  try{window.close();}catch(e){}
+  setTimeout(function(){var n=$('tClosedNote');if(n)n.classList.remove('hidden');},400);
 }
 
 // ====== MODAL ======
