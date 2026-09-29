@@ -61,13 +61,6 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .hdr-actions{display:flex;gap:6px;flex-wrap:wrap}
 
 /* ===== home ===== */
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.act{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;color:#fff;text-align:right;box-shadow:0 4px 14px rgba(26,58,107,.12)}
-.act .ic{font-size:26px}
-.act b{display:block;font-size:15px}
-.act span{font-size:11px;opacity:.88}
-.act-send{background:linear-gradient(135deg,#1f8f55,#27b06c)}
-.act-exp{background:linear-gradient(135deg,var(--gd),var(--gm))}
 .today{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .tcard{padding:12px 14px;cursor:pointer}
 .tcard .t{font-size:12px;color:var(--tl);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
@@ -173,8 +166,6 @@ table.grid td.attc{background:#f3fbf6}
 .plist .row .nm{font-size:13px}
 
 @media(max-width:560px){
-  .act{flex-direction:column;align-items:flex-start;gap:2px;padding:12px}
-  .act .ic{font-size:22px}
   .brand img{height:40px}.brand h1{font-size:15px}
   .fgrid{grid-template-columns:1fr}
   .hdr-actions .btn span{display:none}
@@ -239,16 +230,14 @@ table.grid td.attc{background:#f3fbf6}
         <button class="btn btn-g btn-sm hidden" id="aInstall" onclick="doInstall()">📲 <span>تثبيت التطبيق</span></button>
         <button class="btn btn-o btn-sm" onclick="openSettings()">⚙️ <span>الإعدادات</span></button>
         <button class="btn btn-o btn-sm" onclick="reloadAdmin()">🔄</button>
+        <button class="btn btn-o btn-sm" title="إرسال الروابط" onclick="openSend()">📤 <span>إرسال الروابط</span></button>
+        <button class="btn btn-o btn-sm" title="تصدير PDF" onclick="openExport()">📄 <span>تصدير PDF</span></button>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <div id="aSetupNote"></div>
-    <div class="actions">
-      <button class="act act-send" onclick="openSend()"><span class="ic">📤</span><div><b>إرسال الروابط</b><span>للمعلمين بالواتساب</span></div></button>
-      <button class="act act-exp" onclick="openExport()"><span class="ic">📄</span><div><b>تصدير PDF</b><span>كشوف التحضير والتقرير اليومي</span></div></button>
-    </div>
     <div class="today" id="aToday"></div>
     <div class="tabs" id="aTabs">
       <button class="tab on" data-t="teachers" onclick="setTab('teachers')">👨‍🏫 المعلمون</button>
