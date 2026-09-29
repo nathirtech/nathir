@@ -69,6 +69,9 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .bar{height:7px;border-radius:5px;background:var(--gp);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ok);border-radius:5px;transition:width .3s}
 .live{font-size:10px;background:var(--okb);color:var(--ok);padding:1px 8px;border-radius:10px;font-weight:800;white-space:nowrap}
+.daybar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.daybar select{width:auto;padding:7px 10px;font-size:13px;font-weight:700;color:var(--gd)}
+.daybar .past{font-size:11px;font-weight:800;color:var(--late);background:var(--lateb);padding:3px 10px;border-radius:10px}
 .tabs{display:flex;gap:4px;background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:4px;margin-bottom:14px;overflow-x:auto}
 .tab{flex:1;border:none;background:none;padding:9px 10px;border-radius:9px;font-size:13px;font-weight:700;color:var(--tl);cursor:pointer;white-space:nowrap}
 .tab.on{background:var(--gd);color:#fff}
@@ -238,6 +241,7 @@ table.grid td.attc{background:#f3fbf6}
 
   <div class="wrap">
     <div id="aSetupNote"></div>
+    <div class="daybar" id="aDayBar"></div>
     <div class="today" id="aToday"></div>
     <div class="tabs" id="aTabs">
       <button class="tab on" data-t="teachers" onclick="setTab('teachers')">👨‍🏫 المعلمون</button>
@@ -524,18 +528,57 @@ function renderInstall(forceSteps){
 //  ADMIN (مدير / وكيل)
 // =====================================================================
 var A={token:null,inv:null,code:null,schoolName:'',teachers:[],classes:{},S:null,sched:{},rec:{},keys:{},
-       tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null};
+       tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null,day:''};
+
+// أسابيع الفصل الدراسي الأول 1448هـ حسب التقويم الرسمي لوزارة التعليم (تاريخ أحد كل أسبوع)
+var WEEKS=[['الأسبوع الأول','2026-08-23'],['الأسبوع الثاني','2026-08-30'],['الأسبوع الثالث','2026-09-06'],
+  ['الأسبوع الرابع','2026-09-13'],['الأسبوع الخامس','2026-09-20'],['الأسبوع السادس','2026-09-27'],
+  ['الأسبوع السابع','2026-10-04'],['الأسبوع الثامن','2026-10-11'],['الأسبوع التاسع','2026-10-18'],
+  ['الأسبوع العاشر','2026-10-25'],['الأسبوع الحادي عشر','2026-11-01'],['الأسبوع الثاني عشر','2026-11-08'],
+  ['الأسبوع الثالث عشر','2026-11-15'],['الأسبوع الرابع عشر','2026-11-29'],['الأسبوع الخامس عشر','2026-12-06'],
+  ['الأسبوع السادس عشر','2026-12-13'],['الأسبوع السابع عشر','2026-12-20'],['الأسبوع الثامن عشر','2026-12-27'],
+  ['الأسبوع التاسع عشر','2027-01-03']];
+function weekDates(i){
+  var s=parseKey(WEEKS[i][1]);
+  return [0,1,2,3,4].map(function(k){return new Date(s.getFullYear(),s.getMonth(),s.getDate()+k);});
+}
+function weekOf(dk){
+  for(var i=0;i<WEEKS.length;i++){if(weekDates(i).some(function(d){return dateKey(d)===dk;}))return i;}
+  return -1;
+}
+// اليوم إن كان يوم دراسة، وإلا آخر يوم دراسي مضى
+function defaultDay(){
+  var today=parseKey(dateKey()),best=null;
+  WEEKS.forEach(function(w,i){weekDates(i).forEach(function(d){if(d<=today)best=d;});});
+  return dateKey(best||parseKey(WEEKS[0][1]));
+}
+function isToday(){return A.day===dateKey();}
+function selDow(){return schoolDay(parseKey(A.day));}
+function renderDayBar(){
+  var wi=weekOf(A.day),today=parseKey(dateKey()),def=defaultDay();
+  var wopts=WEEKS.map(function(w,i){
+    return '<option value="'+i+'"'+(i===wi?' selected':'')+(parseKey(w[1])>today?' disabled':'')+'>'+w[0]+'</option>';
+  }).join('');
+  var dopts=wi<0?'':weekDates(wi).map(function(d){
+    var k=dateKey(d);
+    return '<option value="'+k+'"'+(k===A.day?' selected':'')+(d>today?' disabled':'')+'>'+DAYS[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'</option>';
+  }).join('');
+  $('aDayBar').innerHTML=(A.day!==def?'<span class="past">عرض يوم سابق</span><button class="btn btn-l btn-sm" onclick="setDay(defaultDay())">↩ '+(def===dateKey()?'اليوم':'آخر يوم دراسي')+'</button>':'')+
+    '<select onchange="pickWeek(+this.value)">'+wopts+'</select><select onchange="setDay(this.value)">'+dopts+'</select>';
+}
+function pickWeek(i){setDay(weekOf(defaultDay())===i?defaultDay():dateKey(weekDates(i)[0]));}
+function setDay(k){A.day=k;renderDayBar();watchDay();}
 
 function startAdmin(token){
   show('scrBoot');
   rd('att_invites/'+token).then(function(inv){
     if(!inv) return blocked('الحساب غير موجود','تم حذف هذه الدعوة. تواصل مع إدارة منصة رابط.');
     if(inv.active===false) return blocked('تم إيقاف الوصول','تم إيقاف هذا الحساب مؤقتاً من إدارة منصة رابط.');
-    A.token=token;A.inv=inv;A.code=inv.schoolCode;A.schoolName=inv.schoolName||'';
+    A.token=token;A.inv=inv;A.code=inv.schoolCode;A.schoolName=inv.schoolName||'';A.day=defaultDay();
     DB.ref('att_invites/'+token+'/lastUsed').set(Date.now());
     return loadAdminData().then(function(){
       renderAdmin();show('scrAdmin');
-      watchToday();
+      watchDay();
     });
   }).catch(netErr);
 }
@@ -552,10 +595,10 @@ function loadAdminData(){
   });
 }
 function reloadAdmin(){loadAdminData().then(function(){renderAdmin();toast('تم تحديث البيانات');}).catch(function(){toast('تعذّر الاتصال',true);});}
-// تحديث حالة التحضير لحظة بلحظة
-function watchToday(){
+// تحديث حالة التحضير لليوم المختار لحظة بلحظة
+function watchDay(){
   if(A.recRef) A.recRef.off();
-  A.recRef=DB.ref('att_records/'+A.code+'/'+dateKey());
+  A.recRef=DB.ref('att_records/'+A.code+'/'+A.day);
   A.recRef.on('value',function(s){
     A.rec=s.val()||{};renderToday();
     if(SEND.open) renderSendBody();
@@ -569,7 +612,7 @@ function renderAdmin(){
   if(!A.S.saved) notes.push('⏰ لم تُضبط أوقات الحصص بعد، والتطبيق يستخدم أوقاتاً افتراضية. <a href="#" onclick="openSettings();return false" style="color:inherit;font-weight:800">اضبطها من الإعدادات</a>');
   if(!Object.keys(A.classes).length) notes.push('🎓 لم تُضف الصفوف بعد. <a href="#" onclick="setTab(\'classes\');return false" style="color:inherit;font-weight:800">استورد كشف الطلاب من نور</a>');
   $('aSetupNote').innerHTML=notes.map(function(n){return '<div class="note warn" style="margin-bottom:10px">'+n+'</div>';}).join('');
-  renderInstall();renderToday();renderTab();
+  renderInstall();renderDayBar();renderToday();renderTab();
 }
 
 function slot(tid,d,p){var s=A.sched[tid];return (s&&s['d'+d]&&s['d'+d]['p'+p])||'';}
@@ -581,10 +624,10 @@ function expectedFor(p,d){
 function recFor(p,cid){return A.rec&&A.rec['p'+p]&&A.rec['p'+p][cid];}
 
 function renderToday(){
-  var d=schoolDay(),cur=curAttPeriod(A.S);
+  var d=selDow(),cur=isToday()?curAttPeriod(A.S):null;
   $('aToday').innerHTML=A.S.att.map(function(p){
     var P=A.S.periods[p-1]||{};
-    if(d<0) return '<div class="card tcard"><div class="t"><span>'+pLabel(p)+'</span></div><div class="n" style="font-size:15px">اليوم إجازة</div></div>';
+    if(d<0) return '<div class="card tcard"><div class="t"><span>'+pLabel(p)+'</span></div><div class="n" style="font-size:15px">إجازة</div></div>';
     var cids={};expectedFor(p,d).forEach(function(x){cids[x.cid]=1;});
     var exp=Object.keys(cids),done=exp.filter(function(cid){return recFor(p,cid);}).length;
     var pct=exp.length?Math.round(done*100/exp.length):0;
@@ -1014,21 +1057,26 @@ function renderSendBody(){
     '<button class="'+(SEND.mode==='all'?'on':'')+'" onclick="sendMode(\'all\')">الروابط الدائمة</button></div>';
   var items;
   if(SEND.mode==='remind'){
-    var d=schoolDay();
+    var d=selDow(),live=isToday(),dd=parseKey(A.day);
     html+='<div class="seg" style="margin-bottom:12px;margin-inline-start:6px">'+A.S.att.map(function(p){return '<button class="'+(SEND.p===p?'on':'')+'" onclick="sendPeriod('+p+')">'+pLabel(p)+'</button>';}).join('')+'</div>';
-    if(d<0){$('mBody').innerHTML=html+'<div class="empty"><span class="e">🌙</span>اليوم إجازة، لا توجد حصص.</div>';$('mFoot').innerHTML='';return;}
+    if(d<0){$('mBody').innerHTML=html+'<div class="empty"><span class="e">🌙</span>يوم إجازة، لا توجد حصص.</div>';$('mFoot').innerHTML='';return;}
     items=expectedFor(SEND.p,d);
-    if(!items.length){$('mBody').innerHTML=html+'<div class="empty"><span class="e">📅</span>لا يوجد معلمون لديهم '+pLabel(SEND.p)+' اليوم في جدول الحصص.</div>';$('mFoot').innerHTML='';return;}
+    // فصول حُضّرت دون أن تكون في الجدول (حصة انتظار)
+    var recs=(A.rec&&A.rec['p'+SEND.p])||{};
+    Object.keys(recs).forEach(function(cid){
+      if(!items.some(function(x){return x.cid===cid;})) items.push({t:findT(recs[cid].tid)||{id:recs[cid].tid,name:recs[cid].teacher},cid:cid,sub:true});
+    });
+    if(!items.length){$('mBody').innerHTML=html+'<div class="empty"><span class="e">📅</span>لا يوجد معلمون لديهم '+pLabel(SEND.p)+' في هذا اليوم.</div>';$('mFoot').innerHTML='';return;}
     var pending=items.filter(function(x){return !recFor(SEND.p,x.cid);});
-    html+='<div class="note" style="margin-bottom:10px">'+DAYS[d]+' — '+pLabel(SEND.p)+': حُضّر <b>'+(items.length-pending.length)+'</b> من <b>'+items.length+'</b> فصلاً.'+
-      (pending.length?' يمكنك تذكير من لم يحضّر بإرسال الرابط له.':' ✅ اكتمل التحضير.')+'</div>';
+    html+='<div class="note" style="margin-bottom:10px">'+DAYS[d]+' '+dd.getDate()+'/'+(dd.getMonth()+1)+' — '+pLabel(SEND.p)+': حُضّر <b>'+(items.length-pending.length)+'</b> من <b>'+items.length+'</b> فصلاً.'+
+      (!pending.length?' ✅ اكتمل التحضير.':live?' يمكنك تذكير من لم يحضّر بإرسال الرابط له.':'')+'</div>';
     html+='<div class="card plist">'+items.map(function(x){
       var r=recFor(SEND.p,x.cid);
-      return '<div class="row"><div class="main"><div class="nm">'+esc(x.t.name)+'</div><div class="sub">'+esc(clsName(A.classes[x.cid]))+'</div></div>'+
-        (r?'<span class="badge ok">✅ '+hm(r.at)+'</span>':(SEND.sent[x.t.id]?'<span class="badge">✓ أُرسل</span>':'<span class="badge warn">⏳ لم يحضّر</span>'))+
-        (r?'<button class="btn btn-l btn-sm" onclick="viewRecord('+SEND.p+',\''+x.cid+'\')">عرض</button>':'<button class="ib" title="واتساب" onclick="sendOne(\''+x.t.id+'\',\''+x.cid+'\')">📲</button>')+'</div>';
+      var badge=r?'<span class="badge ok">✅ '+hm(r.at)+'</span>':!live?'<span class="badge no">لم يُحضَّر</span>':SEND.sent[x.t.id]?'<span class="badge">✓ أُرسل</span>':'<span class="badge warn">⏳ لم يحضّر</span>';
+      var btn=r?'<button class="btn btn-l btn-sm" onclick="viewRecord('+SEND.p+',\''+x.cid+'\')">عرض</button>':live?'<button class="ib" title="واتساب" onclick="sendOne(\''+x.t.id+'\',\''+x.cid+'\')">📲</button>':'';
+      return '<div class="row"><div class="main"><div class="nm">'+esc(x.t.name)+'</div><div class="sub">'+esc(clsName(A.classes[x.cid]))+(x.sub?' • حصة انتظار':'')+'</div></div>'+badge+btn+'</div>';
     }).join('')+'</div>';
-    SEND.list=pending.map(function(x){return {tid:String(x.t.id),cid:x.cid};});
+    SEND.list=live?pending.map(function(x){return {tid:String(x.t.id),cid:x.cid};}):[];
   } else {
     html+='<div class="note" style="margin-bottom:10px">أرسل لكل معلم رابطه الدائم <b>مرة واحدة</b> في بداية العام أو عند إضافة معلم جديد. بعدها يفتحه المعلم في كل حصة تحضير دون الحاجة لإرسال يومي.</div>';
     html+='<div class="card plist">'+A.teachers.map(function(t){
@@ -1067,7 +1115,7 @@ function viewRecord(p,cid){
 function backToSend(){SEND.viewing=null;$('mTitle').textContent='إرسال الروابط';renderSendBody();}
 function printRecordClass(cid){
   var c=A.classes[cid];
-  printDoc('كشف تحضير - '+clsName(c)+' - '+dateKey(),pageClass(Object.assign({id:cid},c),A.rec,new Date()));
+  printDoc('كشف تحضير - '+clsName(c)+' - '+A.day,pageClass(Object.assign({id:cid},c),A.rec,parseKey(A.day)));
 }
 function sendOne(tid,cid){
   var t=findT(tid);if(!t)return;
@@ -1083,7 +1131,7 @@ function sendNext(){
 function openExport(){
   var opts='<option value="">كل الفصول</option>'+sortedClasses(A.classes).map(function(c){return '<option value="'+c.id+'">'+esc(clsName(c))+'</option>';}).join('');
   openModal('تصدير PDF',
-    '<div class="fld"><label class="f">التاريخ</label><input type="date" id="fExD" value="'+dateKey()+'" max="'+dateKey()+'"></div>'+
+    '<div class="fld"><label class="f">التاريخ</label><input type="date" id="fExD" value="'+A.day+'" max="'+dateKey()+'"></div>'+
     '<div class="fld"><label class="f">نوع التقرير</label><select id="fExT" onchange="$(\'fExCW\').classList.toggle(\'hidden\',this.value===\'daily\')">'+
       '<option value="both">الاثنان معاً</option><option value="classes">كشف تحضير الفصول (صفحة لكل فصل)</option><option value="daily">التقرير اليومي للغياب والتأخر</option></select></div>'+
     '<div class="fld" id="fExCW"><label class="f">الفصل</label><select id="fExC">'+opts+'</select></div>'+
