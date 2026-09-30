@@ -635,6 +635,27 @@ tr:hover td{background:var(--gb)}
   </div>
 </div>
 
+<!-- تعديل دعوة تطبيق سجل الغياب -->
+<div class="modal-bg hidden" id="mdlAttEdit">
+  <div class="modal">
+    <button class="modal-close" onclick="hideModal('mdlAttEdit')">✕</button>
+    <h2>تعديل بيانات الدعوة</h2>
+    <p class="modal-desc">تظهر التعديلات في تطبيق سجل الغياب عند فتحه في المرة التالية.</p>
+    <div class="form-g"><label>الاسم</label><input type="text" id="attEdName"></div>
+    <div class="form-g"><label>الصفة</label>
+      <select id="attEdRole" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
+    <div class="form-g"><label>المدرسة</label>
+      <select id="attEdSchool" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
+    <div class="form-g"><label>رقم الجوال (واتساب)</label><input type="text" id="attEdPhone" placeholder="05xxxxxxxx"></div>
+    <div class="form-g"><label>الحالة</label>
+      <select id="attEdActive" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit">
+        <option value="1">✅ مفعّل — يعمل التطبيق عنده</option><option value="0">⛔ موقوف — يتعطل التطبيق عنده فوراً</option>
+      </select></div>
+    <div class="err" id="attEdErr" style="display:none"></div>
+    <button class="btn btn-g btn-full" onclick="attSaveInvite()">حفظ التغييرات</button>
+  </div>
+</div>
+
 <!-- WAKEEL DASHBOARD -->
 <div id="pgWakeel" class="hidden">
   <div class="wk-header">
@@ -2651,7 +2672,7 @@ function attRenderInvites(){
       return '<tr><td style="font-weight:600">'+v.name+'</td><td>'+(v.role||'')+'</td><td>'+(v.schoolName||'')+'</td><td style="letter-spacing:2px;font-weight:700">'+(v.code||'')+'</td><td>'+st+'</td><td style="font-size:11px">'+last+'</td>'+
         '<td style="white-space:nowrap"><button class="btn btn-g btn-sm" onclick="attSendInvite(\''+k+'\')">واتساب</button> '+
         '<button class="btn btn-o btn-sm" onclick="attCopyInvite(\''+k+'\',this)">نسخ الرابط</button> '+
-        '<button class="btn btn-o btn-sm" onclick="attToggleInvite(\''+k+'\')">'+(v.active===false?'تفعيل':'إيقاف')+'</button> '+
+        '<button class="btn btn-o btn-sm" onclick="attEditInvite(\''+k+'\')">تعديل</button> '+
         '<button class="btn btn-r btn-sm" onclick="attDeleteInvite(\''+k+'\')">حذف</button></td></tr>';
     }).join('');
   });
@@ -2689,10 +2710,33 @@ function attCopyInvite(k,btn){
   var link=attInviteLink(k);
   navigator.clipboard.writeText(link).then(function(){var o=btn.textContent;btn.textContent='✓ تم النسخ';setTimeout(function(){btn.textContent=o;},2000);}).catch(function(){prompt('انسخ الرابط:',link);});
 }
-function attToggleInvite(k){
-  var v=_attInvites[k],on=v.active===false;
-  if(!on&&!confirm('إيقاف وصول «'+v.name+'» إلى التطبيق؟ سيتعطل التطبيق عنده فوراً.'))return;
-  fbWrite('att_invites/'+k+'/active',on).then(attRenderInvites);
+var _attEditKey=null;
+function attEditInvite(k){
+  var v=_attInvites[k];if(!v)return;
+  _attEditKey=k;
+  var roles=['مدير المدرسة','وكيل الشؤون التعليمية','وكيل الشؤون المدرسية','وكيل الشؤون الطلابية','الموجه الطلابي'];
+  if(v.role&&roles.indexOf(v.role)<0) roles.unshift(v.role);
+  document.getElementById('attEdName').value=v.name||'';
+  document.getElementById('attEdRole').innerHTML=roles.map(function(r){return '<option'+(r===v.role?' selected':'')+'>'+r+'</option>';}).join('');
+  document.getElementById('attEdSchool').innerHTML=schools.map(function(s){return '<option value="'+s.code+'"'+(s.code===v.schoolCode?' selected':'')+'>'+s.name+'</option>';}).join('');
+  document.getElementById('attEdPhone').value=v.phone||'';
+  document.getElementById('attEdActive').value=v.active===false?'0':'1';
+  document.getElementById('attEdErr').style.display='none';
+  showModal('mdlAttEdit');
+}
+function attSaveInvite(){
+  var k=_attEditKey,v=_attInvites[k];if(!v)return;
+  var name=document.getElementById('attEdName').value.trim();
+  var code=document.getElementById('attEdSchool').value;
+  var err=document.getElementById('attEdErr');err.style.display='none';
+  if(!name||!code){err.textContent='يرجى إدخال الاسم واختيار المدرسة';err.style.display='block';return;}
+  var active=document.getElementById('attEdActive').value==='1';
+  if(v.active!==false&&!active&&!confirm('إيقاف وصول «'+name+'» إلى التطبيق؟ سيتعطل التطبيق عنده فوراً.'))return;
+  var school=schools.find(function(s){return s.code===code;})||{};
+  if(code!==v.schoolCode&&!confirm('سيعرض التطبيق عند «'+name+'» بيانات مدرسة «'+school.name+'» بدلاً من «'+v.schoolName+'». متابعة؟'))return;
+  var upd=Object.assign({},v,{name:name,role:document.getElementById('attEdRole').value,schoolCode:code,schoolName:school.name||'',
+    phone:document.getElementById('attEdPhone').value.trim(),active:active});
+  fbWrite('att_invites/'+k,upd).then(function(){_attInvites[k]=upd;hideModal('mdlAttEdit');attRenderInvites();});
 }
 function attDeleteInvite(k){
   var v=_attInvites[k];
