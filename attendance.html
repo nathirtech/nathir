@@ -80,6 +80,10 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .sv-head .nm{font-weight:800;color:var(--gd);font-size:15px}
 .chk{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #f1f3f8;font-size:13px;cursor:pointer}
 .chk input{width:17px;height:17px}
+.svf{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 2px 14px}
+.svf-o{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:800;color:var(--tm);cursor:pointer;padding:4px 0}
+.svf-o input{width:17px;height:17px;accent-color:var(--gd);margin:0}
+.svf-o.on{color:var(--gd)}
 /* ===== survey form (public) ===== */
 .fm-prog{position:sticky;top:0;z-index:5;height:5px;background:var(--gp)}
 .fm-prog i{display:block;height:100%;background:#1f8f55;transition:width .25s}
@@ -1575,9 +1579,19 @@ function formCard(fid,isMain){
     (isMain?'<button class="ib del" title="مسح الردود" onclick="resetForm(\''+fid+'\')">🗑️</button>':
       '<button class="ib del" title="حذف هذه النسخة" onclick="deleteForm(\''+fid+'\')">🗑️</button>')+'</div></div>';
 }
+// تصفية حسب الفئة المستهدفة
+var SV_AUDS=[['all','جميع الاستبانات'],['المعلمون','المعلمين'],['الطلاب','الطلاب'],['أولياء الأمور','أولياء الأمور'],['other','أخرى']];
+function audKey(aud){return ['المعلمون','الطلاب','أولياء الأمور'].indexOf(aud)>=0?aud:'other';}
 function renderReady(seg){
-  var html=seg,shown={};
-  SURVEY_TPL.forEach(function(t){
+  var cur=A.svAud||'all',shown={};
+  var count=function(k){return SURVEY_TPL.filter(function(t){return k==='all'||audKey(t.aud)===k;}).length;};
+  var html=seg+'<div class="svf">'+SV_AUDS.map(function(a){
+    return '<label class="svf-o'+(cur===a[0]?' on':'')+'"><input type="radio" name="svAud"'+(cur===a[0]?' checked':'')+
+      ' onchange="A.svAud=\''+a[0]+'\';renderSurveys()"> '+a[1]+' <span class="muted">('+count(a[0])+')</span></label>';
+  }).join('')+'</div>';
+  var list=SURVEY_TPL.filter(function(t){return cur==='all'||audKey(t.aud)===cur;});
+  if(!list.length) html+='<div class="card empty"><span class="e">📝</span>لا توجد استبانات في هذه الفئة بعد.</div>';
+  list.forEach(function(t){
     if(t.perTeacher){
       // استبانة «رضا الطالب عن المعلم»: نسخة مستقلة لكل معلم
       html+='<div class="card sv-card" style="border-style:dashed"><div class="sv-head"><div><div class="nm">'+esc(t.title)+'</div>'+
