@@ -1,7 +1,7 @@
 // Service worker for the attendance app (سجل الغياب والتأخر)
 // Network-first so updates reach users immediately; cache is only a fallback when offline.
-var CACHE='att-v1';
-var SHELL=['attendance.html','att-manifest.json','att-icon-192.png','att-icon-512.png','logo.png'];
+var CACHE='att-v2';
+var SHELL=['attendance.html','att-surveys.js','att-manifest.json','att-icon-192.png','att-icon-512.png','logo.png'];
 
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(SHELL);}).then(function(){return self.skipWaiting();}));
