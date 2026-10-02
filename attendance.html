@@ -97,9 +97,6 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .fm-card textarea{width:100%;min-height:84px;padding:9px 12px;border:1.5px solid var(--bd);border-radius:9px;font-family:inherit;font-size:14px;resize:vertical;outline:none}
 .fm-card textarea:focus{border-color:var(--gl)}
 /* ===== survey library & dashboard ===== */
-.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-.lib .card{padding:14px;display:flex;flex-direction:column;gap:8px}
-.lib .t{font-weight:800;color:var(--gd);font-size:14px;line-height:1.6;flex:1}
 .aud{font-size:11px;font-weight:800;padding:2px 9px;border-radius:10px;background:var(--gp);color:var(--gd)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
 .kpi{padding:14px 16px}
@@ -1449,8 +1446,9 @@ function exportPlans(){
 function loadSurveys(){
   $('secSurv').innerHTML='<div class="card empty"><div class="spin"></div></div>';
   Promise.all([rd('pt_'+A.code+'/surveys'),rd('att_forms/'+A.code),rd('att_resp/'+A.code)]).then(function(r){
-    A.survs=toArr(r[0]);A.forms=r[1]||{};A.resps=r[2]||{};renderSurveys();
-  }).catch(function(){$('secSurv').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
+    A.survs=toArr(r[0]);A.forms=r[1]||{};A.resps=r[2]||{};
+    return ensureTplForms();
+  }).then(renderSurveys).catch(function(){$('secSurv').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
 }
 function saveSurveys(){return wr('pt_'+A.code+'/surveys',A.survs);}
 function findSurv(id){return A.survs.find(function(s){return String(s.id)===String(id);});}
@@ -1548,52 +1546,81 @@ function sortedForms(){
   return Object.keys(A.forms||{}).map(function(k){return Object.assign({id:k},A.forms[k]);})
     .sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
 }
+// كل استبانة جاهزة لها رابط ثابت منذ البداية (معرّفها = معرّف القالب)، ولا تحتاج «إطلاق».
+// إن كانت قد أُطلقت سابقاً برابط آخر يبقى ذلك الرابط الأقدم هو الأساسي حتى لا يتعطل ما أُرسل.
+function mainForm(tplId){
+  if(A.forms[tplId]) return tplId;
+  var ids=Object.keys(A.forms).filter(function(k){return A.forms[k].tpl===tplId&&!A.forms[k].teacher;})
+    .sort(function(a,b){return (A.forms[a].createdAt||0)-(A.forms[b].createdAt||0);});
+  return ids[0]||null;
+}
+function ensureTplForms(){
+  var add={};
+  SURVEY_TPL.forEach(function(t){
+    if(t.perTeacher||mainForm(t.id)) return;
+    add[t.id]={tpl:t.id,title:t.title,aud:t.aud,createdAt:Date.now(),open:true,schoolName:A.schoolName};
+  });
+  if(!Object.keys(add).length) return Promise.resolve();
+  return DB.ref('att_forms/'+A.code).update(add).then(function(){Object.assign(A.forms,add);});
+}
+function formCard(fid,isMain){
+  var f=A.forms[fid],n=formResps(fid).length,open=f.open!==false;
+  return '<div class="card sv-card"><div class="sv-head"><div><div class="nm">'+esc(f.title)+'</div>'+
+    '<div class="muted"><span class="aud">'+esc(f.aud||'')+'</span> • '+esc(dateKey(new Date(f.createdAt||0)))+' • '+
+    (open?'<b style="color:var(--ok)">● تستقبل الردود</b>':'<b style="color:var(--abs)">⏸ متوقفة</b>')+'</div></div>'+
+    '<div style="text-align:left"><div style="font-size:24px;font-weight:800;color:#0b0b0b;line-height:1">'+n+'</div><div class="muted">رداً</div></div></div>'+
+    '<div class="ops"><button class="btn btn-sm" onclick="openDash(\''+fid+'\')">📊 النتائج</button>'+
+    '<button class="btn btn-g btn-sm" onclick="formLinkModal(\''+fid+'\')">🔗 الرابط</button>'+
+    '<button class="btn btn-o btn-sm" onclick="toggleForm(\''+fid+'\')">'+(open?'⏸ إيقاف':'▶ استئناف')+'</button>'+
+    (isMain?'<button class="ib del" title="مسح الردود" onclick="resetForm(\''+fid+'\')">🗑️</button>':
+      '<button class="ib del" title="حذف هذه النسخة" onclick="deleteForm(\''+fid+'\')">🗑️</button>')+'</div></div>';
+}
 function renderReady(seg){
-  var forms=sortedForms();
-  var html=seg;
-  if(forms.length){
-    html+='<div class="sec-title" style="margin:4px 2px 8px;font-weight:800;color:var(--gd)">📊 الاستبانات المُطلقة</div>'+forms.map(function(f){
-      var n=formResps(f.id).length,open=f.open!==false;
-      return '<div class="card sv-card"><div class="sv-head"><div><div class="nm">'+esc(f.title)+'</div>'+
-        '<div class="muted"><span class="aud">'+esc(f.aud||'')+'</span> • '+esc(dateKey(new Date(f.createdAt||0)))+' • '+
-        (open?'<b style="color:var(--ok)">● تستقبل الردود</b>':'<b style="color:var(--abs)">⏸ متوقفة</b>')+'</div></div>'+
-        '<div style="text-align:left"><div style="font-size:24px;font-weight:800;color:#0b0b0b;line-height:1">'+n+'</div><div class="muted">رداً</div></div></div>'+
-        '<div class="ops"><button class="btn btn-sm" onclick="openDash(\''+f.id+'\')">📊 النتائج</button>'+
-        '<button class="btn btn-g btn-sm" onclick="formLinkModal(\''+f.id+'\')">🔗 الرابط</button>'+
-        '<button class="btn btn-o btn-sm" onclick="toggleForm(\''+f.id+'\')">'+(open?'⏸ إيقاف':'▶ استئناف')+'</button>'+
-        '<button class="ib del" title="حذف" onclick="deleteForm(\''+f.id+'\')">🗑️</button></div></div>';
-    }).join('');
-  }
-  html+='<div class="sec-title" style="margin:16px 2px 8px;font-weight:800;color:var(--gd)">📚 مكتبة الاستبانات ('+SURVEY_TPL.length+')</div>'+
-    '<div class="muted" style="margin:-4px 2px 10px">اختر استبانة واضغط «إطلاق» لتحصل على رابطها، ثم أرسله للفئة المستهدفة.</div><div class="lib">'+
-    SURVEY_TPL.map(function(t){
-      var n=tplQuestions(t).length;
-      return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:22px">'+t.icon+'</span><span class="aud">'+esc(t.aud)+'</span></div>'+
-        '<div class="t">'+esc(t.title)+'</div><div class="muted">'+n+' سؤالاً</div>'+
-        '<div class="ops"><button class="btn btn-sm" onclick="launchForm(\''+t.id+'\')">🚀 إطلاق</button>'+
-        '<button class="btn btn-o btn-sm" onclick="previewTpl(\''+t.id+'\')">معاينة</button></div></div>';
-    }).join('')+'</div>';
+  var html=seg,shown={};
+  SURVEY_TPL.forEach(function(t){
+    if(t.perTeacher){
+      // استبانة «رضا الطالب عن المعلم»: نسخة مستقلة لكل معلم
+      html+='<div class="card sv-card" style="border-style:dashed"><div class="sv-head"><div><div class="nm">'+esc(t.title)+'</div>'+
+        '<div class="muted"><span class="aud">'+esc(t.aud)+'</span> • رابط مستقل لكل معلم</div></div></div>'+
+        '<div class="ops"><button class="btn btn-sm" onclick="launchForm(\''+t.id+'\')">➕ إنشاء رابط لمعلم</button></div></div>';
+      sortedForms().filter(function(f){return f.tpl===t.id;}).forEach(function(f){shown[f.id]=1;html+=formCard(f.id,false);});
+      return;
+    }
+    var main=mainForm(t.id);
+    if(main){shown[main]=1;html+=formCard(main,true);}
+    // نسخ إضافية أُطلقت سابقاً من القالب نفسه: تُطوى تحت الاستبانة
+    var extra=sortedForms().filter(function(f){return f.tpl===t.id&&!shown[f.id];});
+    if(extra.length){
+      var empty=extra.filter(function(f){return !formResps(f.id).length;}).length;
+      html+='<details style="margin:-4px 8px 12px"><summary class="muted" style="cursor:pointer;padding:4px 0">📎 نسخ أخرى من «'+esc(t.title)+'» ('+extra.length+')</summary>'+
+        (empty?'<button class="btn btn-r btn-sm" style="margin:6px 0 10px" onclick="deleteEmptyCopies(\''+t.id+'\')">🧹 حذف النسخ التي ليس لها ردود ('+empty+')</button>':'')+
+        extra.map(function(f){shown[f.id]=1;return formCard(f.id,false);}).join('')+'</details>';
+    }
+  });
   $('secSurv').innerHTML=html;
 }
-function previewTpl(id){
-  var t=tplById(id),bi=-1;
-  openModal(t.title,'<div class="note" style="margin-bottom:10px"><b>'+esc(t.aud)+'</b> — '+esc(t.intro)+'</div>'+
-    tplQuestions(t).map(function(q,i){
-      var head=(q.type==='likert'&&q.block!==bi&&(bi=q.block,q.blockTitle))?'<div class="fm-sec">'+esc(q.blockTitle)+'</div>':'';
-      if(q.type!=='likert') bi=q.block;
-      var kind=q.type==='likert'?SURVEY_SCALES[q.scale].opts.join(' / '):q.type==='text'?'إجابة مكتوبة':(q.type==='multi'?'اختيار متعدد: ':'اختيار واحد: ')+q.opts.join('، ');
-      return head+'<div style="padding:7px 0;border-top:1px solid #f1f3f8;font-size:13px;line-height:1.8"><b>'+(i+1)+'.</b> '+esc(q.t)+'<div class="muted">'+esc(kind)+'</div></div>';
-    }).join(''),
-    '<button class="btn" onclick="closeModal();launchForm(\''+id+'\')">🚀 إطلاق هذه الاستبانة</button><button class="btn btn-o" onclick="closeModal()">إغلاق</button>');
+function deleteEmptyCopies(tplId){
+  var main=mainForm(tplId);
+  var ids=Object.keys(A.forms).filter(function(k){return k!==main&&A.forms[k].tpl===tplId&&!A.forms[k].teacher&&!formResps(k).length;});
+  if(!ids.length) return;
+  if(!confirm('حذف '+ids.length+' نسخة ليس لها أي ردود؟ تبقى الاستبانة الأساسية ورابطها كما هي.'))return;
+  var upd={};ids.forEach(function(k){upd[k]=null;});
+  DB.ref('att_forms/'+A.code).update(upd).then(function(){ids.forEach(function(k){delete A.forms[k];});renderSurveys();toast('تم حذف '+ids.length+' نسخة');});
+}
+function resetForm(fid){
+  var f=A.forms[fid],n=formResps(fid).length;
+  if(!n){toast('لا توجد ردود لمسحها');return;}
+  if(!confirm('مسح جميع ردود «'+f.title+'» ('+n+')؟ يبقى الرابط كما هو ويبدأ استقبال الردود من جديد. لا يمكن التراجع.'))return;
+  rm('att_resp/'+A.code+'/'+fid).then(function(){if(A.resps)delete A.resps[fid];renderSurveys();toast('تم مسح الردود');});
 }
 function launchForm(id){
   var t=tplById(id);
-  var teacherSel=t.perTeacher?'<div class="fld"><label class="f">المعلم المستهدف *</label><select id="fLnT"><option value="">اختر المعلم</option>'+
-    A.teachers.map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></div>':'';
-  openModal('إطلاق استبانة',
-    '<div class="fld"><label class="f">عنوان الاستبانة</label><input type="text" id="fLnTitle" value="'+esc(t.title)+'"></div>'+teacherSel+
-    '<div class="note">الفئة المستهدفة: <b>'+esc(t.aud)+'</b>. بعد الإطلاق تحصل على <b>رابط واحد</b> ترسله لهم، ويعبئه كل من يفتحه.</div><div class="err" id="fLnErr"></div>',
-    '<button class="btn" onclick="doLaunch(\''+id+'\')">🚀 إطلاق</button><button class="btn btn-o" onclick="closeModal()">إلغاء</button>');
+  openModal('رابط لمعلم — '+t.title,
+    '<div class="fld"><label class="f">المعلم المستهدف *</label><select id="fLnT"><option value="">اختر المعلم</option>'+
+    A.teachers.map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></div>'+
+    '<input type="hidden" id="fLnTitle" value="'+esc(t.title)+'">'+
+    '<div class="note">يُنشأ رابط خاص بهذا المعلم ترسله لطلابه، ونتائجه منفصلة عن بقية المعلمين.</div><div class="err" id="fLnErr"></div>',
+    '<button class="btn" onclick="doLaunch(\''+id+'\')">إنشاء الرابط</button><button class="btn btn-o" onclick="closeModal()">إلغاء</button>');
 }
 function doLaunch(id){
   var t=tplById(id),title=$('fLnTitle').value.trim()||t.title,teacher=t.perTeacher?$('fLnT').value:'';
