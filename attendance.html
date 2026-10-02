@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="att-surveys.js"></script>
 <style>
 :root{--gd:#1a3a6b;--gm:#1e5fa8;--gl:#0099b8;--gp:#e8f0f8;--tm:#3a4a6b;--tl:#7a8aab;--bd:#d0d8e8;--bg:#f5f4f0;
   --ok:#1a7a4a;--okb:#e3f5ea;--late:#8a5a00;--lateb:#fff4d6;--abs:#b42318;--absb:#fde8e6}
@@ -79,6 +80,62 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .sv-head .nm{font-weight:800;color:var(--gd);font-size:15px}
 .chk{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #f1f3f8;font-size:13px;cursor:pointer}
 .chk input{width:17px;height:17px}
+/* ===== survey form (public) ===== */
+.fm-prog{position:sticky;top:0;z-index:5;height:5px;background:var(--gp)}
+.fm-prog i{display:block;height:100%;background:#1f8f55;transition:width .25s}
+.fm-head{background:linear-gradient(135deg,var(--gd),var(--gl));color:#fff;border-radius:16px;padding:18px;margin-bottom:12px}
+.fm-head h2{font-size:19px;font-weight:800;line-height:1.5}
+.fm-head p{font-size:13px;opacity:.92;line-height:1.9;margin-top:6px}
+.fm-card{background:#fff;border:1.5px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.fm-card.miss{border-color:var(--abs);box-shadow:0 0 0 3px var(--absb)}
+.fm-sec{font-size:14px;font-weight:800;color:var(--gd);margin:16px 2px 8px}
+.fm-q{font-size:14px;font-weight:700;color:var(--tm);line-height:1.8;margin-bottom:10px}
+.fm-q .n{display:inline-block;min-width:24px;color:var(--tl);font-weight:800}
+.fm-opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{border:1.5px solid var(--bd);background:#fff;color:var(--tm);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4}
+.opt.on{background:var(--gd);border-color:var(--gd);color:#fff}
+.fm-card textarea{width:100%;min-height:84px;padding:9px 12px;border:1.5px solid var(--bd);border-radius:9px;font-family:inherit;font-size:14px;resize:vertical;outline:none}
+.fm-card textarea:focus{border-color:var(--gl)}
+/* ===== survey library & dashboard ===== */
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.lib .card{padding:14px;display:flex;flex-direction:column;gap:8px}
+.lib .t{font-weight:800;color:var(--gd);font-size:14px;line-height:1.6;flex:1}
+.aud{font-size:11px;font-weight:800;padding:2px 9px;border-radius:10px;background:var(--gp);color:var(--gd)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.kpi{padding:14px 16px}
+.kpi .l{font-size:12px;color:var(--tl);font-weight:700}
+.kpi .v{font-size:28px;font-weight:800;color:#0b0b0b;line-height:1.3}
+.kpi .v small{font-size:14px;color:var(--tl)}
+.rate{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:#0b0b0b}
+.rate i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dsec{padding:16px;margin-bottom:12px}
+.dsec h3{font-size:15px;font-weight:800;color:var(--gd);margin-bottom:4px}
+.dsec .sub{font-size:12px;color:var(--tl);margin-bottom:12px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;font-size:12px;color:#52514e}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.lk-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 54px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #f1f3f8}
+.lk-row .t{font-size:13px;color:var(--tm);line-height:1.7}
+.lk-row .m{font-size:13px;font-weight:800;color:#0b0b0b;text-align:left}
+.stack{display:flex;gap:2px;height:22px}
+.stack span{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;min-width:0;overflow:hidden}
+.stack span:first-child{border-radius:0 4px 4px 0}.stack span:last-child{border-radius:4px 0 0 4px}
+.hb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 70px;gap:10px;align-items:center;padding:6px 0}
+.hb .t{font-size:13px;color:var(--tm);line-height:1.6}
+.hb .track{height:16px;background:#f3f2ee;border-radius:0 4px 4px 0}
+.hb .track i{display:block;height:100%;background:#2a78d6;border-radius:0 4px 4px 0;min-width:2px}
+.hb .v{font-size:12px;font-weight:800;color:#0b0b0b;text-align:left;white-space:nowrap}
+.cols{display:flex;align-items:flex-end;gap:4px;height:110px;border-bottom:1px solid #c3c2b7;padding-top:6px}
+.cols span{flex:1;background:#2a78d6;border-radius:4px 4px 0 0;min-height:2px;max-width:34px}
+.cols-x{display:flex;gap:4px;font-size:10px;color:#898781;margin-top:4px}
+.cols-x span{flex:1;text-align:center;max-width:34px}
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sw .it{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.7;padding:6px 0;border-top:1px solid #f1f3f8}
+.sw .it b{white-space:nowrap;color:#0b0b0b}
+.quote{background:#f7f9fc;border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.8;margin-bottom:6px;color:var(--tm)}
+.quote small{display:block;color:var(--tl);font-size:11px}
+#vizTip{position:fixed;z-index:120;pointer-events:none;background:#0b0b0b;color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;max-width:260px;line-height:1.6;display:none}
+@media(max-width:640px){.lk-row{grid-template-columns:1fr 46px}.lk-row .stack{grid-column:1/3;grid-row:2}.hb{grid-template-columns:1fr 64px}.hb .track{grid-column:1/3;grid-row:2}.sw{grid-template-columns:1fr}}
 @media(max-width:560px){.mtabs{width:100%;flex-wrap:nowrap}.mtab{flex:1;padding:8px 4px;font-size:12px;white-space:normal;line-height:1.35}}
 .daybar select{width:auto;padding:7px 10px;font-size:13px;font-weight:700;color:var(--gd)}
 .daybar .past{font-size:11px;font-weight:800;color:var(--late);background:var(--lateb);padding:3px 10px;border-radius:10px}
@@ -293,6 +350,21 @@ table.grid td.attc{background:#f3fbf6}
   <div class="wrap" id="tBody" style="max-width:640px"></div>
 </div>
 
+<!-- ============ PUBLIC SURVEY FORM (رابط عام لأي مستجيب) ============ -->
+<div id="scrForm" class="hidden">
+  <div class="hdr">
+    <div class="hdr-in">
+      <div class="brand">
+        <img src="logo.png" alt="رابط">
+        <div class="sep"></div>
+        <div style="min-width:0"><h1 id="fmSchool">—</h1><p>استبانة</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="fm-prog hidden" id="fmProg"><i id="fmProgBar"></i></div>
+  <div class="wrap" id="fmBody" style="max-width:720px"></div>
+</div>
+
 <!-- ============ MODAL ============ -->
 <div class="mbg hidden" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -437,7 +509,7 @@ function clsShort(c){
 
 // ====== SESSION / ROUTING ======
 function show(id){
-  ['scrBoot','scrActivate','scrWelcome','scrBlocked','scrAdmin','scrTeacher'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});
+  ['scrBoot','scrActivate','scrWelcome','scrBlocked','scrAdmin','scrTeacher','scrForm'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});
   window.scrollTo(0,0);
 }
 function blocked(title,sub){
@@ -451,6 +523,9 @@ function boot(){
   var h=location.hash,q=new URLSearchParams(location.search);
   var inv=q.get('i')||(h.indexOf('#i=')===0?decodeURIComponent(h.slice(3)):'');
   var tl=q.get('t')||(h.indexOf('#t=')===0?h.slice(3):'');
+  // رابط استبانة عام: يُفتح لأي شخص دون تسجيل دخول ودون المساس بجلسة الجهاز
+  var sv=q.get('s');
+  if(sv){var sp=sv.split('.');return openPublicForm(sp[0],sp[1]);}
   if(inv) return openInviteLink(inv);
   if(tl){
     var p=tl.split('.').map(decodeURIComponent);
@@ -550,7 +625,7 @@ function renderInstall(forceSteps){
 // =====================================================================
 var A={token:null,inv:null,code:null,schoolName:'',teachers:[],classes:{},S:null,sched:{},rec:{},keys:{},
        tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null,day:'',
-       sec:'att',subs:[],survs:[]};
+       sec:'att',subs:[],survs:[],forms:{},resps:{},svTab:'ready',svDash:null};
 
 // أسابيع الفصل الدراسي الأول 1448هـ حسب التقويم الرسمي لوزارة التعليم (تاريخ أحد كل أسبوع)
 var WEEKS=[['الأسبوع الأول','2026-08-23'],['الأسبوع الثاني','2026-08-30'],['الأسبوع الثالث','2026-09-06'],
@@ -606,7 +681,7 @@ function setSection(s){
   $('hdrExport').classList.toggle('hidden',s!=='att');
   renderDayBar();
   if(s==='plan') loadPlans();
-  if(s==='surv') loadSurveys();
+  if(s==='surv'){A.svDash=null;loadSurveys();}
 }
 // روابط الخطة والاستبانة تفتح صفحات المنصة نفسها
 function platformBase(){return appBase().replace(/attendance\.html$/,'');}
@@ -1253,7 +1328,7 @@ function pageDaily(rec,d){
     listTbl(abs,'الطلاب الغائبون','s-a')+listTbl(late,'الطلاب المتأخرون','s-l')+
     '<div class="sig"><div>وكيل شؤون الطلاب: ....................<br>التوقيع: ....................</div><div>مدير المدرسة: ....................<br>التوقيع: ....................</div></div></section>';
 }
-function printDoc(title,inner){
+function printDoc(title,inner,extraCss){
   var css='@page{size:A4;margin:11mm}*{box-sizing:border-box}body{font-family:Cairo,Tahoma,sans-serif;direction:rtl;color:#1a2a4a;font-size:11.5px;margin:0}'+
     '.page{page-break-after:always}.page:last-child{page-break-after:auto}'+
     '.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:2.5px solid #1a3a6b;padding-bottom:8px;margin-bottom:12px;gap:10px}'+
@@ -1263,7 +1338,7 @@ function printDoc(title,inner){
     'td{border:1px solid #c9d2e3;padding:4px 6px;text-align:center}td.nm{text-align:right}tr:nth-child(even) td{background:#f7f9fc;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
     '.s-p{color:#1a7a4a}.s-l{color:#8a5a00;font-weight:700}.s-a{color:#b42318;font-weight:700}.s-n{color:#9aa6bd}.mut{color:#7a8aab;font-size:10.5px}'+
     '.sum td{text-align:right;background:#fff!important;line-height:1.8}h3{font-size:13px;color:#1a3a6b;margin:12px 0 6px}'+
-    '.sig{display:flex;justify-content:space-between;margin-top:22px;font-size:12px;line-height:2.2}';
+    '.sig{display:flex;justify-content:space-between;margin-top:22px;font-size:12px;line-height:2.2}'+(extraCss||'');
   var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>'+esc(title)+'</title>'+
     '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet"><style>'+css+'</style></head><body>'+inner+'</body></html>';
   var f=document.createElement('iframe');
@@ -1373,16 +1448,25 @@ function exportPlans(){
 // ---------- الاستبانات (مشتركة مع المنصة: pt_{code}/surveys) ----------
 function loadSurveys(){
   $('secSurv').innerHTML='<div class="card empty"><div class="spin"></div></div>';
-  rd('pt_'+A.code+'/surveys').then(function(s){A.survs=toArr(s);renderSurveys();})
-    .catch(function(){$('secSurv').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
+  Promise.all([rd('pt_'+A.code+'/surveys'),rd('att_forms/'+A.code),rd('att_resp/'+A.code)]).then(function(r){
+    A.survs=toArr(r[0]);A.forms=r[1]||{};A.resps=r[2]||{};renderSurveys();
+  }).catch(function(){$('secSurv').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
 }
 function saveSurveys(){return wr('pt_'+A.code+'/surveys',A.survs);}
 function findSurv(id){return A.survs.find(function(s){return String(s.id)===String(id);});}
 function survTargets(s){var ids=toArr(s.targetIds).map(String);return A.teachers.filter(function(t){return ids.indexOf(String(t.id))>=0;});}
 function survDone(s,t){return toArr(s.completions).find(function(c){return String(c.tid)===String(t.id);});}
+// تبويب الاستبانات: جاهزة (نماذج داخل التطبيق) أو برابط خارجي (مشتركة مع المنصة)
 function renderSurveys(){
   if(A.sec!=='surv') return;
-  var html='<div class="toolbar"><div class="grow muted">'+A.survs.length+' استبانة • مشتركة مع منصة رابط</div>'+
+  if(A.svDash) return renderDash(A.svDash);
+  var seg='<div class="seg" style="margin-bottom:12px"><button class="'+(A.svTab!=='ext'?'on':'')+'" onclick="A.svTab=\'ready\';renderSurveys()">📋 الاستبانات الجاهزة</button>'+
+    '<button class="'+(A.svTab==='ext'?'on':'')+'" onclick="A.svTab=\'ext\';renderSurveys()">🔗 استبانات برابط خارجي</button></div>';
+  if(A.svTab==='ext') return renderExtSurveys(seg);
+  renderReady(seg);
+}
+function renderExtSurveys(seg){
+  var html=seg+'<div class="toolbar"><div class="grow muted">'+A.survs.length+' استبانة • مشتركة مع منصة رابط</div>'+
     '<button class="btn" onclick="newSurvey()">➕ استبانة جديدة</button></div>';
   if(!A.survs.length){
     $('secSurv').innerHTML=html+'<div class="card empty"><span class="e">📝</span>لا توجد استبانات بعد.<br>صمّم الاستبانة في Google Forms أو Microsoft Forms، ثم أضف رابطها هنا لترسله للمعلمين وتتابع من عبّأها.</div>';
@@ -1450,6 +1534,399 @@ function deleteSurvey(id){
   if(!confirm('حذف استبانة «'+s.title+'»؟ ستُحذف من المنصة أيضاً.'))return;
   A.survs=A.survs.filter(function(x){return x!==s;});
   saveSurveys().then(function(){renderSurveys();toast('تم الحذف');});
+}
+
+// =====================================================================
+//  الاستبانات الجاهزة: att_forms/{school}/{fid} ، الردود att_resp/{school}/{fid}/{push}
+// =====================================================================
+// ألوان المقياس: أزرق للموافقة، أحمر للرفض، ورمادي للمحايد/«لا أعرف»
+var LK_COLORS={2:['#1c5cab','#c93b3a'],3:['#1c5cab','#d3d2cb','#c93b3a'],4:['#1c5cab','#86b6ef','#f0908f','#c93b3a'],5:['#1c5cab','#86b6ef','#d3d2cb','#f0908f','#c93b3a']};
+var LK_INK={'#1c5cab':'#fff','#c93b3a':'#fff','#86b6ef':'#0b0b0b','#f0908f':'#0b0b0b','#d3d2cb':'#0b0b0b'};
+function formLink(fid){return appBase()+'?s='+A.code+'.'+fid;}
+function formResps(fid){return toArr(A.resps&&A.resps[fid]);}
+function sortedForms(){
+  return Object.keys(A.forms||{}).map(function(k){return Object.assign({id:k},A.forms[k]);})
+    .sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+}
+function renderReady(seg){
+  var forms=sortedForms();
+  var html=seg;
+  if(forms.length){
+    html+='<div class="sec-title" style="margin:4px 2px 8px;font-weight:800;color:var(--gd)">📊 الاستبانات المُطلقة</div>'+forms.map(function(f){
+      var n=formResps(f.id).length,open=f.open!==false;
+      return '<div class="card sv-card"><div class="sv-head"><div><div class="nm">'+esc(f.title)+'</div>'+
+        '<div class="muted"><span class="aud">'+esc(f.aud||'')+'</span> • '+esc(dateKey(new Date(f.createdAt||0)))+' • '+
+        (open?'<b style="color:var(--ok)">● تستقبل الردود</b>':'<b style="color:var(--abs)">⏸ متوقفة</b>')+'</div></div>'+
+        '<div style="text-align:left"><div style="font-size:24px;font-weight:800;color:#0b0b0b;line-height:1">'+n+'</div><div class="muted">رداً</div></div></div>'+
+        '<div class="ops"><button class="btn btn-sm" onclick="openDash(\''+f.id+'\')">📊 النتائج</button>'+
+        '<button class="btn btn-g btn-sm" onclick="formLinkModal(\''+f.id+'\')">🔗 الرابط</button>'+
+        '<button class="btn btn-o btn-sm" onclick="toggleForm(\''+f.id+'\')">'+(open?'⏸ إيقاف':'▶ استئناف')+'</button>'+
+        '<button class="ib del" title="حذف" onclick="deleteForm(\''+f.id+'\')">🗑️</button></div></div>';
+    }).join('');
+  }
+  html+='<div class="sec-title" style="margin:16px 2px 8px;font-weight:800;color:var(--gd)">📚 مكتبة الاستبانات ('+SURVEY_TPL.length+')</div>'+
+    '<div class="muted" style="margin:-4px 2px 10px">اختر استبانة واضغط «إطلاق» لتحصل على رابطها، ثم أرسله للفئة المستهدفة.</div><div class="lib">'+
+    SURVEY_TPL.map(function(t){
+      var n=tplQuestions(t).length;
+      return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:22px">'+t.icon+'</span><span class="aud">'+esc(t.aud)+'</span></div>'+
+        '<div class="t">'+esc(t.title)+'</div><div class="muted">'+n+' سؤالاً</div>'+
+        '<div class="ops"><button class="btn btn-sm" onclick="launchForm(\''+t.id+'\')">🚀 إطلاق</button>'+
+        '<button class="btn btn-o btn-sm" onclick="previewTpl(\''+t.id+'\')">معاينة</button></div></div>';
+    }).join('')+'</div>';
+  $('secSurv').innerHTML=html;
+}
+function previewTpl(id){
+  var t=tplById(id),bi=-1;
+  openModal(t.title,'<div class="note" style="margin-bottom:10px"><b>'+esc(t.aud)+'</b> — '+esc(t.intro)+'</div>'+
+    tplQuestions(t).map(function(q,i){
+      var head=(q.type==='likert'&&q.block!==bi&&(bi=q.block,q.blockTitle))?'<div class="fm-sec">'+esc(q.blockTitle)+'</div>':'';
+      if(q.type!=='likert') bi=q.block;
+      var kind=q.type==='likert'?SURVEY_SCALES[q.scale].opts.join(' / '):q.type==='text'?'إجابة مكتوبة':(q.type==='multi'?'اختيار متعدد: ':'اختيار واحد: ')+q.opts.join('، ');
+      return head+'<div style="padding:7px 0;border-top:1px solid #f1f3f8;font-size:13px;line-height:1.8"><b>'+(i+1)+'.</b> '+esc(q.t)+'<div class="muted">'+esc(kind)+'</div></div>';
+    }).join(''),
+    '<button class="btn" onclick="closeModal();launchForm(\''+id+'\')">🚀 إطلاق هذه الاستبانة</button><button class="btn btn-o" onclick="closeModal()">إغلاق</button>');
+}
+function launchForm(id){
+  var t=tplById(id);
+  var teacherSel=t.perTeacher?'<div class="fld"><label class="f">المعلم المستهدف *</label><select id="fLnT"><option value="">اختر المعلم</option>'+
+    A.teachers.map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></div>':'';
+  openModal('إطلاق استبانة',
+    '<div class="fld"><label class="f">عنوان الاستبانة</label><input type="text" id="fLnTitle" value="'+esc(t.title)+'"></div>'+teacherSel+
+    '<div class="note">الفئة المستهدفة: <b>'+esc(t.aud)+'</b>. بعد الإطلاق تحصل على <b>رابط واحد</b> ترسله لهم، ويعبئه كل من يفتحه.</div><div class="err" id="fLnErr"></div>',
+    '<button class="btn" onclick="doLaunch(\''+id+'\')">🚀 إطلاق</button><button class="btn btn-o" onclick="closeModal()">إلغاء</button>');
+}
+function doLaunch(id){
+  var t=tplById(id),title=$('fLnTitle').value.trim()||t.title,teacher=t.perTeacher?$('fLnT').value:'';
+  if(t.perTeacher&&!teacher){$('fLnErr').textContent='اختر المعلم';return;}
+  if(teacher) title+=' — أ. '+teacher;
+  var fid=rid(8),f={tpl:id,title:title,aud:t.aud,createdAt:Date.now(),open:true,schoolName:A.schoolName};
+  if(teacher) f.teacher=teacher;
+  wr('att_forms/'+A.code+'/'+fid,f).then(function(){A.forms[fid]=f;renderSurveys();formLinkModal(fid);})
+    .catch(function(){toast('تعذّر الحفظ',true);});
+}
+function formMsg(fid){
+  var f=A.forms[fid];
+  return 'السلام عليكم ورحمة الله\nنأمل منكم التكرم بتعبئة استبانة «'+f.title+'» عبر الرابط:\n'+formLink(fid)+'\n\nشاكرين تعاونكم — إدارة '+A.schoolName;
+}
+function formLinkModal(fid){
+  var f=A.forms[fid];
+  openModal('رابط الاستبانة','<p style="font-weight:800;color:var(--gd)">'+esc(f.title)+'</p>'+
+    '<div class="linkbox">'+esc(formLink(fid))+'</div><div class="muted">أرسله لـ'+esc(f.aud)+' في مجموعة الواتساب، ويعبئه كل من يفتحه دون تسجيل دخول.</div>',
+    '<button class="btn btn-g" onclick="waOpen(\'\',formMsg(\''+fid+'\'))">📲 إرسال بالواتساب</button>'+
+    '<button class="btn btn-o" onclick="copyText(formLink(\''+fid+'\'))">📋 نسخ الرابط</button>'+
+    '<a class="btn btn-o" href="'+esc(formLink(fid))+'" target="_blank">👁 فتح النموذج</a>');
+}
+function toggleForm(fid){
+  var f=A.forms[fid],open=f.open===false;
+  DB.ref('att_forms/'+A.code+'/'+fid+'/open').set(open).then(function(){f.open=open;renderSurveys();toast(open?'تم استئناف استقبال الردود':'تم إيقاف استقبال الردود');});
+}
+function deleteForm(fid){
+  var f=A.forms[fid],n=formResps(fid).length;
+  if(!confirm('حذف استبانة «'+f.title+'»'+(n?' وجميع ردودها ('+n+')':'')+'؟ لا يمكن التراجع.'))return;
+  Promise.all([rm('att_forms/'+A.code+'/'+fid),rm('att_resp/'+A.code+'/'+fid)]).then(function(){
+    delete A.forms[fid];if(A.resps)delete A.resps[fid];renderSurveys();toast('تم الحذف');
+  });
+}
+
+// ---------- تحليل الردود ----------
+function rateOf(p){
+  if(p==null) return null;
+  if(p>=85) return {t:'ممتاز',c:'#0ca30c',i:'✔'};
+  if(p>=70) return {t:'جيد جداً',c:'#0ca30c',i:'✔'};
+  if(p>=55) return {t:'جيد',c:'#fab219',i:'●'};
+  if(p>=40) return {t:'مقبول',c:'#ec835a',i:'▲'};
+  return {t:'ضعيف',c:'#d03b3b',i:'✖'};
+}
+function analyze(f){
+  var t=tplById(f.tpl),qs=tplQuestions(t),rs=formResps(f.id),idx=!t.noIndex;
+  var out={t:t,qs:[],n:rs.length,blocks:{},overall:null,last:0,days:{},fields:[]};
+  rs.forEach(function(r){
+    if(r.at>out.last)out.last=r.at;
+    var k=dateKey(new Date(r.at));out.days[k]=(out.days[k]||0)+1;
+  });
+  qs.forEach(function(q){
+    var o={q:q,counts:[],answered:0,mean:null,texts:[],others:[]};
+    if(q.type==='likert'||q.type==='single'||q.type==='multi'){
+      var opts=q.type==='likert'?SURVEY_SCALES[q.scale].opts:q.opts;
+      o.counts=opts.map(function(){return 0;});
+      var sum=0,cnt=0,sc=q.type==='likert'?SURVEY_SCALES[q.scale].scores:null;
+      rs.forEach(function(r){
+        var v=r.a&&r.a[q.id];
+        if(v==null||v==='') return;
+        if(q.type==='multi'){toArr(v).forEach(function(i){if(o.counts[i]!=null)o.counts[i]++;});o.answered++;
+          if(r.a[q.id+'_o'])o.others.push(r.a[q.id+'_o']);return;}
+        v=+v;if(o.counts[v]==null)return;o.counts[v]++;o.answered++;
+        if(sc&&sc[v]!=null){var s=sc[v];sum+=q.rev?100-s:s;cnt++;}
+      });
+      if(rs.length) o.answeredAny=true;
+      if(sc&&cnt){o.mean=sum/cnt;o.valid=cnt;}
+      // المقياس التشخيصي (أوافق/لا أوافق) يُعرض كنسبة الموافقة
+      if(q.type==='likert'&&!idx&&o.answered) o.agree=o.counts[0]*100/o.answered;
+    } else if(q.type==='text'){
+      rs.forEach(function(r){var v=r.a&&r.a[q.id];if(v&&String(v).trim())o.texts.push({v:String(v).trim(),at:r.at,who:r.f&&(r.f.name||r.f.parent||r.f.student)||''});});
+    }
+    out.qs.push(o);
+    if(q.type==='likert'&&o.mean!=null&&idx){(out.blocks[q.block]=out.blocks[q.block]||{title:q.blockTitle,m:[]}).m.push(o.mean);}
+  });
+  var all=[];Object.keys(out.blocks).forEach(function(b){var B=out.blocks[b];B.mean=B.m.reduce(function(a,x){return a+x;},0)/B.m.length;all=all.concat(B.m);});
+  if(idx&&all.length) out.overall=all.reduce(function(a,x){return a+x;},0)/all.length;
+  t.fields.forEach(function(fd){
+    if(fd.type!=='select')return;
+    var c=fd.opts.map(function(){return 0;});
+    rs.forEach(function(r){var i=fd.opts.indexOf(r.f&&r.f[fd.id]);if(i>=0)c[i]++;});
+    if(c.some(function(x){return x;})) out.fields.push({fd:fd,counts:c});
+  });
+  return out;
+}
+function pctTxt(x){return x==null?'—':(Math.round(x*10)/10).toString().replace(/\.0$/,'')+'%';}
+function tip(s){return ' data-tip="'+esc(s)+'"';}
+function stackHtml(o){
+  var opts=SURVEY_SCALES[o.q.scale].opts,cols=LK_COLORS[opts.length],tot=o.answered;
+  if(!tot) return '<div class="stack"><span style="flex:1;background:#f3f2ee;color:#898781">لا توجد إجابات</span></div>';
+  return '<div class="stack">'+o.counts.map(function(c,i){
+    if(!c) return '';
+    var p=c*100/tot;
+    return '<span style="flex:'+c+';background:'+cols[i]+';color:'+LK_INK[cols[i]]+'"'+tip(opts[i]+': '+c+' ('+pctTxt(p)+')')+'>'+(p>=12?Math.round(p)+'%':'')+'</span>';
+  }).join('')+'</div>';
+}
+function barsHtml(labels,counts,base){
+  var max=Math.max.apply(null,counts.concat([1]));
+  return labels.map(function(l,i){
+    var c=counts[i],p=base?c*100/base:0;
+    return '<div class="hb"'+tip(l+': '+c+(base?' ('+pctTxt(p)+')':''))+'><div class="t">'+esc(l)+'</div><div class="track"><i style="width:'+(c*100/max)+'%"></i></div><div class="v">'+c+(base?' • '+Math.round(p)+'%':'')+'</div></div>';
+  }).join('');
+}
+function legendHtml(scale){
+  var opts=SURVEY_SCALES[scale].opts,cols=LK_COLORS[opts.length];
+  return '<div class="legend">'+opts.map(function(o,i){return '<span><i style="background:'+cols[i]+'"></i>'+esc(o)+'</span>';}).join('')+'</div>';
+}
+
+// ---------- لوحة النتائج ----------
+function openDash(fid){A.svDash=fid;renderSurveys();window.scrollTo(0,0);}
+function renderDash(fid){
+  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f),t=R.t,idx=!t.noIndex,rt=rateOf(R.overall);
+  var html='<div class="toolbar"><button class="btn btn-o btn-sm" onclick="A.svDash=null;renderSurveys()">→ رجوع</button>'+
+    '<div class="grow"><div style="font-weight:800;color:var(--gd);font-size:16px">'+esc(f.title)+'</div><div class="muted"><span class="aud">'+esc(f.aud)+'</span> • أُطلقت '+esc(dateKey(new Date(f.createdAt)))+(f.open===false?' • ⏸ متوقفة':'')+'</div></div>'+
+    '<button class="btn btn-g btn-sm" onclick="formLinkModal(\''+fid+'\')">🔗 الرابط</button>'+
+    (R.n?'<button class="btn btn-sm" onclick="exportFormPdf(\''+fid+'\')">📄 تقرير PDF</button><button class="btn btn-o btn-sm" onclick="exportFormCsv(\''+fid+'\')">⬇ Excel</button>':'')+'</div>';
+  html+='<div class="kpis"><div class="card kpi"><div class="l">عدد الردود</div><div class="v">'+R.n+'</div></div>'+
+    (idx?'<div class="card kpi"><div class="l">مؤشر الرضا العام</div><div class="v">'+pctTxt(R.overall)+'</div>'+(rt?'<span class="rate"><i style="background:'+rt.c+'"></i>'+rt.i+' '+rt.t+'</span>':'')+'</div>':
+      '<div class="card kpi"><div class="l">عدد الأسئلة</div><div class="v">'+R.qs.length+'</div></div>')+
+    '<div class="card kpi"><div class="l">آخر رد</div><div class="v" style="font-size:17px;padding-top:8px">'+(R.last?dateKey(new Date(R.last))+'<br><small>'+hm(R.last)+'</small>':'—')+'</div></div></div>';
+  if(!R.n){
+    $('secSurv').innerHTML=html+'<div class="card empty"><span class="e">📭</span>لم تصل أي ردود بعد.<br>أرسل رابط الاستبانة لـ'+esc(f.aud)+' وستظهر النتائج هنا فور وصولها.</div>';
+    return;
+  }
+  // الردود حسب اليوم
+  var dk=Object.keys(R.days).sort(),maxD=Math.max.apply(null,dk.map(function(k){return R.days[k];}));
+  html+='<div class="card dsec"><h3>الردود حسب اليوم</h3><div class="sub">'+dk.length+' يوماً استقبلت ردوداً</div>'+
+    '<div class="cols">'+dk.map(function(k){return '<span style="height:'+(R.days[k]*100/maxD)+'%"'+tip(k+': '+R.days[k]+' رداً')+'></span>';}).join('')+'</div>'+
+    '<div class="cols-x">'+dk.map(function(k){var d=parseKey(k);return '<span>'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';}).join('')+'</div></div>';
+  // المجالات
+  var bk=Object.keys(R.blocks);
+  if(idx&&bk.length>1){
+    html+='<div class="card dsec"><h3>مؤشر الرضا حسب المجال</h3><div class="sub">متوسط درجات عبارات كل مجال من 100%</div>'+
+      bk.map(function(b){var B=R.blocks[b],r=rateOf(B.mean);
+        return '<div class="hb"'+tip(B.title+': '+pctTxt(B.mean))+'><div class="t">'+esc(B.title)+'</div><div class="track"><i style="width:'+B.mean+'%"></i></div><div class="v">'+pctTxt(B.mean)+'</div></div>';}).join('')+'</div>';
+  }
+  // أبرز نقاط القوة والتحسين
+  var lk=R.qs.filter(function(o){return o.q.type==='likert'&&o.mean!=null;});
+  if(idx&&lk.length>=4){
+    var srt=lk.slice().sort(function(a,b){return b.mean-a.mean;});
+    var li=function(arr){return arr.map(function(o){return '<div class="it"><b>'+pctTxt(o.mean)+'</b><span>'+esc(o.q.t)+'</span></div>';}).join('');};
+    html+='<div class="sw"><div class="card dsec"><h3>✔ أبرز نقاط القوة</h3><div class="sub">العبارات الأعلى رضا</div>'+li(srt.slice(0,3))+'</div>'+
+      '<div class="card dsec"><h3>▲ أولويات التحسين</h3><div class="sub">العبارات الأقل رضا</div>'+li(srt.slice(-3).reverse())+'</div></div>';
+  }
+  // توزيع إجابات كل عبارة
+  var lastBlock=-1;
+  R.qs.forEach(function(o,i){
+    var q=o.q;
+    if(q.type==='likert'){
+      if(q.block!==lastBlock){
+        if(lastBlock!==-1) html+='</div>';
+        lastBlock=q.block;
+        html+='<div class="card dsec"><h3>'+esc(q.blockTitle||'توزيع الإجابات')+'</h3><div class="sub">'+
+          (idx?'العمود الأخير: درجة الرضا عن العبارة من 100%':'العمود الأخير: نسبة من اختار «'+esc(SURVEY_SCALES[q.scale].opts[0])+'»')+'</div>'+legendHtml(q.scale);
+      }
+      var m=idx?o.mean:o.agree;
+      html+='<div class="lk-row"><div class="t">'+(i+1)+'. '+esc(q.t)+(q.rev?' <span class="muted">(عبارة سلبية)</span>':'')+'</div>'+stackHtml(o)+'<div class="m">'+pctTxt(m)+'</div></div>';
+      return;
+    }
+    if(lastBlock!==-1){html+='</div>';lastBlock=-1;}
+    if(q.type==='single'||q.type==='multi'){
+      html+='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">'+(q.type==='multi'?'اختيار متعدد • النسبة من '+o.answered+' مستجيباً':'أجاب '+o.answered+' مستجيباً')+'</div>'+
+        barsHtml(q.opts,o.counts,o.answered)+
+        (o.others.length?'<div class="sub" style="margin-top:10px">إجابات أخرى ('+o.others.length+'):</div>'+o.others.map(function(x){return '<div class="quote">'+esc(x)+'</div>';}).join(''):'')+'</div>';
+    } else if(q.type==='text'){
+      html+='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">'+o.texts.length+' إجابة مكتوبة</div>'+
+        (o.texts.length?o.texts.slice().reverse().map(function(x){return '<div class="quote">'+esc(x.v)+'<small>'+(x.who?esc(x.who)+' • ':'')+dateKey(new Date(x.at))+'</small></div>';}).join(''):'<div class="muted">لا توجد إجابات</div>')+'</div>';
+    }
+  });
+  if(lastBlock!==-1) html+='</div>';
+  // توزيع المستجيبين (مثل الصف)
+  R.fields.forEach(function(F){
+    var tot=F.counts.reduce(function(a,x){return a+x;},0);
+    html+='<div class="card dsec"><h3>المستجيبون حسب '+esc(F.fd.label)+'</h3><div class="sub">'+tot+' مستجيباً حدّدوا '+esc(F.fd.label)+'</div>'+barsHtml(F.fd.opts,F.counts,tot)+'</div>';
+  });
+  $('secSurv').innerHTML=html;
+}
+
+// تلميح عند المرور على الأشرطة
+document.addEventListener('mouseover',function(e){
+  var el=e.target.closest&&e.target.closest('[data-tip]'),t=$('vizTip');
+  if(!t){t=document.createElement('div');t.id='vizTip';document.body.appendChild(t);}
+  if(!el){t.style.display='none';return;}
+  t.textContent=el.getAttribute('data-tip');t.style.display='block';
+});
+document.addEventListener('mousemove',function(e){
+  var t=$('vizTip');if(!t||t.style.display!=='block')return;
+  t.style.left=Math.min(e.clientX+12,window.innerWidth-t.offsetWidth-8)+'px';t.style.top=(e.clientY+14)+'px';
+});
+
+// ---------- تقرير PDF وملف Excel ----------
+function exportFormPdf(fid){
+  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f),t=R.t,idx=!t.noIndex,rt=rateOf(R.overall);
+  var css='.kp{display:flex;gap:8px;margin:6px 0 12px}.kp div{flex:1;border:1px solid #c9d2e3;border-radius:8px;padding:8px;text-align:center}.kp b{display:block;font-size:20px;color:#0b0b0b}'+
+    '.st{display:flex;gap:1px;height:14px;width:100%}.st span{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+    '.bar{height:10px;background:#2a78d6;border-radius:0 3px 3px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}td.l{text-align:right}'+
+    '.lg{display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;margin:4px 0}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+    '.q{background:#f7f9fc;border-radius:6px;padding:5px 8px;margin:4px 0;line-height:1.7;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
+  var h=pHead('تقرير نتائج الاستبانة',esc(f.title)+'<br><span class="mut">الفئة: '+esc(f.aud)+'</span>',new Date());
+  h+='<div class="kp"><div>عدد الردود<b>'+R.n+'</b></div>'+(idx?'<div>مؤشر الرضا العام<b>'+pctTxt(R.overall)+'</b>'+(rt?rt.i+' '+rt.t:'')+'</div>':'')+
+    '<div>فترة الردود<b style="font-size:13px">'+(Object.keys(R.days).sort()[0]||'—')+' — '+(R.last?dateKey(new Date(R.last)):'—')+'</b></div></div>';
+  var bk=Object.keys(R.blocks);
+  if(idx&&bk.length>1) h+='<h3>مؤشر الرضا حسب المجال</h3><table><thead><tr><th>المجال</th><th style="width:45%"></th><th style="width:70px">النسبة</th><th style="width:80px">التقدير</th></tr></thead><tbody>'+
+    bk.map(function(b){var B=R.blocks[b],r=rateOf(B.mean);return '<tr><td class="l">'+esc(B.title)+'</td><td><div class="bar" style="width:'+B.mean+'%"></div></td><td>'+pctTxt(B.mean)+'</td><td>'+(r?r.t:'')+'</td></tr>';}).join('')+'</tbody></table>';
+  var lastB=-1,tbl='';
+  R.qs.forEach(function(o,i){
+    var q=o.q;
+    if(q.type==='likert'){
+      var opts=SURVEY_SCALES[q.scale].opts,cols=LK_COLORS[opts.length];
+      if(q.block!==lastB){
+        if(lastB!==-1) tbl+='</tbody></table>';lastB=q.block;
+        tbl+='<h3>'+esc(q.blockTitle||'توزيع الإجابات')+'</h3><div class="lg">'+opts.map(function(x,j){return '<span><i style="background:'+cols[j]+'"></i>'+esc(x)+'</span>';}).join('')+'</div>'+
+          '<table><thead><tr><th style="width:28px">م</th><th>العبارة</th>'+opts.map(function(x){return '<th style="width:52px">'+esc(x)+'</th>';}).join('')+'<th style="width:60px">'+(idx?'الرضا':'نسبة «'+esc(opts[0])+'»')+'</th></tr></thead><tbody>';
+      }
+      tbl+='<tr><td>'+(i+1)+'</td><td class="l">'+esc(q.t)+(q.rev?' <span class="mut">(سلبية)</span>':'')+'</td>'+o.counts.map(function(c){return '<td>'+(o.answered?Math.round(c*100/o.answered)+'%':'—')+'</td>';}).join('')+'<td><b>'+pctTxt(idx?o.mean:o.agree)+'</b></td></tr>';
+      return;
+    }
+    if(lastB!==-1){tbl+='</tbody></table>';lastB=-1;}
+    if(q.type==='single'||q.type==='multi'){
+      tbl+='<h3>'+esc(q.t)+'</h3><table><tbody>'+q.opts.map(function(x,j){var c=o.counts[j],p=o.answered?c*100/o.answered:0;
+        return '<tr><td class="l" style="width:40%">'+esc(x)+'</td><td><div class="bar" style="width:'+p+'%"></div></td><td style="width:90px">'+c+' ('+Math.round(p)+'%)</td></tr>';}).join('')+'</tbody></table>';
+    } else if(q.type==='text'&&o.texts.length){
+      tbl+='<h3>'+esc(q.t)+' ('+o.texts.length+')</h3>'+o.texts.map(function(x){return '<div class="q">'+esc(x.v)+'</div>';}).join('');
+    }
+  });
+  if(lastB!==-1) tbl+='</tbody></table>';
+  h+=tbl+'<div class="sig"><div>إعداد: ....................<br>التوقيع: ....................</div><div>مدير المدرسة: ....................<br>التوقيع: ....................</div></div>';
+  printDoc('نتائج استبانة - '+f.title,'<section class="page">'+h+'</section>',css);
+}
+function exportFormCsv(fid){
+  var f=Object.assign({id:fid},A.forms[fid]),t=tplById(f.tpl),qs=tplQuestions(t),rs=formResps(fid);
+  var cell=function(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  var head=['التاريخ','الوقت'].concat(t.fields.map(function(x){return x.label;}),qs.map(function(q,i){return (i+1)+'. '+q.t;}));
+  var lines=[head.map(cell).join(',')];
+  rs.sort(function(a,b){return a.at-b.at;}).forEach(function(r){
+    var row=[dateKey(new Date(r.at)),hm(r.at)].concat(t.fields.map(function(x){return r.f&&r.f[x.id]||'';}),qs.map(function(q){
+      var v=r.a&&r.a[q.id];if(v==null||v==='')return '';
+      if(q.type==='likert') return SURVEY_SCALES[q.scale].opts[+v];
+      if(q.type==='single') return q.opts[+v];
+      if(q.type==='multi') return toArr(v).map(function(i){return q.opts[i];}).concat(r.a[q.id+'_o']?[r.a[q.id+'_o']]:[]).join('؛ ');
+      return v;
+    }));
+    lines.push(row.map(cell).join(','));
+  });
+  var blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='ردود - '+f.title+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
+}
+
+// =====================================================================
+//  نموذج الاستبانة العام (يفتحه الطالب أو ولي الأمر أو المعلم)
+// =====================================================================
+var FM={school:null,fid:null,f:null,t:null,qs:[],a:{},fields:{}};
+function openPublicForm(school,fid){
+  show('scrBoot');
+  rd('att_forms/'+school+'/'+fid).then(function(f){
+    if(!f||!tplById(f.tpl)) return blocked('الاستبانة غير موجودة','ربما حُذفت. تواصل مع إدارة المدرسة.');
+    FM={school:school,fid:fid,f:f,t:tplById(f.tpl),qs:tplQuestions(tplById(f.tpl)),a:{},fields:{}};
+    $('fmSchool').textContent=f.schoolName||'';
+    show('scrForm');
+    if(f.open===false) return fmMessage('⏸','انتهى استقبال الردود','توقفت هذه الاستبانة عن استقبال الردود. شكراً لاهتمامك.');
+    if(LS.get('att_fm_done_'+fid)) return fmMessage('✅','سبق أن أرسلت إجابتك','شكراً لك، وصلت إجابتك على هذه الاستبانة.','<button class="btn btn-o" style="margin-top:14px" onclick="LS.del(\'att_fm_done_'+fid+'\');renderPublicForm()">إرسال إجابة أخرى من هذا الجهاز</button>');
+    renderPublicForm();
+  }).catch(netErr);
+}
+function fmMessage(icon,title,sub,extra){
+  $('fmProg').classList.add('hidden');
+  $('fmBody').innerHTML='<div class="card" style="text-align:center;padding:34px 18px;margin-top:10px"><div style="font-size:54px">'+icon+'</div>'+
+    '<h2 style="color:var(--gd);font-size:20px;margin-top:6px">'+title+'</h2><p class="muted" style="font-size:14px;margin-top:6px;line-height:1.9">'+sub+'</p>'+(extra||'')+'</div>';
+}
+function renderPublicForm(){
+  var t=FM.t,f=FM.f,lastB=-1,num=0;
+  var h='<div class="fm-head"><div style="font-size:12px;opacity:.85">'+t.icon+' استبانة موجهة إلى: '+esc(t.aud)+'</div><h2>'+esc(f.title)+'</h2><p>'+esc(t.intro)+'</p></div>';
+  if(t.fields.length){
+    h+='<div class="fm-card" id="fmFields">'+t.fields.map(function(x){
+      var inp=x.type==='select'?'<select data-f="'+x.id+'" onchange="fmField(this)"><option value="">اختر</option>'+x.opts.map(function(o){return '<option>'+esc(o)+'</option>';}).join('')+'</select>':
+        '<input type="'+(x.type==='tel'?'tel':'text')+'" data-f="'+x.id+'" oninput="fmField(this)"'+(x.type==='tel'?' dir="ltr" placeholder="05xxxxxxxx"':'')+'>';
+      return '<div class="fld" id="fmF_'+x.id+'"><label class="f">'+esc(x.label)+(x.req?' *':'')+'</label>'+inp+'</div>';
+    }).join('')+'</div>';
+  }
+  FM.qs.forEach(function(q){
+    if(q.type==='likert'&&q.block!==lastB&&q.blockTitle) h+='<div class="fm-sec">'+esc(q.blockTitle)+'</div>';
+    lastB=q.block;num++;
+    var opts=q.type==='likert'?SURVEY_SCALES[q.scale].opts:q.opts,body;
+    if(q.type==='text') body='<textarea data-q="'+q.id+'" oninput="fmText(this)" placeholder="اكتب إجابتك هنا"></textarea>';
+    else body='<div class="fm-opts">'+opts.map(function(o,i){return '<button type="button" class="opt" data-q="'+q.id+'" data-i="'+i+'" onclick="fmPick(this)">'+esc(o)+'</button>';}).join('')+'</div>'+
+      (q.other?'<input type="text" style="margin-top:8px" data-q="'+q.id+'_o" oninput="fmText(this)" placeholder="'+esc(q.other)+'">':'');
+    h+='<div class="fm-card" id="fmQ_'+q.id+'"><div class="fm-q"><span class="n">'+num+'.</span> '+esc(q.t)+(fmRequired(q)?' <span style="color:var(--abs)">*</span>':'')+'</div>'+body+'</div>';
+  });
+  h+='<div class="err" id="fmErr" style="text-align:center"></div><div class="stick"><button class="btn btn-g btn-lg btn-w" id="fmSend" onclick="fmSubmit()">✅ إرسال الإجابات</button></div>';
+  $('fmBody').innerHTML=h;
+  $('fmProg').classList.remove('hidden');fmProgress();
+}
+// عبارات المقياس والاختيار الواحد إلزامية كما في النماذج الأصلية، والأسئلة المكتوبة اختيارية
+function fmRequired(q){return q.type==='likert'||q.type==='single'||!!q.req;}
+function fmPick(el){
+  var id=el.dataset.q,i=+el.dataset.i,q=FM.qs.find(function(x){return x.id===id;});
+  if(q.type==='multi'){
+    var arr=toArr(FM.a[id]),k=arr.indexOf(i);
+    if(k>=0)arr.splice(k,1);else arr.push(i);
+    FM.a[id]=arr;el.classList.toggle('on',k<0);
+  } else {
+    FM.a[id]=i;
+    el.parentNode.querySelectorAll('.opt').forEach(function(b){b.classList.toggle('on',b===el);});
+  }
+  $('fmQ_'+id).classList.remove('miss');fmProgress();
+}
+function fmText(el){FM.a[el.dataset.q]=el.value;var c=$('fmQ_'+el.dataset.q);if(c)c.classList.remove('miss');fmProgress();}
+function fmField(el){FM.fields[el.dataset.f]=el.value;}
+function fmAnswered(q){var v=FM.a[q.id];return q.type==='multi'?toArr(v).length>0:(v!=null&&String(v).trim()!=='');}
+function fmProgress(){
+  var req=FM.qs.filter(fmRequired),done=req.filter(fmAnswered).length;
+  $('fmProgBar').style.width=(req.length?done*100/req.length:100)+'%';
+}
+function fmSubmit(){
+  var miss=FM.qs.filter(function(q){return fmRequired(q)&&!fmAnswered(q);});
+  var fmiss=FM.t.fields.filter(function(x){return x.req&&!String(FM.fields[x.id]||'').trim();});
+  document.querySelectorAll('#fmBody .miss').forEach(function(e){e.classList.remove('miss');});
+  if(miss.length||fmiss.length){
+    miss.forEach(function(q){$('fmQ_'+q.id).classList.add('miss');});
+    if(fmiss.length) $('fmFields').classList.add('miss');
+    $('fmErr').textContent='يرجى الإجابة عن جميع الأسئلة المطلوبة ('+(miss.length+fmiss.length)+' متبقية)';
+    var first=fmiss.length?$('fmFields'):$('fmQ_'+miss[0].id);
+    first.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  var a={};Object.keys(FM.a).forEach(function(k){var v=FM.a[k];if(v!=null&&!(typeof v==='string'&&!v.trim())&&!(Array.isArray(v)&&!v.length))a[k]=v;});
+  var fields={};Object.keys(FM.fields).forEach(function(k){if(String(FM.fields[k]).trim())fields[k]=String(FM.fields[k]).trim();});
+  var btn=$('fmSend');btn.disabled=true;btn.textContent='جاري الإرسال...';
+  DB.ref('att_resp/'+FM.school+'/'+FM.fid).push({at:Date.now(),f:fields,a:a}).then(function(){
+    LS.set('att_fm_done_'+FM.fid,1);window.scrollTo(0,0);
+    fmMessage('✅','شكراً لك','تم إرسال إجابتك بنجاح. نقدّر وقتك ومشاركتك في تطوير المدرسة.',
+      '<button class="btn btn-lg btn-w" style="margin-top:20px" onclick="closeApp()">إغلاق</button><div id="tClosedNote" class="muted hidden" style="margin-top:12px">يمكنك الآن إغلاق هذه الصفحة.</div>');
+  }).catch(function(){btn.disabled=false;btn.textContent='✅ إرسال الإجابات';toast('تعذّر الإرسال، تحقق من الاتصال وحاول مجدداً',true);});
 }
 
 // =====================================================================
