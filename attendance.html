@@ -1590,6 +1590,7 @@ function renderReady(seg){
       ' onchange="A.svAud=\''+a[0]+'\';renderSurveys()"> '+a[1]+' <span class="muted">('+count(a[0])+')</span></label>';
   }).join('')+'</div>';
   var list=SURVEY_TPL.filter(function(t){return cur==='all'||audKey(t.aud)===cur;});
+  if(list.length) html+='<div style="margin:-6px 2px 12px"><button class="btn btn-o btn-sm" onclick="printAllQR()">🖨️ طباعة رموز QR للاستبانات المعروضة</button></div>';
   if(!list.length) html+='<div class="card empty"><span class="e">📝</span>لا توجد استبانات في هذه الفئة بعد.</div>';
   list.forEach(function(t){
     if(t.perTeacher){
@@ -1652,10 +1653,48 @@ function formMsg(fid){
 function formLinkModal(fid){
   var f=A.forms[fid];
   openModal('رابط الاستبانة','<p style="font-weight:800;color:var(--gd)">'+esc(f.title)+'</p>'+
-    '<div class="linkbox">'+esc(formLink(fid))+'</div><div class="muted">أرسله لـ'+esc(f.aud)+' في مجموعة الواتساب، ويعبئه كل من يفتحه دون تسجيل دخول.</div>',
+    '<div id="qrBox" style="width:200px;height:200px;margin:10px auto;display:flex;align-items:center;justify-content:center"><div class="spin"></div></div>'+
+    '<div class="muted" style="text-align:center;margin-bottom:6px">امسح الرمز بكاميرا الجوال لفتح الاستبانة</div>'+
+    '<div class="linkbox">'+esc(formLink(fid))+'</div><div class="muted">أرسله لـ'+esc(f.aud)+' في مجموعة الواتساب، أو اطبع رمز QR وعلّقه، ويعبئه كل من يفتحه دون تسجيل دخول.</div>',
     '<button class="btn btn-g" onclick="waOpen(\'\',formMsg(\''+fid+'\'))">📲 إرسال بالواتساب</button>'+
+    '<button class="btn" onclick="printQR([\''+fid+'\'])">🖨️ طباعة QR</button>'+
     '<button class="btn btn-o" onclick="copyText(formLink(\''+fid+'\'))">📋 نسخ الرابط</button>'+
     '<a class="btn btn-o" href="'+esc(formLink(fid))+'" target="_blank">👁 فتح النموذج</a>');
+  loadQR().then(function(){var b=$('qrBox');if(b)b.innerHTML=qrSvg(formLink(fid));})
+    .catch(function(){var b=$('qrBox');if(b)b.innerHTML='<span class="muted">تعذّر إنشاء الرمز</span>';});
+}
+// رموز QR (مكتبة qrcode-generator تُحمّل عند الحاجة فقط)
+function loadQR(){return window.qrcode?Promise.resolve():loadScript('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js');}
+function qrSvg(text){var q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:4,margin:4,scalable:true});}
+// صفحة A4 لكل استبانة: الترويسة، العنوان، الفئة، رمز كبير، والرابط
+function printQR(fids){
+  fids=fids.filter(function(k){return A.forms[k];});
+  if(!fids.length){toast('لا توجد استبانات للطباعة',true);return;}
+  loadQR().then(function(){
+    var css='.qr-t{text-align:center;font-size:24px;font-weight:800;color:#1a3a6b;margin:26px 0 6px;line-height:1.5}'+
+      '.qr-a{text-align:center;font-size:15px;margin-bottom:18px}.qr-a b{background:#e8f0f8;color:#1a3a6b;padding:3px 14px;border-radius:12px}'+
+      '.qr-box{width:115mm;height:115mm;margin:0 auto;border:2px solid #1a3a6b;border-radius:14px;padding:6mm}.qr-box svg{width:100%;height:100%;display:block}'+
+      '.qr-h{text-align:center;font-size:17px;font-weight:800;margin-top:16px}.qr-l{text-align:center;direction:ltr;font-size:11px;color:#52514e;margin-top:6px;word-break:break-all}'+
+      '.qr-f{text-align:center;font-size:13px;color:#52514e;margin-top:22px}';
+    var pages=fids.map(function(k){
+      var f=A.forms[k];
+      return '<section class="page">'+pHead('استبانة','',new Date())+
+        '<div class="qr-t">'+esc(f.title)+'</div><div class="qr-a">موجهة إلى: <b>'+esc(f.aud)+'</b></div>'+
+        '<div class="qr-box">'+qrSvg(formLink(k))+'</div>'+
+        '<div class="qr-h">📱 امسح الرمز بكاميرا الجوال لتعبئة الاستبانة</div>'+
+        '<div class="qr-l">'+esc(formLink(k))+'</div><div class="qr-f">شاكرين تعاونكم — إدارة '+esc(A.schoolName)+'</div></section>';
+    }).join('');
+    printDoc(fids.length>1?'رموز QR للاستبانات':'QR - '+A.forms[fids[0]].title,pages,css);
+  }).catch(function(){toast('تعذّر تحميل مولّد رموز QR، تحقق من الاتصال',true);});
+}
+// رموز كل الاستبانات المعروضة حسب التصفية الحالية
+function printAllQR(){
+  var cur=A.svAud||'all',ids=[];
+  SURVEY_TPL.filter(function(t){return cur==='all'||audKey(t.aud)===cur;}).forEach(function(t){
+    if(t.perTeacher) sortedForms().filter(function(f){return f.tpl===t.id;}).forEach(function(f){ids.push(f.id);});
+    else {var m=mainForm(t.id);if(m)ids.push(m);}
+  });
+  printQR(ids);
 }
 function toggleForm(fid){
   var f=A.forms[fid],open=f.open===false;
