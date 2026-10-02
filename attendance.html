@@ -69,7 +69,17 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .bar{height:7px;border-radius:5px;background:var(--gp);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ok);border-radius:5px;transition:width .3s}
 .live{font-size:10px;background:var(--okb);color:var(--ok);padding:1px 8px;border-radius:10px;font-weight:800;white-space:nowrap}
-.daybar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mtabs{display:flex;gap:6px;flex-wrap:wrap}
+.mtab{border:1.5px solid var(--bd);background:#fff;color:var(--tm);padding:8px 14px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.mtab.on{background:var(--gd);color:#fff;border-color:var(--gd)}
+.daybar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.sv-card{padding:14px 16px;margin-bottom:10px}
+.sv-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sv-head .nm{font-weight:800;color:var(--gd);font-size:15px}
+.chk{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #f1f3f8;font-size:13px;cursor:pointer}
+.chk input{width:17px;height:17px}
+@media(max-width:560px){.mtabs{width:100%;flex-wrap:nowrap}.mtab{flex:1;padding:8px 4px;font-size:12px;white-space:normal;line-height:1.35}}
 .daybar select{width:auto;padding:7px 10px;font-size:13px;font-weight:700;color:var(--gd)}
 .daybar .past{font-size:11px;font-weight:800;color:var(--late);background:var(--lateb);padding:3px 10px;border-radius:10px}
 .tabs{display:flex;gap:4px;background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:4px;margin-bottom:14px;overflow-x:auto}
@@ -233,22 +243,33 @@ table.grid td.attc{background:#f3fbf6}
         <button class="btn btn-g btn-sm hidden" id="aInstall" onclick="doInstall()">📲 <span>تثبيت التطبيق</span></button>
         <button class="btn btn-o btn-sm" onclick="openSettings()">⚙️ <span>الإعدادات</span></button>
         <button class="btn btn-o btn-sm" onclick="reloadAdmin()">🔄</button>
-        <button class="btn btn-o btn-sm" title="إرسال الروابط" onclick="openSend()">📤 <span>إرسال الروابط</span></button>
-        <button class="btn btn-o btn-sm" title="تصدير PDF" onclick="openExport()">📄 <span>تصدير PDF</span></button>
+        <button class="btn btn-o btn-sm" id="hdrSend" title="إرسال الروابط" onclick="openSend()">📤 <span>إرسال الروابط</span></button>
+        <button class="btn btn-o btn-sm" id="hdrExport" title="تصدير PDF" onclick="openExport()">📄 <span>تصدير PDF</span></button>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <div id="aSetupNote"></div>
-    <div class="daybar" id="aDayBar"></div>
-    <div class="today" id="aToday"></div>
-    <div class="tabs" id="aTabs">
-      <button class="tab on" data-t="teachers" onclick="setTab('teachers')">👨‍🏫 المعلمون</button>
-      <button class="tab" data-t="classes" onclick="setTab('classes')">🎓 الصفوف</button>
-      <button class="tab" data-t="schedule" onclick="setTab('schedule')">📅 جدول الحصص</button>
+    <div class="topbar">
+      <div class="mtabs" id="aMain">
+        <button class="mtab on" data-s="att" onclick="setSection('att')">📋 سجل الغياب والتأخر</button>
+        <button class="mtab" data-s="surv" onclick="setSection('surv')">📝 الاستبانات</button>
+        <button class="mtab" data-s="plan" onclick="setSection('plan')">📚 الخطة الأسبوعية</button>
+      </div>
+      <div class="daybar" id="aDayBar"></div>
     </div>
-    <div id="aPane"></div>
+    <div id="secAtt">
+      <div class="today" id="aToday"></div>
+      <div class="tabs" id="aTabs">
+        <button class="tab on" data-t="teachers" onclick="setTab('teachers')">👨‍🏫 المعلمون</button>
+        <button class="tab" data-t="classes" onclick="setTab('classes')">🎓 الصفوف</button>
+        <button class="tab" data-t="schedule" onclick="setTab('schedule')">📅 جدول الحصص</button>
+      </div>
+      <div id="aPane"></div>
+    </div>
+    <div id="secPlan" class="hidden"></div>
+    <div id="secSurv" class="hidden"></div>
   </div>
 </div>
 
@@ -528,7 +549,8 @@ function renderInstall(forceSteps){
 //  ADMIN (مدير / وكيل)
 // =====================================================================
 var A={token:null,inv:null,code:null,schoolName:'',teachers:[],classes:{},S:null,sched:{},rec:{},keys:{},
-       tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null,day:''};
+       tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null,day:'',
+       sec:'att',subs:[],survs:[]};
 
 // أسابيع الفصل الدراسي الأول 1448هـ حسب التقويم الرسمي لوزارة التعليم (تاريخ أحد كل أسبوع)
 var WEEKS=[['الأسبوع الأول','2026-08-23'],['الأسبوع الثاني','2026-08-30'],['الأسبوع الثالث','2026-09-06'],
@@ -563,11 +585,32 @@ function renderDayBar(){
     var k=dateKey(d);
     return '<option value="'+k+'"'+(k===A.day?' selected':'')+(d>today?' disabled':'')+'>'+DAYS[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'</option>';
   }).join('');
-  $('aDayBar').innerHTML=(A.day!==def?'<span class="past">عرض يوم سابق</span><button class="btn btn-l btn-sm" onclick="setDay(defaultDay())">↩ '+(def===dateKey()?'اليوم':'آخر يوم دراسي')+'</button>':'')+
-    '<select onchange="pickWeek(+this.value)">'+wopts+'</select><select onchange="setDay(this.value)">'+dopts+'</select>';
+  // الاستبانات لا ترتبط بيوم، والخطة الأسبوعية تحتاج الأسبوع فقط
+  if(A.sec==='surv'){$('aDayBar').innerHTML='';return;}
+  var plan=A.sec==='plan',back=plan?weekOf(A.day)!==weekOf(def):A.day!==def;
+  $('aDayBar').innerHTML=(back?'<span class="past">'+(plan?'عرض أسبوع سابق':'عرض يوم سابق')+'</span><button class="btn btn-l btn-sm" onclick="setDay(defaultDay())">↩ '+(plan?'هذا الأسبوع':def===dateKey()?'اليوم':'آخر يوم دراسي')+'</button>':'')+
+    '<select onchange="pickWeek(+this.value)">'+wopts+'</select>'+(plan?'':'<select onchange="setDay(this.value)">'+dopts+'</select>');
 }
 function pickWeek(i){setDay(weekOf(defaultDay())===i?defaultDay():dateKey(weekDates(i)[0]));}
-function setDay(k){A.day=k;renderDayBar();watchDay();}
+function setDay(k){A.day=k;renderDayBar();watchDay();if(A.sec==='plan')renderPlans();}
+
+// ---------- الأقسام الرئيسية: الغياب / الاستبانات / الخطة الأسبوعية ----------
+function setSection(s){
+  A.sec=s;
+  document.querySelectorAll('#aMain .mtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===s);});
+  $('secAtt').classList.toggle('hidden',s!=='att');
+  $('secPlan').classList.toggle('hidden',s!=='plan');
+  $('secSurv').classList.toggle('hidden',s!=='surv');
+  // زرّا الإرسال والتصدير في الأعلى خاصّان بسجل الغياب
+  $('hdrSend').classList.toggle('hidden',s!=='att');
+  $('hdrExport').classList.toggle('hidden',s!=='att');
+  renderDayBar();
+  if(s==='plan') loadPlans();
+  if(s==='surv') loadSurveys();
+}
+// روابط الخطة والاستبانة تفتح صفحات المنصة نفسها
+function platformBase(){return appBase().replace(/attendance\.html$/,'');}
+function normName(n){return String(n||'').trim().replace(/\s+/g,' ').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');}
 
 function startAdmin(token){
   show('scrBoot');
@@ -594,7 +637,14 @@ function loadAdminData(){
     var d=schoolDay();A.schedDay=d<0?0:d;
   });
 }
-function reloadAdmin(){loadAdminData().then(function(){renderAdmin();toast('تم تحديث البيانات');}).catch(function(){toast('تعذّر الاتصال',true);});}
+function reloadAdmin(){
+  loadAdminData().then(function(){
+    renderAdmin();
+    if(A.sec==='plan') loadPlans();
+    if(A.sec==='surv') loadSurveys();
+    toast('تم تحديث البيانات');
+  }).catch(function(){toast('تعذّر الاتصال',true);});
+}
 // تحديث حالة التحضير لليوم المختار لحظة بلحظة
 function watchDay(){
   if(A.recRef) A.recRef.off();
@@ -1229,6 +1279,177 @@ function printDoc(title,inner){
   };
   var fontsReady=(doc.fonts&&doc.fonts.ready)?doc.fonts.ready:Promise.resolve();
   Promise.race([fontsReady,new Promise(function(r){setTimeout(r,2500);})]).then(function(){setTimeout(go,300);});
+}
+
+// ---------- الخطة الأسبوعية (مشتركة مع المنصة: pt_{code}/submissions) ----------
+function curWeekName(){var i=weekOf(A.day);return i<0?'':WEEKS[i][0];}
+function loadPlans(){
+  $('secPlan').innerHTML='<div class="card empty"><div class="spin"></div></div>';
+  rd('pt_'+A.code+'/submissions').then(function(s){A.subs=toArr(s);renderPlans();})
+    .catch(function(){$('secPlan').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
+}
+// أسماء الأسابيع تتكرر كل فصل، فنعرض فقط ما رُفع منذ بداية الفصل الحالي
+function weekPlans(){
+  var wk=curWeekName(),start=WEEKS[0][1];
+  return A.subs.map(function(s,i){return Object.assign({_i:i},s);}).filter(function(s){
+    var w=String(s.week||'');try{w=decodeURIComponent(w);}catch(e){}
+    return w.trim()===wk&&(s.date||'')>=start;
+  });
+}
+function renderPlans(){
+  if(A.sec!=='plan') return;
+  var wk=curWeekName(),subs=weekPlans();
+  var sent=subs.map(function(s){return normName(s.teacherName);});
+  var notSent=A.teachers.filter(function(t){return sent.indexOf(normName(t.name))<0;});
+  var pct=A.teachers.length?Math.round(subs.length*100/A.teachers.length):0;
+  var html='<div class="card sv-card"><div class="sv-head"><div><div class="nm">📚 خطط '+esc(wk)+'</div>'+
+      '<div class="muted">استلمت <b>'+subs.length+'</b> خطة • لم يرسل <b>'+notSent.length+'</b> معلماً</div></div>'+
+      '<div class="ops"><button class="btn btn-g btn-sm" onclick="sendPlanLink()">📱 إرسال رابط الخطة</button>'+
+      '<button class="btn btn-o btn-sm" onclick="exportPlans()">📄 تصدير PDF</button></div></div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+  html+='<div class="card">'+
+    subs.map(function(s){
+      var t=A.teachers.find(function(x){return normName(x.name)===normName(s.teacherName);});
+      var hasFile=s.fileUrl||s.fileData;
+      return '<div class="row"><div class="main"><div class="nm">'+esc(s.teacherName)+'</div><div class="sub">'+esc(s.teacherSubject||(t&&t.subject)||'')+' • '+esc(s.date||'')+'</div></div>'+
+        '<span class="badge ok">✓ أرسل</span>'+
+        (hasFile?'<button class="btn btn-l btn-sm" onclick="viewPlanFile('+s._i+')">عرض</button><button class="btn btn-o btn-sm" onclick="downloadPlanFile('+s._i+')">تحميل</button>':'')+'</div>';
+    }).join('')+
+    notSent.map(function(t){
+      return '<div class="row"><div class="main"><div class="nm">'+esc(t.name)+'</div><div class="sub">'+esc(t.subject||'')+'</div></div>'+
+        '<span class="badge warn">✗ لم يرسل</span>'+
+        (t.phone?'<button class="ib" title="تذكير بالواتساب" onclick="remindPlan(\''+t.id+'\')">📲</button>':'')+'</div>';
+    }).join('')+
+    (subs.length||notSent.length?'':'<div class="empty">لا يوجد معلمون</div>')+'</div>';
+  $('secPlan').innerHTML=html;
+}
+function planLink(){return platformBase()+'#upload='+A.code+'&week='+encodeURIComponent(curWeekName());}
+function sendPlanLink(){
+  waOpen('','السلام عليكم ،\nيرجى رفع خطة الدروس لـ'+curWeekName()+' عبر:\n'+planLink()+'\nإدارة '+A.schoolName);
+}
+function remindPlan(tid){
+  var t=findT(tid);if(!t)return;
+  waOpen(t.phone,'تذكير: '+t.name+'، لم يتم استلام خطة الدروس لـ'+curWeekName()+'. يرجى الرفع عبر:\n'+planLink()+'\nإدارة '+A.schoolName);
+}
+// نفس طريقة المنصة: ملفات PDF على Cloudinary تُعرض كصورة
+function viewPlanFile(i){
+  var s=A.subs[i];if(!s)return;
+  if(s.fileUrl){
+    var url=s.fileUrl;
+    if(url.indexOf('cloudinary.com')!==-1&&url.indexOf('/image/upload/')!==-1&&url.toLowerCase().indexOf('.pdf')!==-1)
+      url=url.replace('/image/upload/','/image/upload/f_jpg,q_90/').replace(/\.pdf$/i,'.jpg');
+    window.open(url,'_blank');
+  } else if(s.fileData){
+    var w=window.open('','_blank');
+    w.document.write('<html><body style="margin:0"><iframe src="'+s.fileData+'" style="border:none;position:fixed;inset:0;width:100%;height:100%"></iframe></body></html>');
+    w.document.close();
+  }
+}
+function downloadPlanFile(i){
+  var s=A.subs[i];if(!s)return;
+  if(s.fileData){var a=document.createElement('a');a.href=s.fileData;a.download=s.teacherName+'_خطة.pdf';a.click();return;}
+  var url=s.fileUrl;
+  if(url.indexOf('cloudinary.com')!==-1){
+    if(url.indexOf('/image/upload/')===-1){toast('هذا الملف القديم لا يمكن تحميله، اطلب إعادة رفعه',true);return;}
+    url=url.replace('/image/upload/','/image/upload/fl_attachment,f_jpg/').replace(/\.[^.]+$/,'.jpg');
+  }
+  fetch(url).then(function(r){return r.blob();}).then(function(b){
+    var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=s.teacherName+'_خطة.jpg';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
+  }).catch(function(){toast('تعذّر تحميل الملف',true);});
+}
+function exportPlans(){
+  var wk=curWeekName(),subs=weekPlans(),sent=subs.map(function(s){return normName(s.teacherName);});
+  var notSent=A.teachers.filter(function(t){return sent.indexOf(normName(t.name))<0;});
+  var d=parseKey(A.day);
+  printDoc('تقرير الخطة الأسبوعية - '+wk,'<section class="page">'+pHead('تقرير الخطة الأسبوعية',esc(wk),d)+
+    '<h3>أولاً: المعلمون الذين أرسلوا ('+subs.length+')</h3><table><thead><tr><th style="width:36px">م</th><th>الاسم</th><th>التخصص</th><th style="width:110px">التاريخ</th></tr></thead><tbody>'+
+    subs.map(function(s,i){return '<tr><td>'+(i+1)+'</td><td class="nm">'+esc(s.teacherName)+'</td><td>'+esc(s.teacherSubject||'')+'</td><td>'+esc(s.date||'')+'</td></tr>';}).join('')+'</tbody></table>'+
+    '<h3>ثانياً: لم يرسلوا ('+notSent.length+')</h3><table><thead><tr><th style="width:36px">م</th><th>الاسم</th><th>التخصص</th></tr></thead><tbody>'+
+    notSent.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td class="nm s-a">'+esc(t.name)+'</td><td>'+esc(t.subject||'')+'</td></tr>';}).join('')+'</tbody></table>'+
+    '<div class="sig"><div>وكيل الشؤون التعليمية: ....................<br>التوقيع: ....................</div><div>مدير المدرسة: ....................<br>التوقيع: ....................</div></div></section>');
+}
+
+// ---------- الاستبانات (مشتركة مع المنصة: pt_{code}/surveys) ----------
+function loadSurveys(){
+  $('secSurv').innerHTML='<div class="card empty"><div class="spin"></div></div>';
+  rd('pt_'+A.code+'/surveys').then(function(s){A.survs=toArr(s);renderSurveys();})
+    .catch(function(){$('secSurv').innerHTML='<div class="card empty"><span class="e">⚠️</span>تعذّر الاتصال</div>';});
+}
+function saveSurveys(){return wr('pt_'+A.code+'/surveys',A.survs);}
+function findSurv(id){return A.survs.find(function(s){return String(s.id)===String(id);});}
+function survTargets(s){var ids=toArr(s.targetIds).map(String);return A.teachers.filter(function(t){return ids.indexOf(String(t.id))>=0;});}
+function survDone(s,t){return toArr(s.completions).find(function(c){return String(c.tid)===String(t.id);});}
+function renderSurveys(){
+  if(A.sec!=='surv') return;
+  var html='<div class="toolbar"><div class="grow muted">'+A.survs.length+' استبانة • مشتركة مع منصة رابط</div>'+
+    '<button class="btn" onclick="newSurvey()">➕ استبانة جديدة</button></div>';
+  if(!A.survs.length){
+    $('secSurv').innerHTML=html+'<div class="card empty"><span class="e">📝</span>لا توجد استبانات بعد.<br>صمّم الاستبانة في Google Forms أو Microsoft Forms، ثم أضف رابطها هنا لترسله للمعلمين وتتابع من عبّأها.</div>';
+    return;
+  }
+  html+=A.survs.slice().reverse().map(function(s){
+    var tg=survTargets(s),done=tg.filter(function(t){return survDone(s,t);}).length,pct=tg.length?Math.round(done*100/tg.length):0;
+    return '<div class="card sv-card"><div class="sv-head"><div><div class="nm">📝 '+esc(s.title)+'</div><div class="muted">'+esc(s.date||'')+' • '+tg.length+' مستلماً</div></div>'+
+      '<div class="ops"><button class="btn btn-g btn-sm" onclick="sendSurvey(\''+s.id+'\')">📱 إرسال</button>'+
+      '<button class="btn btn-l btn-sm" onclick="surveyDetails(\''+s.id+'\')">عرض</button>'+
+      '<button class="ib del" title="حذف" onclick="deleteSurvey(\''+s.id+'\')">🗑️</button></div></div>'+
+      '<div class="chips"><span class="chip c-p">✓ عبّأ '+done+'</span><span class="chip c-a">✗ لم يعبئ '+(tg.length-done)+'</span><span class="chip" style="background:var(--gp);color:var(--gd)">'+pct+'%</span></div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+  }).join('');
+  $('secSurv').innerHTML=html;
+}
+function newSurvey(){
+  openModal('استبانة جديدة',
+    '<div class="fld"><label class="f">عنوان الاستبانة *</label><input type="text" id="fSvT" placeholder="مثال: استبانة تقييم الأداء الوظيفي"></div>'+
+    '<div class="fld"><label class="f">رابط الاستبانة *</label><input type="text" id="fSvU" dir="ltr" placeholder="https://forms.google.com/..."></div>'+
+    '<label class="f">المستلمون</label>'+
+    '<label class="chk" style="font-weight:800;color:var(--gd)"><input type="checkbox" id="fSvAll" onchange="document.querySelectorAll(\'.fSvT\').forEach(function(c){c.checked=$(\'fSvAll\').checked;})"> تحديد الكل ('+A.teachers.length+')</label>'+
+    '<div style="max-height:240px;overflow-y:auto;border:1px solid #eef1f6;border-radius:9px;padding:0 8px">'+
+    A.teachers.map(function(t){return '<label class="chk"><input type="checkbox" class="fSvT" value="'+t.id+'"> '+esc(t.name)+'<span class="muted" style="margin-inline-start:auto">'+esc(t.subject||'')+'</span></label>';}).join('')+
+    '</div><div class="err" id="fSvErr"></div>',
+    '<button class="btn" onclick="saveNewSurvey()">حفظ</button><button class="btn btn-o" onclick="closeModal()">إلغاء</button>');
+}
+function saveNewSurvey(){
+  var title=$('fSvT').value.trim(),url=$('fSvU').value.trim();
+  var ids=[];document.querySelectorAll('.fSvT:checked').forEach(function(c){ids.push(isNaN(+c.value)?c.value:+c.value);});
+  if(!title){$('fSvErr').textContent='يرجى إدخال عنوان الاستبانة';return;}
+  if(!/^https?:\/\//i.test(url)){$('fSvErr').textContent='يرجى إدخال رابط صحيح يبدأ بـ https://';return;}
+  if(!ids.length){$('fSvErr').textContent='اختر مستلماً واحداً على الأقل';return;}
+  A.survs.push({id:Date.now(),title:title,url:url,date:dateKey(),targetIds:ids});
+  saveSurveys().then(function(){closeModal();renderSurveys();toast('تم إضافة الاستبانة ✓');}).catch(function(){A.survs.pop();toast('تعذّر الحفظ',true);});
+}
+// رسالة واحدة فيها رابط خاص لكل مستلم، كما في المنصة
+function sendSurvey(id){
+  var s=findSurv(id),tg=survTargets(s);
+  if(!tg.length){toast('لا يوجد مستلمون',true);return;}
+  var lines=tg.map(function(t){return t.name+':\n'+platformBase()+'#survey='+A.code+'|'+s.id+'|'+t.id;}).join('\n\n');
+  waOpen('','السلام عليكم ،\nيرجى تعبئة الاستبانة التالية:\n'+s.title+'\n\n'+lines+'\n\nإدارة '+A.schoolName);
+}
+function surveyDetails(id){
+  var s=findSurv(id),tg=survTargets(s);
+  var done=tg.filter(function(t){return survDone(s,t);}),not=tg.filter(function(t){return !survDone(s,t);});
+  openModal(s.title,
+    '<div class="chips"><span class="chip c-p">✓ عبّأ '+done.length+'</span><span class="chip c-a">✗ لم يعبئ '+not.length+'</span></div>'+
+    '<div class="card">'+done.map(function(t){return '<div class="srow"><span class="n">'+esc(t.name)+'</span><b class="chip c-p">✓ '+esc(survDone(s,t).date||'')+'</b></div>';}).join('')+
+    not.map(function(t){return '<div class="srow st-a"><span class="n">'+esc(t.name)+'</span><b class="chip c-a">لم يعبئ</b></div>';}).join('')+'</div>'+
+    '<a href="'+esc(s.url)+'" target="_blank" class="muted" style="display:inline-block;margin-top:10px">🔗 فتح الاستبانة</a>',
+    '<button class="btn" onclick="exportSurvey(\''+s.id+'\')">📄 تصدير PDF</button><button class="btn btn-o" onclick="closeModal()">إغلاق</button>');
+}
+function exportSurvey(id){
+  var s=findSurv(id),tg=survTargets(s);
+  var done=tg.filter(function(t){return survDone(s,t);}),not=tg.filter(function(t){return !survDone(s,t);});
+  printDoc('تقرير استبانة - '+s.title,'<section class="page">'+pHead('تقرير الاستبانة',esc(s.title),new Date())+
+    '<h3>من عبّأ الاستبانة ('+done.length+')</h3><table><thead><tr><th style="width:36px">م</th><th>الاسم</th><th style="width:120px">التاريخ</th></tr></thead><tbody>'+
+    done.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td class="nm">'+esc(t.name)+'</td><td>'+esc(survDone(s,t).date||'')+'</td></tr>';}).join('')+'</tbody></table>'+
+    '<h3>لم يعبئ الاستبانة ('+not.length+')</h3><table><thead><tr><th style="width:36px">م</th><th>الاسم</th><th>التخصص</th></tr></thead><tbody>'+
+    not.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td class="nm s-a">'+esc(t.name)+'</td><td>'+esc(t.subject||'')+'</td></tr>';}).join('')+'</tbody></table></section>');
+}
+function deleteSurvey(id){
+  var s=findSurv(id);
+  if(!confirm('حذف استبانة «'+s.title+'»؟ ستُحذف من المنصة أيضاً.'))return;
+  A.survs=A.survs.filter(function(x){return x!==s;});
+  saveSurveys().then(function(){renderSurveys();toast('تم الحذف');});
 }
 
 // =====================================================================
