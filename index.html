@@ -2996,6 +2996,12 @@ function buildWeekSel(id){
 }
 
 function getWKey(w){return w.split('—')[0].trim();}
+// أسماء الأسابيع تتكرر كل فصل، فلا تُحسب إلا الخطط المرفوعة منذ بداية الأسبوع الأول من القائمة الحالية
+function isThisTerm(s){
+  var p=WEEKS[0].split('|')[1].trim().split(' ')[0].split('/');
+  var start=p[2]+'-'+('0'+p[1]).slice(-2)+'-'+('0'+p[0]).slice(-2);
+  return (s.date||'')>=start;
+}
 // الأسبوع الحالي: آخر أسبوع بدأ قبل اليوم (تاريخ البداية الميلادي بعد «|» في نص الأسبوع)
 function currentWeekIdx(){
   var now=new Date(),idx=0;
@@ -3011,7 +3017,7 @@ function renderStats(){
   var d=getSD(cur.code)||{teachers:[],submissions:[]};
   var w=document.getElementById('weekSel')?document.getElementById('weekSel').value:WEEKS[currentWeekIdx()];
   var wk=getWKey(w);
-  var sent=d.submissions.filter(function(s){return s.week===wk;}).length;
+  var sent=d.submissions.filter(function(s){return s.week===wk&&isThisTerm(s);}).length;
   document.getElementById('statsGrid').innerHTML=
     '<div class="stat-card"><div class="stat-num">'+d.teachers.length+'</div><div class="stat-lbl">إجمالي المعلمين</div></div>'+
     '<div class="stat-card"><div class="stat-num" style="color:var(--gm)">'+sent+'</div><div class="stat-lbl">أرسلوا هذا الأسبوع</div></div>'+
@@ -3025,7 +3031,7 @@ function renderReport(){
   var d=getSD(cur.code)||{teachers:[],submissions:[]};
   var w=document.getElementById('weekSel').value;
   var wk=getWKey(w);
-  var rows=d.submissions.filter(function(s){return s.week===wk;});
+  var rows=d.submissions.filter(function(s){return s.week===wk&&isThisTerm(s);});
   function normName(n){return(n||'').trim().replace(/\s+/g,' ').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');}
   var sentNames=rows.map(function(r){return normName(r.teacherName);});
   var notSent=d.teachers.filter(function(t){return !sentNames.includes(normName(t.name));});
@@ -3052,7 +3058,7 @@ function renderReport(){
 
 function viewPlan(sCode,teacherName,week){
   var d=getSD(sCode)||{submissions:[]};
-  var sub=d.submissions.find(function(s){return s.teacherName===teacherName&&s.week===week;});
+  var sub=d.submissions.find(function(s){return s.teacherName===teacherName&&s.week===week&&isThisTerm(s);});
   if(!sub){alert('لا يوجد ملف لهذا المعلم');return;}
   if(sub.fileUrl){
     var url=sub.fileUrl;
@@ -3073,7 +3079,7 @@ function viewPlan(sCode,teacherName,week){
 
 function downloadPlan(sCode,teacherName,week){
   var d=getSD(sCode)||{submissions:[]};
-  var sub=d.submissions.find(function(s){return s.teacherName===teacherName&&s.week===week;});
+  var sub=d.submissions.find(function(s){return s.teacherName===teacherName&&s.week===week&&isThisTerm(s);});
   if(!sub){alert('لا يوجد ملف لهذا المعلم');return;}
   if(sub.fileUrl){
     var url=sub.fileUrl;
@@ -3122,7 +3128,7 @@ function exportReport(){
   var d=getSD(cur.code)||{teachers:[],submissions:[]};
   var w=document.getElementById('weekSel').value;
   var wk=getWKey(w);
-  var rows=d.submissions.filter(function(s){return s.week===wk;});
+  var rows=d.submissions.filter(function(s){return s.week===wk&&isThisTerm(s);});
   function normN(n){return(n||'').trim().replace(/\s+/g,' ').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');}
   var notSent=d.teachers.filter(function(t){return !rows.find(function(r){return normN(r.teacherName)===normN(t.name);});});
   var today=new Date().toLocaleDateString('ar-SA');
@@ -3840,7 +3846,7 @@ function confirmUpload(){
     var sub={teacherName:teacherName,teacherSubject:teacherSubject,date:new Date().toISOString().split('T')[0],week:wk,status:'مرسل',fileName:file.name};
     if(fileUrl) sub.fileUrl=fileUrl;
     if(fileData) sub.fileData=fileData;
-    var existing=d.submissions.findIndex(function(s){return s.teacherName===teacherName&&s.week===wk;});
+    var existing=d.submissions.findIndex(function(s){return s.teacherName===teacherName&&s.week===wk&&isThisTerm(s);});
     if(existing>-1) d.submissions[existing]=sub;
     else d.submissions.push(sub);
     setSD(sCode,d);
