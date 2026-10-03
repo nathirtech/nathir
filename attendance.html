@@ -653,9 +653,10 @@ function defaultDay(){
 function isToday(){return A.day===dateKey();}
 function selDow(){return schoolDay(parseKey(A.day));}
 function renderDayBar(){
-  var wi=weekOf(A.day),today=parseKey(dateKey()),def=defaultDay();
+  var wi=weekOf(A.day),today=parseKey(dateKey()),def=defaultDay(),plan=A.sec==='plan';
+  // الخطة الأسبوعية تُطلب مسبقاً، فكل الأسابيع متاحة فيها؛ أما سجل الغياب فلا يعرض أياماً لم تأتِ
   var wopts=WEEKS.map(function(w,i){
-    return '<option value="'+i+'"'+(i===wi?' selected':'')+(parseKey(w[1])>today?' disabled':'')+'>'+w[0]+'</option>';
+    return '<option value="'+i+'"'+(i===wi?' selected':'')+(!plan&&parseKey(w[1])>today?' disabled':'')+'>'+w[0]+'</option>';
   }).join('');
   var dopts=wi<0?'':weekDates(wi).map(function(d){
     var k=dateKey(d);
@@ -663,8 +664,8 @@ function renderDayBar(){
   }).join('');
   // الاستبانات لا ترتبط بيوم، والخطة الأسبوعية تحتاج الأسبوع فقط
   if(A.sec==='surv'){$('aDayBar').innerHTML='';return;}
-  var plan=A.sec==='plan',back=plan?weekOf(A.day)!==weekOf(def):A.day!==def;
-  $('aDayBar').innerHTML=(back?'<span class="past">'+(plan?'عرض أسبوع سابق':'عرض يوم سابق')+'</span><button class="btn btn-l btn-sm" onclick="setDay(defaultDay())">↩ '+(plan?'هذا الأسبوع':def===dateKey()?'اليوم':'آخر يوم دراسي')+'</button>':'')+
+  var back=plan?weekOf(A.day)!==weekOf(def):A.day!==def,ahead=weekOf(A.day)>weekOf(def);
+  $('aDayBar').innerHTML=(back?'<span class="past">'+(plan?(ahead?'عرض أسبوع قادم':'عرض أسبوع سابق'):'عرض يوم سابق')+'</span><button class="btn btn-l btn-sm" onclick="setDay(defaultDay())">↩ '+(plan?'هذا الأسبوع':def===dateKey()?'اليوم':'آخر يوم دراسي')+'</button>':'')+
     '<select onchange="pickWeek(+this.value)">'+wopts+'</select>'+(plan?'':'<select onchange="setDay(this.value)">'+dopts+'</select>');
 }
 function pickWeek(i){setDay(weekOf(defaultDay())===i?defaultDay():dateKey(weekDates(i)[0]));}
@@ -673,6 +674,8 @@ function setDay(k){A.day=k;renderDayBar();watchDay();if(A.sec==='plan')renderPla
 // ---------- الأقسام الرئيسية: الغياب / الاستبانات / الخطة الأسبوعية ----------
 function setSection(s){
   A.sec=s;
+  // أسبوع قادم اختير في الخطة الأسبوعية لا معنى له في سجل الغياب، فنعود لليوم
+  if(s==='att'&&A.day>dateKey()){A.day=defaultDay();watchDay();}
   document.querySelectorAll('#aMain .mtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===s);});
   $('secAtt').classList.toggle('hidden',s!=='att');
   $('secPlan').classList.toggle('hidden',s!=='plan');
