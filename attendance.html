@@ -1554,14 +1554,14 @@ function sortedForms(){
 // إن كانت قد أُطلقت سابقاً برابط آخر يبقى ذلك الرابط الأقدم هو الأساسي حتى لا يتعطل ما أُرسل.
 function mainForm(tplId){
   if(A.forms[tplId]) return tplId;
-  var ids=Object.keys(A.forms).filter(function(k){return A.forms[k].tpl===tplId&&!A.forms[k].teacher;})
+  var ids=Object.keys(A.forms).filter(function(k){return A.forms[k].tpl===tplId;})
     .sort(function(a,b){return (A.forms[a].createdAt||0)-(A.forms[b].createdAt||0);});
   return ids[0]||null;
 }
 function ensureTplForms(){
   var add={};
   SURVEY_TPL.forEach(function(t){
-    if(t.perTeacher||mainForm(t.id)) return;
+    if(mainForm(t.id)) return;
     add[t.id]={tpl:t.id,title:t.title,aud:t.aud,createdAt:Date.now(),open:true,schoolName:A.schoolName};
   });
   if(!Object.keys(add).length) return Promise.resolve();
@@ -1593,14 +1593,6 @@ function renderReady(seg){
   if(list.length) html+='<div style="margin:-6px 2px 12px"><button class="btn btn-o btn-sm" onclick="printAllQR()">🖨️ طباعة رموز QR للاستبانات المعروضة</button></div>';
   if(!list.length) html+='<div class="card empty"><span class="e">📝</span>لا توجد استبانات في هذه الفئة بعد.</div>';
   list.forEach(function(t){
-    if(t.perTeacher){
-      // استبانة «رضا الطالب عن المعلم»: نسخة مستقلة لكل معلم
-      html+='<div class="card sv-card" style="border-style:dashed"><div class="sv-head"><div><div class="nm">'+esc(t.title)+'</div>'+
-        '<div class="muted"><span class="aud">'+esc(t.aud)+'</span> • رابط مستقل لكل معلم</div></div></div>'+
-        '<div class="ops"><button class="btn btn-sm" onclick="launchForm(\''+t.id+'\')">➕ إنشاء رابط لمعلم</button></div></div>';
-      sortedForms().filter(function(f){return f.tpl===t.id;}).forEach(function(f){shown[f.id]=1;html+=formCard(f.id,false);});
-      return;
-    }
     var main=mainForm(t.id);
     if(main){shown[main]=1;html+=formCard(main,true);}
     // نسخ إضافية أُطلقت سابقاً من القالب نفسه: تُطوى تحت الاستبانة
@@ -1616,7 +1608,7 @@ function renderReady(seg){
 }
 function deleteEmptyCopies(tplId){
   var main=mainForm(tplId);
-  var ids=Object.keys(A.forms).filter(function(k){return k!==main&&A.forms[k].tpl===tplId&&!A.forms[k].teacher&&!formResps(k).length;});
+  var ids=Object.keys(A.forms).filter(function(k){return k!==main&&A.forms[k].tpl===tplId&&!formResps(k).length;});
   if(!ids.length) return;
   if(!confirm('حذف '+ids.length+' نسخة ليس لها أي ردود؟ تبقى الاستبانة الأساسية ورابطها كما هي.'))return;
   var upd={};ids.forEach(function(k){upd[k]=null;});
@@ -1627,24 +1619,6 @@ function resetForm(fid){
   if(!n){toast('لا توجد ردود لمسحها');return;}
   if(!confirm('مسح جميع ردود «'+f.title+'» ('+n+')؟ يبقى الرابط كما هو ويبدأ استقبال الردود من جديد. لا يمكن التراجع.'))return;
   rm('att_resp/'+A.code+'/'+fid).then(function(){if(A.resps)delete A.resps[fid];renderSurveys();toast('تم مسح الردود');});
-}
-function launchForm(id){
-  var t=tplById(id);
-  openModal('رابط لمعلم — '+t.title,
-    '<div class="fld"><label class="f">المعلم المستهدف *</label><select id="fLnT"><option value="">اختر المعلم</option>'+
-    A.teachers.map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></div>'+
-    '<input type="hidden" id="fLnTitle" value="'+esc(t.title)+'">'+
-    '<div class="note">يُنشأ رابط خاص بهذا المعلم ترسله لطلابه، ونتائجه منفصلة عن بقية المعلمين.</div><div class="err" id="fLnErr"></div>',
-    '<button class="btn" onclick="doLaunch(\''+id+'\')">إنشاء الرابط</button><button class="btn btn-o" onclick="closeModal()">إلغاء</button>');
-}
-function doLaunch(id){
-  var t=tplById(id),title=$('fLnTitle').value.trim()||t.title,teacher=t.perTeacher?$('fLnT').value:'';
-  if(t.perTeacher&&!teacher){$('fLnErr').textContent='اختر المعلم';return;}
-  if(teacher) title+=' — أ. '+teacher;
-  var fid=rid(8),f={tpl:id,title:title,aud:t.aud,createdAt:Date.now(),open:true,schoolName:A.schoolName};
-  if(teacher) f.teacher=teacher;
-  wr('att_forms/'+A.code+'/'+fid,f).then(function(){A.forms[fid]=f;renderSurveys();formLinkModal(fid);})
-    .catch(function(){toast('تعذّر الحفظ',true);});
 }
 function formMsg(fid){
   var f=A.forms[fid];
@@ -1691,8 +1665,7 @@ function printQR(fids){
 function printAllQR(){
   var cur=A.svAud||'all',ids=[];
   SURVEY_TPL.filter(function(t){return cur==='all'||audKey(t.aud)===cur;}).forEach(function(t){
-    if(t.perTeacher) sortedForms().filter(function(f){return f.tpl===t.id;}).forEach(function(f){ids.push(f.id);});
-    else {var m=mainForm(t.id);if(m)ids.push(m);}
+    var m=mainForm(t.id);if(m)ids.push(m);
   });
   printQR(ids);
 }
