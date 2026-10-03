@@ -225,8 +225,8 @@ var SURVEY_TPL=[
   {type:'text',id:'other',label:'أمور أخرى تحب ذكرها'}
  ]},
 
-{id:'sat_student_teacher',title:'قياس رضا الطالب عن المعلم',aud:'الطلاب',icon:'🎓',perTeacher:true,
- intro:'عزيزي الطالب: نأمل تعبئة هذا الاستطلاع من واقع تعامل معلم المادة معكم. شاكرين لك تفاعلك ومصداقيتك.',
+{id:'sat_student_teacher',title:'قياس رضا الطالب عن المعلم',aud:'الطلاب',icon:'🎓',
+ intro:'عزيزي الطالب: نأمل تعبئة هذا الاستطلاع من واقع تعامل معلميك معك بشكل عام. شاكرين لك تفاعلك ومصداقيتك.',
  fields:[F_NAME,F_GRADE],
  blocks:[
   {type:'likert',scale:'FREQ4',items:[
