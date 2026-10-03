@@ -261,6 +261,19 @@ table.grid td.attc{background:#f3fbf6}
   </div>
 </div>
 
+<!-- ============ SCHOOL PICKER (مدير لأكثر من مدرسة) ============ -->
+<div id="scrPick" class="center hidden">
+  <div class="wcard">
+    <img class="logo" src="logo.png" alt="رابط">
+    <h2 id="pkName"></h2>
+    <p>أدخل <b>الرمز الوزاري</b> للمدرسة التي تريد فتحها</p>
+    <input type="text" id="pkCode" class="code-in" inputmode="numeric" autocomplete="off" placeholder="الرمز الوزاري" style="letter-spacing:4px" onkeydown="if(event.key==='Enter')pickSchool()">
+    <div class="err" id="pkErr"></div>
+    <button class="btn btn-lg btn-w" onclick="pickSchool()">دخول</button>
+    <p class="muted" id="pkList" style="margin-top:14px;font-size:12px"></p>
+  </div>
+</div>
+
 <!-- ============ WELCOME + INSTALL ============ -->
 <div id="scrWelcome" class="center hidden">
   <div class="wcard">
@@ -299,6 +312,7 @@ table.grid td.attc{background:#f3fbf6}
       </div>
       <div class="hdr-actions">
         <button class="btn btn-g btn-sm hidden" id="aInstall" onclick="doInstall()">📲 <span>تثبيت التطبيق</span></button>
+        <button class="btn btn-o btn-sm hidden" id="aSwitch" title="تبديل المدرسة" onclick="showPicker()">🏫 <span>تبديل المدرسة</span></button>
         <button class="btn btn-o btn-sm" onclick="openSettings()">⚙️ <span>الإعدادات</span></button>
         <button class="btn btn-o btn-sm" onclick="reloadAdmin()">🔄</button>
         <button class="btn btn-o btn-sm" id="hdrSend" title="إرسال الروابط" onclick="openSend()">📤 <span>إرسال الروابط</span></button>
@@ -510,7 +524,7 @@ function clsShort(c){
 
 // ====== SESSION / ROUTING ======
 function show(id){
-  ['scrBoot','scrActivate','scrWelcome','scrBlocked','scrAdmin','scrTeacher','scrForm'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});
+  ['scrBoot','scrActivate','scrWelcome','scrBlocked','scrAdmin','scrTeacher','scrForm','scrPick'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});
   window.scrollTo(0,0);
 }
 function blocked(title,sub){
@@ -696,12 +710,47 @@ function startAdmin(token){
   rd('att_invites/'+token).then(function(inv){
     if(!inv) return blocked('الحساب غير موجود','تم حذف هذه الدعوة. تواصل مع إدارة منصة رابط.');
     if(inv.active===false) return blocked('تم إيقاف الوصول','تم إيقاف هذا الحساب مؤقتاً من إدارة منصة رابط.');
-    A.token=token;A.inv=inv;A.code=inv.schoolCode;A.schoolName=inv.schoolName||'';A.day=defaultDay();
+    A.token=token;A.inv=inv;
     DB.ref('att_invites/'+token+'/lastUsed').set(Date.now());
-    return loadAdminData().then(function(){
-      renderAdmin();show('scrAdmin');
-      watchDay();
+    // حساب المدير قد يرتبط بأكثر من مدرسة؛ بيانات كل مدرسة (الاسم والرمز الوزاري) من سجل المنصة
+    return rd('pt_schools').then(function(list){
+      var all=toArr(list),codes=toArr(inv.schools);
+      if(!codes.length) codes=[inv.schoolCode];
+      A.mySchools=codes.map(function(c){
+        var s=all.find(function(x){return x.code===c;})||{};
+        return {code:c,name:s.name||(c===inv.schoolCode?inv.schoolName:'')||c,moe:String(s.moe||'')};
+      });
+      if(A.mySchools.length===1) return openSchool(A.mySchools[0].code);
+      showPicker();
     });
+  }).catch(netErr);
+}
+// الشاشة الترحيبية: يكتب المدير الرمز الوزاري للمدرسة التي يريد فتحها
+function showPicker(){
+  if(A.recRef){A.recRef.off();A.recRef=null;}
+  closeModal();
+  $('pkName').textContent='مرحباً، '+(A.inv.name||'');
+  $('pkList').innerHTML='المدارس المرتبطة بحسابك: '+A.mySchools.map(function(s){return '<b>'+esc(s.name)+'</b>';}).join(' • ');
+  $('pkCode').value='';$('pkErr').textContent='';
+  show('scrPick');
+  setTimeout(function(){$('pkCode').focus();},100);
+}
+function pickSchool(){
+  var v=$('pkCode').value.trim(),err=$('pkErr');
+  if(!v){err.textContent='أدخل الرمز الوزاري للمدرسة';return;}
+  var s=A.mySchools.find(function(x){return x.moe&&x.moe===v;});
+  if(!s){err.textContent='الرمز الوزاري غير صحيح، أو المدرسة غير مرتبطة بحسابك';return;}
+  openSchool(s.code);
+}
+function openSchool(code){
+  var s=A.mySchools.find(function(x){return x.code===code;});
+  show('scrBoot');
+  // بيانات المدرسة السابقة لا تنتقل إلى المدرسة الجديدة
+  Object.assign(A,{code:code,schoolName:s.name,moe:s.moe,day:defaultDay(),teachers:[],classes:{},sched:{},rec:{},keys:{},
+    tab:'teachers',tq:'',schedTid:'',openG:{},openS:{},sec:'att',subs:[],survs:[],forms:{},resps:{},svTab:'ready',svDash:null,svAud:'all'});
+  SEND.open=false;
+  return loadAdminData().then(function(){
+    setSection('att');setTab('teachers');renderAdmin();show('scrAdmin');watchDay();
   }).catch(netErr);
 }
 function loadAdminData(){
@@ -736,7 +785,8 @@ function watchDay(){
 
 function renderAdmin(){
   $('aSchool').textContent=A.schoolName||'—';
-  $('aUser').textContent=(A.inv.name||'')+(A.inv.role?' — '+A.inv.role:'');
+  $('aUser').textContent=(A.inv.name||'')+(A.inv.role?' — '+A.inv.role:'')+(A.moe?' • الرمز الوزاري: '+A.moe:'');
+  $('aSwitch').classList.toggle('hidden',!(A.mySchools&&A.mySchools.length>1));
   var notes=[];
   if(!A.S.saved) notes.push('⏰ لم تُضبط أوقات الحصص بعد، والتطبيق يستخدم أوقاتاً افتراضية. <a href="#" onclick="openSettings();return false" style="color:inherit;font-weight:800">اضبطها من الإعدادات</a>');
   if(!Object.keys(A.classes).length) notes.push('🎓 لم تُضف الصفوف بعد. <a href="#" onclick="setTab(\'classes\');return false" style="color:inherit;font-weight:800">استورد كشف الطلاب من نور</a>');
