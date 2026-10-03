@@ -636,6 +636,18 @@ tr:hover td{background:var(--gb)}
 </div>
 
 <!-- تعديل دعوة تطبيق سجل الغياب -->
+<!-- دخول المشرف العام -->
+<div class="modal-bg hidden" id="mdlAdminLogin">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" onclick="hideModal('mdlAdminLogin')">✕</button>
+    <h2>لوحة التحكم</h2>
+    <p class="modal-desc">أدخل كلمة مرور المشرف العام</p>
+    <div class="form-g"><input type="password" id="adLoginPass" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="••••••" onkeydown="if(event.key==='Enter')submitAdminLogin()"></div>
+    <div class="err" id="adLoginErr" style="display:none"></div>
+    <button class="btn btn-g btn-full" id="adLoginBtn" onclick="submitAdminLogin()">دخول</button>
+  </div>
+</div>
+
 <div class="modal-bg hidden" id="mdlAttEdit">
   <div class="modal">
     <button class="modal-close" onclick="hideModal('mdlAttEdit')">✕</button>
@@ -2608,15 +2620,45 @@ function doLogin(){
 }
 document.getElementById('lPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
-var ADMIN_PASS_KEY='pt_admin_pass';
-function getAdminPass(){return localStorage.getItem(ADMIN_PASS_KEY)||'Admin@2026';}
-function setAdminPass(p){localStorage.setItem(ADMIN_PASS_KEY,p);}
+// كلمة مرور المشرف العام تُحفظ في قاعدة البيانات كبصمة SHA-256 (pt_admin/passHash) فتعمل من أي جهاز.
+// كانت سابقاً في متصفح الجهاز فقط؛ تُنقل تلقائياً إلى قاعدة البيانات عند أول دخول ناجح من ذلك الجهاز.
+var ADMIN_PASS_KEY='pt_admin_pass',ADMIN_SALT='rabit-admin:';
+function getLocalAdminPass(){try{return localStorage.getItem(ADMIN_PASS_KEY)||'Admin@2026';}catch(e){return 'Admin@2026';}}
+function adminHash(p){
+  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(ADMIN_SALT+p)).then(function(b){
+    return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2);}).join('');
+  });
+}
+// يتحقق من كلمة المرور: من قاعدة البيانات إن وُجدت، وإلا من الحفظ القديم في هذا المتصفح ثم ينقلها
+function checkAdminPass(p){
+  return Promise.all([fbRead('pt_admin/passHash'),adminHash(p)]).then(function(r){
+    if(r[0]) return r[0]===r[1];
+    if(p!==getLocalAdminPass()) return false;
+    return fbWrite('pt_admin/passHash',r[1]).then(function(){return true;});
+  });
+}
+function setAdminPass(p){
+  return adminHash(p).then(function(h){
+    try{localStorage.setItem(ADMIN_PASS_KEY,p);}catch(e){}
+    return fbWrite('pt_admin/passHash',h);
+  });
+}
 
 function doAdminLogin(){
-  var p=prompt('كلمة مرور المشرف العام:');
-  if(p===null) return;
-  if(p===getAdminPass()){showAdminDashboard();}
-  else{alert('كلمة المرور غير صحيحة');}
+  document.getElementById('adLoginPass').value='';
+  document.getElementById('adLoginErr').style.display='none';
+  showModal('mdlAdminLogin');
+  setTimeout(function(){document.getElementById('adLoginPass').focus();},100);
+}
+function submitAdminLogin(){
+  var p=document.getElementById('adLoginPass').value.trim(),err=document.getElementById('adLoginErr'),btn=document.getElementById('adLoginBtn');
+  if(!p) return;
+  btn.disabled=true;btn.textContent='جاري التحقق...';
+  checkAdminPass(p).then(function(ok){
+    btn.disabled=false;btn.textContent='دخول';
+    if(ok){hideModal('mdlAdminLogin');showAdminDashboard();}
+    else{err.textContent='كلمة المرور غير صحيحة';err.style.display='block';}
+  }).catch(function(){btn.disabled=false;btn.textContent='دخول';err.textContent='تعذّر الاتصال، حاول مرة أخرى';err.style.display='block';});
 }
 
 function showAdminDashboard(){
@@ -2914,15 +2956,18 @@ function changeAdminPass(){
   var np=document.getElementById('adNew').value.trim();
   var co=document.getElementById('adCon').value.trim();
   var err=document.getElementById('adErr');
-  if(cc!==getAdminPass()){err.style.display='block';err.textContent='كلمة المرور الحالية غير صحيحة';return;}
   if(np.length<6){err.style.display='block';err.textContent='كلمة المرور قصيرة جداً (6 أحرف على الأقل)';return;}
   if(np!==co){err.style.display='block';err.textContent='كلمتا المرور غير متطابقتين';return;}
-  err.style.display='none';
-  setAdminPass(np);
-  document.getElementById('adCur').value='';
-  document.getElementById('adNew').value='';
-  document.getElementById('adCon').value='';
-  alert('تم تغيير كلمة مرور المشرف العام ✅');
+  checkAdminPass(cc).then(function(ok){
+    if(!ok){err.style.display='block';err.textContent='كلمة المرور الحالية غير صحيحة';return;}
+    err.style.display='none';
+    return setAdminPass(np).then(function(){
+      document.getElementById('adCur').value='';
+      document.getElementById('adNew').value='';
+      document.getElementById('adCon').value='';
+      alert('تم تغيير كلمة مرور المشرف العام ✅ — تعمل الآن من أي جهاز');
+    });
+  }).catch(function(){err.style.display='block';err.textContent='تعذّر الاتصال، حاول مرة أخرى';});
 }
 
 function resetPlatform(){
