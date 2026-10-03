@@ -1055,7 +1055,7 @@ function parseWorkbook(wb){
     });
     var h=rows.findIndex(function(r){return r.indexOf('اسم الطالب')>=0;});
     if(h<0) return;
-    var H=rows[h],ni=H.indexOf('اسم الطالب'),ci=H.indexOf('الفصل'),gi=H.indexOf('الصف');
+    var H=rows[h],ni=H.indexOf('اسم الطالب'),ci=H.indexOf('الفصل'),gi=H.indexOf('الصف'),mi=H.indexOf('م');
     // في كشف نور: «الصف» و«الفصل» خانات عنوان فوق الجدول وقيمتها في نفس السطر
     function label(name){
       for(var i=0;i<h;i++){
@@ -1069,6 +1069,8 @@ function parseWorkbook(wb){
     for(var k=h+1;k<rows.length;k++){
       var r=rows[k],n=r[ni];
       if(!n||n==='اسم الطالب') continue;
+      // تقرير «كشف بيانات الطلاب» يكتب لكل طالب سطرين (عربي ثم إنجليزي)؛ سطر الطالب الحقيقي هو الذي فيه رقم «م»
+      if(mi>=0&&!/^\d+$/.test(r[mi]||'')) continue;
       var g=(gi>=0&&r[gi])||sg||'غير محدد',s=(ci>=0&&r[ci])||ss||'';
       var key=g+'|'+s;
       if(!groups[key]){groups[key]={grade:g,section:s,names:[]};order.push(key);}
