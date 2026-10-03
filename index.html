@@ -644,8 +644,8 @@ tr:hover td{background:var(--gb)}
     <div class="form-g"><label>الاسم</label><input type="text" id="attEdName"></div>
     <div class="form-g"><label>الصفة</label>
       <select id="attEdRole" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
-    <div class="form-g"><label>المدرسة</label>
-      <select id="attEdSchool" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
+    <div class="form-g"><label>المدارس (يمكن اختيار أكثر من مدرسة) والرمز الوزاري لكل منها</label>
+      <div id="attEdSchools"></div></div>
     <div class="form-g"><label>رقم الجوال (واتساب)</label><input type="text" id="attEdPhone" placeholder="05xxxxxxxx"></div>
     <div class="form-g"><label>الحالة</label>
       <select id="attEdActive" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit">
@@ -1932,10 +1932,10 @@ tr:hover td{background:var(--gb)}
               <select id="attInvRole" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit">
                 <option>مدير المدرسة</option><option>وكيل الشؤون التعليمية</option><option>وكيل الشؤون المدرسية</option><option>وكيل الشؤون الطلابية</option><option>الموجه الطلابي</option>
               </select></div>
-            <div class="form-g" style="margin:0"><label>المدرسة</label>
-              <select id="attInvSchool" style="width:100%;padding:8px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit"></select></div>
             <div class="form-g" style="margin:0"><label>رقم الجوال (واتساب)</label><input type="text" id="attInvPhone" placeholder="05xxxxxxxx"></div>
             <button class="btn btn-g" onclick="attCreateInvite()">➕ إنشاء الدعوة</button>
+            <div class="form-g" style="margin:0;grid-column:1/-1"><label>المدارس (يمكن اختيار أكثر من مدرسة) والرمز الوزاري لكل منها</label>
+              <div id="attInvSchools"></div></div>
           </div>
           <div class="err" id="attInvErr" style="display:none;margin-top:8px"></div>
         </div>
@@ -2656,9 +2656,38 @@ function attUniqueCode(){
   var c=String(100000+Math.floor(Math.random()*900000));
   return fbRead('att_codes/'+c).then(function(v){return v?attUniqueCode():c;});
 }
+// قائمة المدارس مع مربع اختيار وخانة الرمز الوزاري لكل مدرسة (يُحفظ الرمز في سجل المدرسة pt_schools)
+function attSchoolChecklist(id,selected){
+  document.getElementById(id).innerHTML=schools.length?schools.map(function(s){
+    var on=selected.indexOf(s.code)>=0;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eef1f6">'+
+      '<label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;margin:0">'+
+      '<input type="checkbox" class="att-sch" value="'+s.code+'"'+(on?' checked':'')+' style="width:17px;height:17px;margin:0"> '+s.name+'</label>'+
+      '<input type="text" class="att-moe" data-code="'+s.code+'" value="'+(s.moe||'')+'" placeholder="الرمز الوزاري" inputmode="numeric" style="width:130px;padding:6px 8px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;direction:ltr;text-align:center">'+
+    '</div>';
+  }).join(''):'<div style="color:var(--tl);font-size:13px">لا توجد مدارس مسجّلة</div>';
+}
+function attCheckedSchools(id){
+  return Array.prototype.map.call(document.querySelectorAll('#'+id+' .att-sch:checked'),function(c){return c.value;});
+}
+function attSaveMoe(id){
+  var seen={},dup='';
+  document.querySelectorAll('#'+id+' .att-moe').forEach(function(inp){var v=inp.value.trim();if(v){if(seen[v])dup=v;seen[v]=1;}});
+  if(dup){alert('الرمز الوزاري '+dup+' مكرر لأكثر من مدرسة');return false;}
+  document.querySelectorAll('#'+id+' .att-moe').forEach(function(inp){
+    var i=schools.findIndex(function(s){return s.code===inp.dataset.code;}),v=inp.value.trim();
+    if(i<0||v===(schools[i].moe||''))return;
+    if(v)schools[i].moe=v;else delete schools[i].moe;
+    fbWrite('pt_schools/'+i+'/moe',v||null);
+  });
+  try{localStorage.setItem('pt_schools',JSON.stringify(schools));}catch(e){}
+  return true;
+}
+function attSchoolNames(codes){
+  return codes.map(function(c){var s=schools.find(function(x){return x.code===c;});return s?s.name:c;}).join(' + ');
+}
 function attRenderInvites(){
-  var sel=document.getElementById('attInvSchool');
-  sel.innerHTML=schools.length?schools.map(function(s){return '<option value="'+s.code+'">'+s.name+'</option>';}).join(''):'<option value="">لا توجد مدارس مسجّلة</option>';
+  attSchoolChecklist('attInvSchools',[]);
   document.getElementById('attInvBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tl)">جاري التحميل...</td></tr>';
   fbRead('att_invites').then(function(data){
     _attInvites=data||{};
@@ -2680,14 +2709,14 @@ function attRenderInvites(){
 function attCreateInvite(){
   var name=document.getElementById('attInvName').value.trim();
   var role=document.getElementById('attInvRole').value;
-  var code=document.getElementById('attInvSchool').value;
+  var codes=attCheckedSchools('attInvSchools');
   var phone=document.getElementById('attInvPhone').value.trim();
   var err=document.getElementById('attInvErr');err.style.display='none';
-  if(!name||!code){err.textContent='يرجى إدخال الاسم واختيار المدرسة';err.style.display='block';return;}
-  var school=schools.find(function(s){return s.code===code;})||{};
+  if(!name||!codes.length){err.textContent='يرجى إدخال الاسم واختيار مدرسة واحدة على الأقل';err.style.display='block';return;}
+  if(!attSaveMoe('attInvSchools'))return;
   attUniqueCode().then(function(c6){
     var token=attRid(16);
-    var inv={name:name,role:role,schoolCode:code,schoolName:school.name||'',phone:phone,code:c6,active:true,createdAt:Date.now()};
+    var inv={name:name,role:role,schools:codes,schoolCode:codes[0],schoolName:attSchoolNames(codes),phone:phone,code:c6,active:true,createdAt:Date.now()};
     return Promise.all([fbWrite('att_invites/'+token,inv),fbWrite('att_codes/'+c6,{kind:'admin',token:token})]).then(function(){
       document.getElementById('attInvName').value='';document.getElementById('attInvPhone').value='';
       _attInvites[token]=inv;
@@ -2718,7 +2747,7 @@ function attEditInvite(k){
   if(v.role&&roles.indexOf(v.role)<0) roles.unshift(v.role);
   document.getElementById('attEdName').value=v.name||'';
   document.getElementById('attEdRole').innerHTML=roles.map(function(r){return '<option'+(r===v.role?' selected':'')+'>'+r+'</option>';}).join('');
-  document.getElementById('attEdSchool').innerHTML=schools.map(function(s){return '<option value="'+s.code+'"'+(s.code===v.schoolCode?' selected':'')+'>'+s.name+'</option>';}).join('');
+  attSchoolChecklist('attEdSchools',v.schools&&v.schools.length?v.schools:[v.schoolCode]);
   document.getElementById('attEdPhone').value=v.phone||'';
   document.getElementById('attEdActive').value=v.active===false?'0':'1';
   document.getElementById('attEdErr').style.display='none';
@@ -2727,14 +2756,17 @@ function attEditInvite(k){
 function attSaveInvite(){
   var k=_attEditKey,v=_attInvites[k];if(!v)return;
   var name=document.getElementById('attEdName').value.trim();
-  var code=document.getElementById('attEdSchool').value;
+  var codes=attCheckedSchools('attEdSchools');
   var err=document.getElementById('attEdErr');err.style.display='none';
-  if(!name||!code){err.textContent='يرجى إدخال الاسم واختيار المدرسة';err.style.display='block';return;}
+  if(!name||!codes.length){err.textContent='يرجى إدخال الاسم واختيار مدرسة واحدة على الأقل';err.style.display='block';return;}
   var active=document.getElementById('attEdActive').value==='1';
   if(v.active!==false&&!active&&!confirm('إيقاف وصول «'+name+'» إلى التطبيق؟ سيتعطل التطبيق عنده فوراً.'))return;
-  var school=schools.find(function(s){return s.code===code;})||{};
-  if(code!==v.schoolCode&&!confirm('سيعرض التطبيق عند «'+name+'» بيانات مدرسة «'+school.name+'» بدلاً من «'+v.schoolName+'». متابعة؟'))return;
-  var upd=Object.assign({},v,{name:name,role:document.getElementById('attEdRole').value,schoolCode:code,schoolName:school.name||'',
+  if(codes.length>1){
+    var noMoe=codes.filter(function(c){var i=document.querySelector('#attEdSchools .att-moe[data-code="'+c+'"]');return !i||!i.value.trim();});
+    if(noMoe.length&&!confirm('بعض المدارس المختارة ليس لها رمز وزاري: '+attSchoolNames(noMoe)+'.\nلن يستطيع المدير فتحها حتى يُضاف رمزها. متابعة؟'))return;
+  }
+  if(!attSaveMoe('attEdSchools'))return;
+  var upd=Object.assign({},v,{name:name,role:document.getElementById('attEdRole').value,schools:codes,schoolCode:codes[0],schoolName:attSchoolNames(codes),
     phone:document.getElementById('attEdPhone').value.trim(),active:active});
   fbWrite('att_invites/'+k,upd).then(function(){_attInvites[k]=upd;hideModal('mdlAttEdit');attRenderInvites();});
 }
