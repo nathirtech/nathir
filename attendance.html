@@ -322,7 +322,7 @@ table.grid td.attc{background:#f3fbf6}
   <div class="hdr">
     <div class="hdr-in">
       <div class="brand">
-        <img src="logo.png" alt="رابط">
+        <img id="aLogo" src="logo.png" alt="">
         <div class="sep"></div>
         <div style="min-width:0">
           <h1 id="aSchool">—</h1>
@@ -369,7 +369,7 @@ table.grid td.attc{background:#f3fbf6}
   <div class="hdr">
     <div class="hdr-in">
       <div class="brand">
-        <img src="logo.png" alt="رابط">
+        <img id="tLogo" src="logo.png" alt="">
         <div class="sep"></div>
         <div style="min-width:0">
           <h1 id="tSchool">—</h1>
@@ -389,7 +389,7 @@ table.grid td.attc{background:#f3fbf6}
   <div class="hdr">
     <div class="hdr-in">
       <div class="brand">
-        <img src="logo.png" alt="رابط">
+        <img id="fmLogo" src="logo.png" alt="">
         <div class="sep"></div>
         <div style="min-width:0"><h1 id="fmSchool">—</h1><p>استبانة</p></div>
       </div>
@@ -657,6 +657,9 @@ function renderInstall(forceSteps){
 // =====================================================================
 //  ADMIN (مدير / وكيل)
 // =====================================================================
+// شعار كل مدرسة (شعار المنصة يبقى في شاشات الترحيب فقط)
+var SCHOOL_LOGOS={"SCH-QX3G":1,"SCH-KJFH":1};
+function schoolLogo(code){return SCHOOL_LOGOS[code]?"logo-"+code+".png":"logo.png";}
 var A={token:null,inv:null,code:null,schoolName:'',teachers:[],classes:{},S:null,sched:{},rec:{},keys:{},
        tab:'teachers',tq:'',schedMode:'teacher',schedTid:'',schedDay:0,openG:{},openS:{},recRef:null,day:'',
        sec:'att',subs:[],survs:[],forms:{},resps:{},svTab:'ready',svDash:null};
@@ -803,7 +806,7 @@ function watchDay(){
 }
 
 function renderAdmin(){
-  $('aSchool').textContent=A.schoolName||'—';
+  $('aSchool').textContent=A.schoolName||'—';$('aLogo').src=schoolLogo(A.code);
   $('aUser').textContent=(A.inv.name||'')+(A.inv.role?' — '+A.inv.role:'')+(A.moe?' • الرمز الوزاري: '+A.moe:'');
   $('aSwitch').classList.toggle('hidden',!(A.mySchools&&A.mySchools.length>1));
   var notes=[];
@@ -1356,7 +1359,7 @@ function doExport(){
 function pHead(title,sub,d){
   return '<div class="ph"><div class="ph-r">المملكة العربية السعودية<br>وزارة التعليم<br><b>'+esc(A.schoolName)+'</b></div>'+
     '<div class="ph-c"><h1>'+title+'</h1><div>'+sub+'</div></div>'+
-    '<div class="ph-l"><img src="'+new URL('logo.png',location.href).href+'"><div>'+fmtDay(d)+'<br>'+fmtHijri(d)+'<br>'+fmtGreg(d)+'</div></div></div>';
+    '<div class="ph-l"><img src="'+new URL(schoolLogo(A.code),location.href).href+'"><div>'+fmtDay(d)+'<br>'+fmtHijri(d)+'<br>'+fmtGreg(d)+'</div></div></div>';
 }
 function rowsMap(r){var m={};toArr(r&&r.rows).forEach(function(x){m[x.id]=x;});return m;}
 function stCell(x){return x?'<td class="s-'+x.s+'">'+STN[x.s]+'</td>':'<td class="s-n">—</td>';}
@@ -2052,7 +2055,7 @@ function openPublicForm(school,fid){
   rd('att_forms/'+school+'/'+fid).then(function(f){
     if(!f||!tplById(f.tpl)) return blocked('الاستبانة غير موجودة','ربما حُذفت. تواصل مع إدارة المدرسة.');
     FM={school:school,fid:fid,f:f,t:tplById(f.tpl),qs:tplQuestions(tplById(f.tpl)),a:{},fields:{}};
-    $('fmSchool').textContent=f.schoolName||'';
+    $('fmSchool').textContent=f.schoolName||'';$('fmLogo').src=schoolLogo(school);
     show('scrForm');
     if(f.open===false) return fmMessage('⏸','انتهى استقبال الردود','توقفت هذه الاستبانة عن استقبال الردود. شكراً لاهتمامك.');
     if(LS.get('att_fm_done_'+fid)) return fmMessage('✅','سبق أن أرسلت إجابتك','شكراً لك، وصلت إجابتك على هذه الاستبانة.','<button class="btn btn-o" style="margin-top:14px" onclick="LS.del(\'att_fm_done_'+fid+'\');renderPublicForm()">إرسال إجابة أخرى من هذا الجهاز</button>');
@@ -2144,7 +2147,7 @@ function startTeacher(school,tid,key){
       T.teacher=toArr(r[0]).find(function(t){return String(t.id)===String(tid);});
       if(!T.teacher) return blocked('لم يُعثر على بياناتك','ربما حُذف اسمك من سجل المعلمين. تواصل مع إدارة المدرسة.');
       T.S=normSettings(r[1]);T.sched=r[2]||{};
-      $('tSchool').textContent=T.schoolName||'—';$('tName').textContent='أ. '+T.teacher.name;
+      $('tSchool').textContent=T.schoolName||'—';$('tLogo').src=schoolLogo(school);$('tName').textContent='أ. '+T.teacher.name;
       renderInstall();show('scrTeacher');
       teacherRefresh();
       clearInterval(T.timer);
