@@ -135,8 +135,27 @@ label.f{display:block;font-size:12px;font-weight:700;color:var(--tm);margin-bott
 .sw .it b{white-space:nowrap;color:#0b0b0b}
 .quote{background:#f7f9fc;border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.8;margin-bottom:6px;color:var(--tm)}
 .quote small{display:block;color:var(--tl);font-size:11px}
+.kpi{text-align:center}
+.dgrid{display:flex;flex-wrap:wrap;gap:0 12px}
+.dgrid>.card{flex:1 1 100%;min-width:0}
+.dgrid>.half{flex:1 1 calc(50% - 6px);min-width:300px}
+.kg .gauge{width:170px;max-width:100%;height:auto;display:block;margin:2px auto 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dn{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.donut{width:170px;height:170px;flex-shrink:0;margin:0 auto}
+.donut circle{cursor:default}
+.dl{flex:1;min-width:180px;font-size:13px}
+.dl div{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f3f8}
+.dl i{width:12px;height:12px;border-radius:3px;display:inline-block;flex-shrink:0}
+.dl span{flex:1;color:var(--tm)}.dl b{color:#0b0b0b}.dl small{color:#898781;min-width:28px;text-align:left}
+.rk{display:grid;grid-template-columns:22px minmax(0,1.3fr) minmax(0,1fr) 56px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid #f1f3f8}
+.rk .n{color:#898781;font-size:12px;text-align:center}.rk .t{font-size:13px;color:var(--tm);line-height:1.6}
+.rk .track{position:relative;height:14px;background:#f3f2ee;border-radius:0 4px 4px 0}
+.rk .track i{display:block;height:100%;background:#2a78d6;border-radius:0 4px 4px 0}
+.rk .track em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#0b0b0b;opacity:.7}
+.rk .v{font-size:13px;font-weight:800;color:#0b0b0b;text-align:left}
 #vizTip{position:fixed;z-index:120;pointer-events:none;background:#0b0b0b;color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;max-width:260px;line-height:1.6;display:none}
-@media(max-width:640px){.lk-row{grid-template-columns:1fr 46px}.lk-row .stack{grid-column:1/3;grid-row:2}.hb{grid-template-columns:1fr 64px}.hb .track{grid-column:1/3;grid-row:2}.sw{grid-template-columns:1fr}}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.rk{grid-template-columns:20px 1fr 50px}.rk .track{grid-column:2/4;grid-row:2}.lk-row{grid-template-columns:1fr 46px}.lk-row .stack{grid-column:1/3;grid-row:2}.hb{grid-template-columns:1fr 64px}.hb .track{grid-column:1/3;grid-row:2}.sw{grid-template-columns:1fr}}
 @media(max-width:560px){.mtabs{width:100%;flex-wrap:nowrap}.mtab{flex:1;padding:8px 4px;font-size:12px;white-space:normal;line-height:1.35}}
 .daybar select{width:auto;padding:7px 10px;font-size:13px;font-weight:700;color:var(--gd)}
 .daybar .past{font-size:11px;font-weight:800;color:var(--late);background:var(--lateb);padding:3px 10px;border-radius:10px}
@@ -1801,7 +1820,7 @@ function barsHtml(labels,counts,base){
   var max=Math.max.apply(null,counts.concat([1]));
   return labels.map(function(l,i){
     var c=counts[i],p=base?c*100/base:0;
-    return '<div class="hb"'+tip(l+': '+c+(base?' ('+pctTxt(p)+')':''))+'><div class="t">'+esc(l)+'</div><div class="track"><i style="width:'+(c*100/max)+'%"></i></div><div class="v">'+c+(base?' • '+Math.round(p)+'%':'')+'</div></div>';
+    return '<div class="hb"'+tip(l+': '+c+(base?' ('+pctTxt(p)+')':''))+'><div class="t">'+esc(l)+'</div><div class="track"><i style="width:'+(c*100/max)+'%'+(c?'':';min-width:0')+'"></i></div><div class="v">'+c+(base?' • '+Math.round(p)+'%':'')+'</div></div>';
   }).join('');
 }
 function legendHtml(scale){
@@ -1810,73 +1829,143 @@ function legendHtml(scale){
 }
 
 // ---------- لوحة النتائج ----------
+// الألوان: تدرّج أزرق↔أحمر للمقياس (LK_COLORS)، أزرق واحد للأشرطة، ولوحة فئوية للاختيار الواحد، وألوان الحالة للتقدير مع رمز ونص
+var CAT_COLORS=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
 function openDash(fid){A.svDash=fid;renderSurveys();window.scrollTo(0,0);}
+// توزيع كل إجابات المقياس معاً بعد عكس العبارات السلبية، مع نسب الإيجابي والسلبي
+function overallDist(R){
+  var lk=R.qs.filter(function(o){return o.q.type==='likert'&&o.answered;});
+  if(!lk.length) return null;
+  var scale=lk[0].q.scale,S=SURVEY_SCALES[scale],k=S.opts.length,counts=S.opts.map(function(){return 0;}),rev=false;
+  lk.filter(function(o){return o.q.scale===scale;}).forEach(function(o){
+    if(o.q.rev) rev=true;
+    o.counts.forEach(function(c,i){var j=o.q.rev&&S.scores[i]!=null?k-1-i:i;counts[j]+=c;});
+  });
+  var tot=0,valid=0,pos=0,neg=0;
+  counts.forEach(function(c,j){tot+=c;if(S.scores[j]==null)return;valid+=c;if(S.scores[j]>50)pos+=c;else if(S.scores[j]<50)neg+=c;});
+  return {scale:scale,opts:S.opts,colors:LK_COLORS[k],counts:counts,total:tot,pos:valid?pos*100/valid:null,neg:valid?neg*100/valid:null,rev:rev};
+}
+// عداد نصف دائري لمؤشر الرضا
+function gaugeSvg(p){
+  var r=rateOf(p),v=Math.max(0,Math.min(100,p||0)),th=Math.PI*(1-v/100),x=100+80*Math.cos(th),y=100-80*Math.sin(th);
+  return '<svg class="gauge" viewBox="0 0 200 112" role="img" aria-label="مؤشر الرضا '+pctTxt(p)+'">'+
+    '<path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#e8eef6" stroke-width="18" stroke-linecap="round"/>'+
+    (v>0?'<path d="M20 100 A80 80 0 0 1 '+x.toFixed(2)+' '+y.toFixed(2)+'" fill="none" stroke="'+(r?r.c:'#2a78d6')+'" stroke-width="18" stroke-linecap="round"/>':'')+
+    '<text x="100" y="92" text-anchor="middle" font-size="30" font-weight="800" fill="#0b0b0b">'+pctTxt(p)+'</text>'+
+    '<text x="22" y="111" text-anchor="middle" font-size="10" fill="#898781">0</text><text x="178" y="111" text-anchor="middle" font-size="10" fill="#898781">100</text></svg>';
+}
+// مخطط دائري مجوّف: أجزاء [{l,v,c}] مع فراغ 2 بكسل بين الأجزاء
+function donutSvg(parts,center,sub){
+  var tot=parts.reduce(function(a,p){return a+p.v;},0),R0=60,C=2*Math.PI*R0,acc=0;
+  var segs=tot?parts.map(function(p){
+    if(!p.v) return '';
+    var len=p.v/tot*C,s='<circle cx="80" cy="80" r="'+R0+'" fill="none" stroke="'+p.c+'" stroke-width="24" stroke-dasharray="'+Math.max(len-2,0.5).toFixed(2)+' '+C.toFixed(2)+'" stroke-dashoffset="'+(-acc).toFixed(2)+'" transform="rotate(-90 80 80)"'+tip(p.l+': '+p.v+' ('+pctTxt(p.v*100/tot)+')')+'/>';
+    acc+=len;return s;
+  }).join(''):'<circle cx="80" cy="80" r="'+R0+'" fill="none" stroke="#e8eef6" stroke-width="24"/>';
+  return '<svg class="donut" viewBox="0 0 160 160" role="img">'+segs+
+    '<text x="80" y="80" text-anchor="middle" font-size="24" font-weight="800" fill="#0b0b0b">'+esc(center)+'</text>'+
+    '<text x="80" y="99" text-anchor="middle" font-size="11" fill="#52514e">'+esc(sub)+'</text></svg>';
+}
+function donutBlock(parts,center,sub){
+  var tot=parts.reduce(function(a,p){return a+p.v;},0);
+  return '<div class="dn">'+donutSvg(parts,center,sub)+'<div class="dl">'+parts.map(function(p){
+    return '<div><i style="background:'+p.c+'"></i><span>'+esc(p.l)+'</span><b>'+(tot?Math.round(p.v*100/tot):0)+'%</b><small>'+p.v+'</small></div>';
+  }).join('')+'</div></div>';
+}
+function rankHtml(items,avg){
+  return items.map(function(o,i){
+    return '<div class="rk"'+tip(o.q.t+': '+pctTxt(o.mean))+'><span class="n">'+(i+1)+'</span><div class="t">'+esc(o.q.t)+'</div>'+
+      '<div class="track"><i style="width:'+o.mean+'%"></i>'+(avg!=null?'<em style="right:calc('+avg+'% - 1px)"></em>':'')+'</div><div class="v">'+pctTxt(o.mean)+'</div></div>';
+  }).join('');
+}
+// أقسام لوحة النتائج؛ تُستخدم في التطبيق (pdf=false) وفي تقرير PDF (pdf=true)
+function dashParts(R,pdf){
+  var t=R.t,idx=!t.noIndex,rt=rateOf(R.overall),D=overallDist(R),P={summary:'',detail:'',appendix:''};
+  var lk=R.qs.filter(function(o){return o.q.type==='likert'&&(idx?o.mean!=null:o.answered);});
+  var dk=Object.keys(R.days).sort();
+  // مؤشرات رئيسية
+  P.summary+='<div class="kpis">'+
+    '<div class="card kpi"><div class="l">عدد الردود</div><div class="v">'+R.n+'</div><div class="l">'+(dk.length?'من <bdi>'+dk[0]+'</bdi>'+(dk.length>1?' إلى <bdi>'+dk[dk.length-1]+'</bdi>':''):'')+'</div></div>'+
+    (idx&&R.overall!=null?'<div class="card kpi kg"><div class="l">مؤشر الرضا العام</div>'+gaugeSvg(R.overall)+(rt?'<span class="rate"><i style="background:'+rt.c+'"></i>'+rt.i+' '+rt.t+'</span>':'')+'</div>':'')+
+    (D&&D.pos!=null?'<div class="card kpi"><div class="l">التقييمات الإيجابية</div><div class="v" style="color:#1c5cab">'+pctTxt(D.pos)+'</div><div class="l">السلبية: '+pctTxt(D.neg)+'</div></div>':'')+
+    '<div class="card kpi"><div class="l">'+(lk.length?'العبارات المقيَّمة':'عدد الأسئلة')+'</div><div class="v">'+(lk.length||R.qs.length)+'</div>'+(R.last?'<div class="l">آخر رد <bdi>'+dateKey(new Date(R.last))+'</bdi></div>':'')+'</div></div>';
+  // التوزيع العام + نقاط القوة والتحسين
+  var srt=idx?lk.slice().sort(function(a,b){return b.mean-a.mean;}):[];
+  var li=function(arr){return arr.map(function(o){return '<div class="it"><b>'+pctTxt(o.mean)+'</b><span>'+esc(o.q.t)+'</span></div>';}).join('');};
+  if(D){
+    P.summary+='<div class="g2"><div class="card dsec"><h3>التوزيع العام للإجابات</h3><div class="sub">جميع إجابات العبارات معاً ('+D.total+' إجابة)'+(D.rev?' بعد عكس العبارات السلبية':'')+'</div>'+
+      donutBlock(D.opts.map(function(o,i){return {l:o,v:D.counts[i],c:D.colors[i]};}),D.pos!=null?Math.round(D.pos)+'%':D.total,D.pos!=null?'إيجابي':'إجابة')+'</div>';
+    P.summary+=(srt.length>=4?'<div class="card dsec"><h3>✔ أبرز نقاط القوة</h3><div class="sub">العبارات الأعلى رضا</div>'+li(srt.slice(0,3))+
+      '<h3 style="margin-top:14px">▲ أولويات التحسين</h3><div class="sub">العبارات الأقل رضا</div>'+li(srt.slice(-3).reverse())+'</div>':'<div></div>')+'</div>';
+  }
+  // المجالات
+  var bk=Object.keys(R.blocks);
+  if(idx&&bk.length>1){
+    P.summary+='<div class="card dsec"><h3>مؤشر الرضا حسب المجال</h3><div class="sub">متوسط درجات عبارات كل مجال من 100%</div>'+
+      bk.map(function(b){var B=R.blocks[b],r=rateOf(B.mean);
+        return '<div class="hb"'+tip(B.title+': '+pctTxt(B.mean))+'><div class="t">'+esc(B.title)+'</div><div class="track"><i style="width:'+B.mean+'%"></i></div><div class="v">'+pctTxt(B.mean)+(r?' • '+r.t:'')+'</div></div>';}).join('')+'</div>';
+  }
+  // الردود حسب اليوم
+  if(dk.length>1||!pdf){
+    var maxD=Math.max.apply(null,dk.map(function(k){return R.days[k];}).concat([1]));
+    P.summary+='<div class="card dsec"><h3>الردود حسب اليوم</h3><div class="sub">'+dk.length+' يوماً استقبلت ردوداً</div>'+
+      '<div class="cols">'+dk.map(function(k){return '<span style="height:'+(R.days[k]*100/maxD)+'%"'+tip(k+': '+R.days[k]+' رداً')+'></span>';}).join('')+'</div>'+
+      '<div class="cols-x">'+dk.map(function(k){var d=parseKey(k);return '<span>'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';}).join('')+'</div></div>';
+  }
+  // ترتيب العبارات
+  if(idx&&srt.length){
+    P.detail+='<div class="card dsec"><h3>ترتيب العبارات حسب درجة الرضا</h3><div class="sub">من الأعلى إلى الأدنى • الخط الأسود: المتوسط العام '+pctTxt(R.overall)+'</div>'+rankHtml(srt,R.overall)+'</div>';
+  }
+  // توزيع إجابات كل عبارة + أسئلة الاختيار والإجابات المكتوبة
+  var last=-1;
+  R.qs.forEach(function(o,i){
+    var q=o.q;
+    if(q.type==='likert'){
+      if(q.block!==last){
+        if(last!==-1) P.detail+='</div>';
+        last=q.block;
+        P.detail+='<div class="card dsec"><h3>'+esc(q.blockTitle?'توزيع الإجابات — '+q.blockTitle:'توزيع الإجابات لكل عبارة')+'</h3><div class="sub">'+
+          (idx?'العمود الأخير: درجة الرضا عن العبارة من 100%':'العمود الأخير: نسبة من اختار «'+esc(SURVEY_SCALES[q.scale].opts[0])+'»')+'</div>'+legendHtml(q.scale);
+      }
+      P.detail+='<div class="lk-row"><div class="t">'+(i+1)+'. '+esc(q.t)+(q.rev?' <span class="muted">(عبارة سلبية)</span>':'')+'</div>'+stackHtml(o)+'<div class="m">'+pctTxt(idx?o.mean:o.agree)+'</div></div>';
+      return;
+    }
+    if(last!==-1){P.detail+='</div>';last=-1;}
+    if(q.type==='single'){
+      P.detail+='<div class="card dsec half"><h3>'+esc(q.t)+'</h3><div class="sub">أجاب '+o.answered+' مستجيباً</div>'+
+        (q.opts.length<=6?donutBlock(q.opts.map(function(x,j){return {l:x,v:o.counts[j],c:CAT_COLORS[j]};}),o.answered,'مستجيباً'):barsHtml(q.opts,o.counts,o.answered))+'</div>';
+    } else if(q.type==='multi'){
+      var ord=q.opts.map(function(x,j){return {l:x,c:o.counts[j]};}).sort(function(a,b){return b.c-a.c;});
+      P.detail+='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">اختيار متعدد • مرتّبة من الأكثر اختياراً • النسبة من '+o.answered+' مستجيباً</div>'+
+        barsHtml(ord.map(function(x){return x.l;}),ord.map(function(x){return x.c;}),o.answered)+
+        (o.others.length?'<div class="sub" style="margin-top:10px">إجابات أخرى ('+o.others.length+'):</div>'+o.others.map(function(x){return '<div class="quote">'+esc(x)+'</div>';}).join(''):'')+'</div>';
+    } else if(q.type==='text'){
+      var tx='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">'+o.texts.length+' إجابة مكتوبة</div>'+
+        (o.texts.length?o.texts.slice().reverse().map(function(x){return '<div class="quote">'+esc(x.v)+(pdf?'':'<small>'+(x.who?esc(x.who)+' • ':'')+dateKey(new Date(x.at))+'</small>')+'</div>';}).join(''):'<div class="muted">لا توجد إجابات</div>')+'</div>';
+      if(pdf){if(o.texts.length)P.appendix+=tx;}else P.detail+=tx;
+    }
+  });
+  if(last!==-1) P.detail+='</div>';
+  // المستجيبون حسب الصف وغيره
+  R.fields.forEach(function(F){
+    var tot=F.counts.reduce(function(a,x){return a+x;},0);
+    P.detail+='<div class="card dsec half"><h3>المستجيبون حسب '+esc(F.fd.label)+'</h3><div class="sub">'+tot+' مستجيباً حدّدوا '+esc(F.fd.label)+'</div>'+
+      donutBlock(F.fd.opts.map(function(x,j){return {l:x,v:F.counts[j],c:CAT_COLORS[j]};}),tot,'مستجيباً')+'</div>';
+  });
+  return P;
+}
 function renderDash(fid){
-  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f),t=R.t,idx=!t.noIndex,rt=rateOf(R.overall);
+  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f);
   var html='<div class="toolbar"><button class="btn btn-o btn-sm" onclick="A.svDash=null;renderSurveys()">→ رجوع</button>'+
     '<div class="grow"><div style="font-weight:800;color:var(--gd);font-size:16px">'+esc(f.title)+'</div><div class="muted"><span class="aud">'+esc(f.aud)+'</span> • أُطلقت '+esc(dateKey(new Date(f.createdAt)))+(f.open===false?' • ⏸ متوقفة':'')+'</div></div>'+
     '<button class="btn btn-g btn-sm" onclick="formLinkModal(\''+fid+'\')">🔗 الرابط</button>'+
     (R.n?'<button class="btn btn-sm" onclick="exportFormPdf(\''+fid+'\')">📄 تقرير PDF</button><button class="btn btn-o btn-sm" onclick="exportFormCsv(\''+fid+'\')">⬇ Excel</button>':'')+'</div>';
-  html+='<div class="kpis"><div class="card kpi"><div class="l">عدد الردود</div><div class="v">'+R.n+'</div></div>'+
-    (idx?'<div class="card kpi"><div class="l">مؤشر الرضا العام</div><div class="v">'+pctTxt(R.overall)+'</div>'+(rt?'<span class="rate"><i style="background:'+rt.c+'"></i>'+rt.i+' '+rt.t+'</span>':'')+'</div>':
-      '<div class="card kpi"><div class="l">عدد الأسئلة</div><div class="v">'+R.qs.length+'</div></div>')+
-    '<div class="card kpi"><div class="l">آخر رد</div><div class="v" style="font-size:17px;padding-top:8px">'+(R.last?dateKey(new Date(R.last))+'<br><small>'+hm(R.last)+'</small>':'—')+'</div></div></div>';
   if(!R.n){
     $('secSurv').innerHTML=html+'<div class="card empty"><span class="e">📭</span>لم تصل أي ردود بعد.<br>أرسل رابط الاستبانة لـ'+esc(f.aud)+' وستظهر النتائج هنا فور وصولها.</div>';
     return;
   }
-  // الردود حسب اليوم
-  var dk=Object.keys(R.days).sort(),maxD=Math.max.apply(null,dk.map(function(k){return R.days[k];}));
-  html+='<div class="card dsec"><h3>الردود حسب اليوم</h3><div class="sub">'+dk.length+' يوماً استقبلت ردوداً</div>'+
-    '<div class="cols">'+dk.map(function(k){return '<span style="height:'+(R.days[k]*100/maxD)+'%"'+tip(k+': '+R.days[k]+' رداً')+'></span>';}).join('')+'</div>'+
-    '<div class="cols-x">'+dk.map(function(k){var d=parseKey(k);return '<span>'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';}).join('')+'</div></div>';
-  // المجالات
-  var bk=Object.keys(R.blocks);
-  if(idx&&bk.length>1){
-    html+='<div class="card dsec"><h3>مؤشر الرضا حسب المجال</h3><div class="sub">متوسط درجات عبارات كل مجال من 100%</div>'+
-      bk.map(function(b){var B=R.blocks[b],r=rateOf(B.mean);
-        return '<div class="hb"'+tip(B.title+': '+pctTxt(B.mean))+'><div class="t">'+esc(B.title)+'</div><div class="track"><i style="width:'+B.mean+'%"></i></div><div class="v">'+pctTxt(B.mean)+'</div></div>';}).join('')+'</div>';
-  }
-  // أبرز نقاط القوة والتحسين
-  var lk=R.qs.filter(function(o){return o.q.type==='likert'&&o.mean!=null;});
-  if(idx&&lk.length>=4){
-    var srt=lk.slice().sort(function(a,b){return b.mean-a.mean;});
-    var li=function(arr){return arr.map(function(o){return '<div class="it"><b>'+pctTxt(o.mean)+'</b><span>'+esc(o.q.t)+'</span></div>';}).join('');};
-    html+='<div class="sw"><div class="card dsec"><h3>✔ أبرز نقاط القوة</h3><div class="sub">العبارات الأعلى رضا</div>'+li(srt.slice(0,3))+'</div>'+
-      '<div class="card dsec"><h3>▲ أولويات التحسين</h3><div class="sub">العبارات الأقل رضا</div>'+li(srt.slice(-3).reverse())+'</div></div>';
-  }
-  // توزيع إجابات كل عبارة
-  var lastBlock=-1;
-  R.qs.forEach(function(o,i){
-    var q=o.q;
-    if(q.type==='likert'){
-      if(q.block!==lastBlock){
-        if(lastBlock!==-1) html+='</div>';
-        lastBlock=q.block;
-        html+='<div class="card dsec"><h3>'+esc(q.blockTitle||'توزيع الإجابات')+'</h3><div class="sub">'+
-          (idx?'العمود الأخير: درجة الرضا عن العبارة من 100%':'العمود الأخير: نسبة من اختار «'+esc(SURVEY_SCALES[q.scale].opts[0])+'»')+'</div>'+legendHtml(q.scale);
-      }
-      var m=idx?o.mean:o.agree;
-      html+='<div class="lk-row"><div class="t">'+(i+1)+'. '+esc(q.t)+(q.rev?' <span class="muted">(عبارة سلبية)</span>':'')+'</div>'+stackHtml(o)+'<div class="m">'+pctTxt(m)+'</div></div>';
-      return;
-    }
-    if(lastBlock!==-1){html+='</div>';lastBlock=-1;}
-    if(q.type==='single'||q.type==='multi'){
-      html+='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">'+(q.type==='multi'?'اختيار متعدد • النسبة من '+o.answered+' مستجيباً':'أجاب '+o.answered+' مستجيباً')+'</div>'+
-        barsHtml(q.opts,o.counts,o.answered)+
-        (o.others.length?'<div class="sub" style="margin-top:10px">إجابات أخرى ('+o.others.length+'):</div>'+o.others.map(function(x){return '<div class="quote">'+esc(x)+'</div>';}).join(''):'')+'</div>';
-    } else if(q.type==='text'){
-      html+='<div class="card dsec"><h3>'+esc(q.t)+'</h3><div class="sub">'+o.texts.length+' إجابة مكتوبة</div>'+
-        (o.texts.length?o.texts.slice().reverse().map(function(x){return '<div class="quote">'+esc(x.v)+'<small>'+(x.who?esc(x.who)+' • ':'')+dateKey(new Date(x.at))+'</small></div>';}).join(''):'<div class="muted">لا توجد إجابات</div>')+'</div>';
-    }
-  });
-  if(lastBlock!==-1) html+='</div>';
-  // توزيع المستجيبين (مثل الصف)
-  R.fields.forEach(function(F){
-    var tot=F.counts.reduce(function(a,x){return a+x;},0);
-    html+='<div class="card dsec"><h3>المستجيبون حسب '+esc(F.fd.label)+'</h3><div class="sub">'+tot+' مستجيباً حدّدوا '+esc(F.fd.label)+'</div>'+barsHtml(F.fd.opts,F.counts,tot)+'</div>';
-  });
-  $('secSurv').innerHTML=html;
+  var P=dashParts(R,false);
+  $('secSurv').innerHTML=html+P.summary+'<div class="dgrid">'+P.detail+'</div>';
 }
 
 // تلميح عند المرور على الأشرطة
@@ -1892,43 +1981,47 @@ document.addEventListener('mousemove',function(e){
 });
 
 // ---------- تقرير PDF وملف Excel ----------
+// تقرير PDF: صفحة ملخص بصري، صفحة التفاصيل، ثم ملحق الجدول الرقمي والإجابات المكتوبة
+var DASH_PRINT_CSS='*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+  '.card{background:#fff;border:1px solid #d0d8e8;border-radius:10px}.muted{color:#7a8aab;font-size:10px}'+
+  '.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:2px 0 10px}'+
+  '.kpi{padding:8px 10px;text-align:center}.kpi .l{font-size:10px;color:#52514e}.kpi .v{font-size:26px;font-weight:800;color:#0b0b0b;line-height:1.3}'+
+  '.kg .gauge{width:150px;height:auto;display:block;margin:0 auto}'+
+  '.rate{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#0b0b0b}.rate i{width:9px;height:9px;border-radius:50%;display:inline-block}'+
+  '.dsec{padding:10px 12px;margin-bottom:10px;page-break-inside:avoid}.dsec h3{font-size:13px;color:#1a3a6b;margin:0 0 2px}.dsec .sub{font-size:10px;color:#7a8aab;margin-bottom:8px}'+
+  '.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}'+
+  '.dn{display:flex;align-items:center;gap:14px}.donut{width:140px;height:140px;flex-shrink:0}'+
+  '.dl{flex:1;font-size:11px}.dl div{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f1f3f8}.dl i{width:10px;height:10px;border-radius:3px;display:inline-block}.dl span{flex:1}.dl b{color:#0b0b0b}.dl small{color:#898781;min-width:24px;text-align:left}'+
+  '.it{display:flex;gap:8px;font-size:11px;line-height:1.6;padding:3px 0;border-top:1px solid #f1f3f8}.it b{white-space:nowrap;color:#0b0b0b}'+
+  '.hb{display:grid;grid-template-columns:38% 1fr 90px;gap:8px;align-items:center;padding:3px 0;font-size:11px}.hb .track{height:12px;background:#f3f2ee;border-radius:0 3px 3px 0}.hb .track i{display:block;height:100%;background:#2a78d6;border-radius:0 3px 3px 0}.hb .v{text-align:left;font-weight:800}'+
+  '.rk{display:grid;grid-template-columns:18px 47% 1fr 46px;gap:6px;align-items:center;padding:2px 0;font-size:10.5px;line-height:1.5}.rk .n{color:#898781;text-align:center}.rk .track{position:relative;height:11px;background:#f3f2ee;border-radius:0 3px 3px 0}.rk .track i{display:block;height:100%;background:#2a78d6;border-radius:0 3px 3px 0}.rk .track em{position:absolute;top:-3px;bottom:-3px;width:2px;background:#0b0b0b}.rk .v{text-align:left;font-weight:800}'+
+  '.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:10px;margin-bottom:6px}.legend span{display:inline-flex;align-items:center;gap:4px}.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}'+
+  '.lk-row{display:grid;grid-template-columns:44% 1fr 46px;gap:8px;align-items:center;padding:3px 0;border-top:1px solid #f1f3f8;font-size:10.5px;line-height:1.5}.lk-row .m{text-align:left;font-weight:800}'+
+  '.stack{display:flex;gap:1px;height:14px}.stack span{display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;overflow:hidden}'+
+  '.cols{display:flex;align-items:flex-end;gap:3px;height:70px;border-bottom:1px solid #c3c2b7}.cols span{flex:1;max-width:26px;background:#2a78d6;border-radius:3px 3px 0 0;min-height:2px}.cols-x{display:flex;gap:3px;font-size:8.5px;color:#898781}.cols-x span{flex:1;max-width:26px;text-align:center}'+
+  '.quote{background:#f7f9fc;border-radius:6px;padding:5px 8px;margin:4px 0;line-height:1.7;font-size:11px}'+
+  '.dgrid{display:flex;flex-wrap:wrap;gap:0 10px}.dgrid>.card{flex:1 1 100%}.dgrid>.half{flex:1 1 45%}.half .dn{flex-direction:column;align-items:stretch}.half .donut{margin:0 auto}'+'.ptitle{font-size:15px;color:#1a3a6b;font-weight:800;margin:0 0 8px;border-bottom:2px solid #e8f0f8;padding-bottom:4px}td.l{text-align:right}';
 function exportFormPdf(fid){
-  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f),t=R.t,idx=!t.noIndex,rt=rateOf(R.overall);
-  var css='.kp{display:flex;gap:8px;margin:6px 0 12px}.kp div{flex:1;border:1px solid #c9d2e3;border-radius:8px;padding:8px;text-align:center}.kp b{display:block;font-size:20px;color:#0b0b0b}'+
-    '.st{display:flex;gap:1px;height:14px;width:100%}.st span{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-    '.bar{height:10px;background:#2a78d6;border-radius:0 3px 3px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}td.l{text-align:right}'+
-    '.lg{display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;margin:4px 0}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-    '.q{background:#f7f9fc;border-radius:6px;padding:5px 8px;margin:4px 0;line-height:1.7;-webkit-print-color-adjust:exact;print-color-adjust:exact}';
-  var h=pHead('تقرير نتائج الاستبانة',esc(f.title)+'<br><span class="mut">الفئة: '+esc(f.aud)+'</span>',new Date());
-  h+='<div class="kp"><div>عدد الردود<b>'+R.n+'</b></div>'+(idx?'<div>مؤشر الرضا العام<b>'+pctTxt(R.overall)+'</b>'+(rt?rt.i+' '+rt.t:'')+'</div>':'')+
-    '<div>فترة الردود<b style="font-size:13px">'+(Object.keys(R.days).sort()[0]||'—')+' — '+(R.last?dateKey(new Date(R.last)):'—')+'</b></div></div>';
-  var bk=Object.keys(R.blocks);
-  if(idx&&bk.length>1) h+='<h3>مؤشر الرضا حسب المجال</h3><table><thead><tr><th>المجال</th><th style="width:45%"></th><th style="width:70px">النسبة</th><th style="width:80px">التقدير</th></tr></thead><tbody>'+
-    bk.map(function(b){var B=R.blocks[b],r=rateOf(B.mean);return '<tr><td class="l">'+esc(B.title)+'</td><td><div class="bar" style="width:'+B.mean+'%"></div></td><td>'+pctTxt(B.mean)+'</td><td>'+(r?r.t:'')+'</td></tr>';}).join('')+'</tbody></table>';
-  var lastB=-1,tbl='';
+  var f=Object.assign({id:fid},A.forms[fid]),R=analyze(f),t=R.t,idx=!t.noIndex,P=dashParts(R,true);
+  var head=pHead('تقرير نتائج الاستبانة',esc(f.title)+'<br><span class="mut">الفئة: '+esc(f.aud)+'</span>',new Date());
+  var pages=['<section class="page">'+head+P.summary+'</section>'];
+  if(P.detail) pages.push('<section class="page"><div class="ptitle">تفاصيل النتائج</div><div class="dgrid">'+P.detail+'</div></section>');
+  // ملحق: الجدول الرقمي لكل عبارة
+  var tbl='',lastB=-1;
   R.qs.forEach(function(o,i){
     var q=o.q;
-    if(q.type==='likert'){
-      var opts=SURVEY_SCALES[q.scale].opts,cols=LK_COLORS[opts.length];
-      if(q.block!==lastB){
-        if(lastB!==-1) tbl+='</tbody></table>';lastB=q.block;
-        tbl+='<h3>'+esc(q.blockTitle||'توزيع الإجابات')+'</h3><div class="lg">'+opts.map(function(x,j){return '<span><i style="background:'+cols[j]+'"></i>'+esc(x)+'</span>';}).join('')+'</div>'+
-          '<table><thead><tr><th style="width:28px">م</th><th>العبارة</th>'+opts.map(function(x){return '<th style="width:52px">'+esc(x)+'</th>';}).join('')+'<th style="width:60px">'+(idx?'الرضا':'نسبة «'+esc(opts[0])+'»')+'</th></tr></thead><tbody>';
-      }
-      tbl+='<tr><td>'+(i+1)+'</td><td class="l">'+esc(q.t)+(q.rev?' <span class="mut">(سلبية)</span>':'')+'</td>'+o.counts.map(function(c){return '<td>'+(o.answered?Math.round(c*100/o.answered)+'%':'—')+'</td>';}).join('')+'<td><b>'+pctTxt(idx?o.mean:o.agree)+'</b></td></tr>';
-      return;
+    if(q.type!=='likert') return;
+    var opts=SURVEY_SCALES[q.scale].opts;
+    if(q.block!==lastB){
+      if(lastB!==-1) tbl+='</tbody></table>';lastB=q.block;
+      tbl+=(q.blockTitle?'<h3>'+esc(q.blockTitle)+'</h3>':'')+'<table><thead><tr><th style="width:28px">م</th><th>العبارة</th>'+opts.map(function(x){return '<th style="width:52px">'+esc(x)+'</th>';}).join('')+'<th style="width:60px">'+(idx?'الرضا':'نسبة «'+esc(opts[0])+'»')+'</th></tr></thead><tbody>';
     }
-    if(lastB!==-1){tbl+='</tbody></table>';lastB=-1;}
-    if(q.type==='single'||q.type==='multi'){
-      tbl+='<h3>'+esc(q.t)+'</h3><table><tbody>'+q.opts.map(function(x,j){var c=o.counts[j],p=o.answered?c*100/o.answered:0;
-        return '<tr><td class="l" style="width:40%">'+esc(x)+'</td><td><div class="bar" style="width:'+p+'%"></div></td><td style="width:90px">'+c+' ('+Math.round(p)+'%)</td></tr>';}).join('')+'</tbody></table>';
-    } else if(q.type==='text'&&o.texts.length){
-      tbl+='<h3>'+esc(q.t)+' ('+o.texts.length+')</h3>'+o.texts.map(function(x){return '<div class="q">'+esc(x.v)+'</div>';}).join('');
-    }
+    tbl+='<tr><td>'+(i+1)+'</td><td class="l">'+esc(q.t)+(q.rev?' <span class="mut">(سلبية)</span>':'')+'</td>'+o.counts.map(function(c){return '<td>'+(o.answered?Math.round(c*100/o.answered)+'%':'—')+'</td>';}).join('')+'<td><b>'+pctTxt(idx?o.mean:o.agree)+'</b></td></tr>';
   });
   if(lastB!==-1) tbl+='</tbody></table>';
-  h+=tbl+'<div class="sig"><div>إعداد: ....................<br>التوقيع: ....................</div><div>مدير المدرسة: ....................<br>التوقيع: ....................</div></div>';
-  printDoc('نتائج استبانة - '+f.title,'<section class="page">'+h+'</section>',css);
+  var app=(tbl?'<div class="ptitle">ملحق: الجدول التفصيلي</div>'+tbl:'')+(P.appendix?'<div class="ptitle" style="margin-top:14px">الإجابات المكتوبة</div>'+P.appendix:'');
+  pages.push('<section class="page">'+app+'<div class="sig"><div>إعداد: ....................<br>التوقيع: ....................</div><div>مدير المدرسة: ....................<br>التوقيع: ....................</div></div></section>');
+  printDoc('نتائج استبانة - '+f.title,pages.join(''),DASH_PRINT_CSS);
 }
 function exportFormCsv(fid){
   var f=Object.assign({id:fid},A.forms[fid]),t=tplById(f.tpl),qs=tplQuestions(t),rs=formResps(fid);
