@@ -2362,6 +2362,37 @@ try{
 
 function fbWrite(path,data){if(fbDB)return fbDB.ref(path).set(data).catch(function(e){console.warn('FB write error',e);});return Promise.resolve();}
 function fbRead(path){if(fbDB)return fbDB.ref(path).get().then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});return Promise.resolve(null);}
+// قراءة تُفرّق بين «غير موجود» (null) و«تعذّرت القراءة» (خطأ) — حتى لا يُعامل انقطاع الشبكة كبيانات فارغة
+function fbReadStrict(path){if(!fbDB)return Promise.reject(new Error('no-db'));return fbDB.ref(path).get().then(function(s){return s.exists()?s.val():null;});}
+// استكمال ما فُقد من الخادم من نسخة الجهاز: يضيف العناصر الناقصة فقط ولا يحذف أو يعدّل شيئاً موجوداً
+async function recoverFromLocal(code,fbSD,localSD,opt){
+  var after=Number(opt&&opt.teachersAfter)||0;
+  var subKey=function(s){return [s.teacherName,s.week,s.fileUrl||s.fileName||s.date].join('|');};
+  var lists=[
+    ['teachers',function(t){return String(t.id);},function(t){return Number(t.id)>after;}],
+    ['submissions',subKey,null],
+    ['surveys',function(s){return String(s.id);},null],
+    ['circulars',function(c){return String(c.id);},null],
+    ['staff',function(s){return s.user;},null]
+  ];
+  for(var i=0;i<lists.length;i++){
+    var key=lists[i][0],idOf=lists[i][1],ok=lists[i][2];
+    var have={};toArr(fbSD[key]).filter(Boolean).forEach(function(x){have[idOf(x)]=1;});
+    var add=toArr(localSD[key]).filter(Boolean).filter(function(x){return !have[idOf(x)]&&(!ok||ok(x));});
+    if(!add.length) continue;
+    add=JSON.parse(JSON.stringify(add)).map(function(x){delete x.fileData;return x;});
+    try{
+      var r=await fbDB.ref('pt_'+code+'/'+key).transaction(function(v){
+        var a=toArr(v).filter(Boolean),h={};a.forEach(function(x){h[idOf(x)]=1;});
+        add.forEach(function(x){if(!h[idOf(x)])a.push(x);});return a;
+      });
+      if(r.committed) fbSD[key]=toArr(r.snapshot.val()).filter(Boolean);
+      console.log('recovered',add.length,key,'for',code);
+    }catch(e){console.warn('recover failed',key,e);}
+  }
+  if(!fbSD.driveUrl&&localSD.driveUrl){fbSD.driveUrl=localSD.driveUrl;fbDB.ref('pt_'+code+'/driveUrl').set(localSD.driveUrl).catch(function(){});}
+  return normalizeSD(fbSD);
+}
 function fbDelete(path){if(fbDB)return fbDB.ref(path).remove().catch(function(e){console.warn('FB delete error',e);});return Promise.resolve();}
 
 // تحويل كائنات Firebase مجدداً إلى مصفوفات
@@ -2386,16 +2417,35 @@ function normalizeSD(d){
 function getSchools(){try{return JSON.parse(localStorage.getItem('pt_schools')||'[]');}catch(e){return[];}}
 function setSchools(d){localStorage.setItem('pt_schools',JSON.stringify(d));fbWrite('pt_schools',d);}
 function getSD(c){try{var d=JSON.parse(localStorage.getItem('pt_'+c)||'null');return normalizeSD(d);}catch(e){return null;}}
+// الصفحات العامة (رفع خطة، تعميم، استبانة، نماذج) قد تفتح على جهاز لا يملك نسخة من بيانات المدرسة،
+// فلا يُسمح لها بإعادة كتابة بيانات المدرسة كاملة — تعدّل الجزء الخاص بها فقط عبر fbPatchList
+function isPublicRoute(){return /^#(upload|circ|survey|wkform|perm)=/.test(location.hash);}
 function setSD(c,d){
   try{localStorage.setItem('pt_'+c,JSON.stringify(d));}catch(e){}
+  if(isPublicRoute()){console.warn('setSD: full write blocked on public page');return;}
   try{
     var dFB=JSON.parse(JSON.stringify(d));
     if(dFB.submissions) dFB.submissions=dFB.submissions.map(function(s){var s2=Object.assign({},s);delete s2.fileData;return s2;});
     if(dFB.circulars) dFB.circulars=dFB.circulars.map(function(ci){var c2=Object.assign({},ci);delete c2.fileData;return c2;});
+    // حماية: نسخة بلا معلمين لا تستبدل بيانات المدرسة كاملة، بل تحدّث بقية الأجزاء فقط
+    if(fbDB&&!(dFB.teachers&&dFB.teachers.length)){
+      Object.keys(dFB).forEach(function(k){if(k==='teachers'||(Array.isArray(dFB[k])&&!dFB[k].length))delete dFB[k];});
+      fbDB.ref('pt_'+c).update(dFB).catch(function(e){console.warn('FB update error',e);});
+      return;
+    }
     fbWrite('pt_'+c,dFB).catch(function(e){console.warn('FB write error',e);});
   }catch(e){console.warn('setSD FB error',e);}
 }
-function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars:[],surveys:[],driveUrl:''};setSD(c,d);}return d;}
+function initSD(c){var d=getSD(c);if(!d){d={teachers:[],submissions:[],circulars:[],surveys:[],driveUrl:''};try{localStorage.setItem('pt_'+c,JSON.stringify(d));}catch(e){}}return d;}
+// تعديل قائمة واحدة من بيانات المدرسة (submissions / surveys / circulars) مباشرة على الخادم بمعاملة آمنة
+function fbPatchList(c,key,mut){
+  if(!fbDB) return Promise.reject(new Error('no-db'));
+  return fbDB.ref('pt_'+c+'/'+key).transaction(function(v){var a=toArr(v).filter(Boolean);mut(a);return a;}).then(function(r){
+    var d=getSD(c);
+    if(d&&r.snapshot){var tmp={};tmp[key]=r.snapshot.val();d[key]=normalizeSD(Object.assign({},d,tmp))[key];try{localStorage.setItem('pt_'+c,JSON.stringify(d));}catch(e){}}
+    return r;
+  });
+}
 
 async function loadFromFirebase(){
   try{
@@ -2411,23 +2461,18 @@ async function loadFromFirebase(){
       schools=[];
       localStorage.removeItem('pt_schools');
     }
+    // استرجاع: المدارس المعلَّمة في pt_recover تستكمل من نسخة هذا الجهاز ما ينقص على الخادم (إضافة فقط، بلا حذف)
+    var recover=null;try{recover=await fbReadStrict('pt_recover');}catch(e){}
     // تحميل بيانات كل مدرسة مع التطبيع
     for(var i=0;i<schools.length;i++){
       var code=schools[i].code;
-      var fbSD=normalizeSD(await fbRead('pt_'+code));
+      var raw;
+      try{raw=await fbReadStrict('pt_'+code);}catch(e){console.warn('pt_'+code+' read failed — keeping local copy, nothing written',e);continue;}
       var localSD=getSD(code);
-      var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
-      var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
-      if(fbHas&&locHas){
-        // استخدم الأحدث - Firebase
-        try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
-      } else if(fbHas){
-        // Firebase فقط - احفظ محلياً
-        try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
-      } else if(locHas){
-        // محلي فقط - رحّل إلى Firebase
-        await fbWrite('pt_'+code,localSD);
-      }
+      var fbSD=normalizeSD(raw)||{teachers:[],submissions:[],circulars:[],surveys:[],driveUrl:''};
+      if(recover&&recover[code]&&localSD) fbSD=await recoverFromLocal(code,fbSD,localSD,recover[code]);
+      // الخادم هو المرجع دائماً — لا تُرحَّل نسخة محلية فوق بيانات الخادم
+      try{localStorage.setItem('pt_'+code,JSON.stringify(fbSD));}catch(e){}
     }
   }catch(e){console.warn('Firebase load failed, using local data',e);}
 }
@@ -2990,7 +3035,7 @@ function refreshDashboard(btn){
     var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
     var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
     if(fbHas){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){}}
-    else if(locHas){fbWrite('pt_'+cur.code,localSD);}
+    else if(locHas){recoverFromLocal(cur.code,fbSD||{},localSD,{}).then(function(nd){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(nd));}catch(e){}});} // الخادم بلا معلمين: أكمل الناقص فقط ولا تستبدل
     // أعد رسم التبويب النشط
     var activeTab=document.querySelector('.nav-tab.active');
     if(activeTab) activeTab.click();
@@ -3014,7 +3059,7 @@ function showDashboard(){
     var fbHas=fbSD&&fbSD.teachers&&fbSD.teachers.length>0;
     var locHas=localSD&&localSD.teachers&&localSD.teachers.length>0;
     if(fbHas){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(fbSD));}catch(e){};}
-    else if(locHas){fbWrite('pt_'+cur.code,localSD);}
+    else if(locHas){recoverFromLocal(cur.code,fbSD||{},localSD,{}).then(function(nd){try{localStorage.setItem('pt_'+cur.code,JSON.stringify(nd));}catch(e){}});} // الخادم بلا معلمين: أكمل الناقص فقط ولا تستبدل
     buildWeekSel('weekSel');
     renderReport();
   }).catch(function(){buildWeekSel('weekSel');renderReport();});
@@ -3923,12 +3968,19 @@ function confirmUpload(){
     var sub={teacherName:teacherName,teacherSubject:teacherSubject,date:new Date().toISOString().split('T')[0],week:wk,status:'مرسل',fileName:file.name};
     if(fileUrl) sub.fileUrl=fileUrl;
     if(fileData) sub.fileData=fileData;
-    var existing=d.submissions.findIndex(function(s){return s.teacherName===teacherName&&s.week===wk&&isThisTerm(s);});
-    if(existing>-1) d.submissions[existing]=sub;
-    else d.submissions.push(sub);
-    setSD(sCode,d);
-    document.getElementById('upForm').style.display='none';
-    document.getElementById('upSuccess').style.display='block';
+    // تُضاف الخطة إلى قائمة الخطط على الخادم فقط — لا تُعاد كتابة بيانات المدرسة (المعلمين وغيرهم)
+    var subFB=Object.assign({},sub);delete subFB.fileData;
+    fbPatchList(sCode,'submissions',function(a){
+      var ex=a.findIndex(function(s){return s.teacherName===teacherName&&s.week===wk&&isThisTerm(s);});
+      if(ex>-1) a[ex]=subFB; else a.push(subFB);
+    }).then(function(){
+      document.getElementById('upForm').style.display='none';
+      document.getElementById('upSuccess').style.display='block';
+    }).catch(function(e){
+      console.warn('submission save failed',e);
+      if(btn){btn.disabled=false;btn.textContent=origTxt;}
+      alert('تعذّر حفظ الخطة، تحقق من الاتصال بالإنترنت ثم أعد المحاولة');
+    });
   }
   var fd=new FormData();
   fd.append('file',file);
@@ -3990,15 +4042,14 @@ function confirmView(){
   var sCode=parts[0];
   var cId=parseInt(parts[1]);
   var tId=parseInt(parts[2]);
-  var d=getSD(sCode);
-  var c=d.circulars?d.circulars.find(function(x){return x.id===cId;}):null;
+  var d=getSD(sCode)||{teachers:[]};
   var t=d.teachers.find(function(x){return x.id===tId;});
-  if(!c) return;
-  if(!c.views) c.views=[];
-  if(!c.views.find(function(v){return v.tid===tId;})){
-    c.views.push({tid:tId,name:t?t.name:'مستلم',date:new Date().toISOString().split('T')[0]});
-    setSD(sCode,d);
-  }
+  fbPatchList(sCode,'circulars',function(a){
+    var c=a.find(function(x){return x.id===cId;});
+    if(!c) return;
+    c.views=toArr(c.views).filter(Boolean);
+    if(!c.views.find(function(v){return v.tid===tId;})) c.views.push({tid:tId,name:t?t.name:'مستلم',date:new Date().toISOString().split('T')[0]});
+  }).catch(function(e){console.warn('view save failed',e);});
   document.getElementById('cvForm').style.display='none';
   document.getElementById('cvSuccess').style.display='block';
 }
@@ -4032,15 +4083,14 @@ function confirmSurveyFilled(){
   var sCode=parts[0];
   var sId=parseInt(parts[1]);
   var tId=parseInt(parts[2]);
-  var d=getSD(sCode);
-  var s=d.surveys?d.surveys.find(function(x){return x.id===sId;}):null;
+  var d=getSD(sCode)||{teachers:[]};
   var t=d.teachers.find(function(x){return x.id===tId;});
-  if(!s) return;
-  if(!s.completions) s.completions=[];
-  if(!s.completions.find(function(c){return c.tid===tId;})){
-    s.completions.push({tid:tId,name:t?t.name:'مستلم',date:new Date().toISOString().split('T')[0]});
-    setSD(sCode,d);
-  }
+  fbPatchList(sCode,'surveys',function(a){
+    var s=a.find(function(x){return x.id===sId;});
+    if(!s) return;
+    s.completions=toArr(s.completions).filter(Boolean);
+    if(!s.completions.find(function(c){return c.tid===tId;})) s.completions.push({tid:tId,name:t?t.name:'مستلم',date:new Date().toISOString().split('T')[0]});
+  }).catch(function(e){console.warn('completion save failed',e);});
   document.getElementById('svForm').style.display='none';
   document.getElementById('svSuccess').style.display='block';
 }
@@ -4151,7 +4201,6 @@ function wkSaveCredentials(){
   d.staff[idx].pass=newPass;
   delete d.staff[idx].firstLogin;
   setSD(wkSchool.code,d);
-  fbWrite('pt_'+wkSchool.code, d);
 
   wkStaff=d.staff[idx];
   hideModal('mdlWkSettings');
